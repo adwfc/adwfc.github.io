@@ -1,0 +1,113 @@
+.einzug {
+         display: block;
+         margin-left: 20px;}
+
+
+
+ul, ol {margin-top: 0;}
+
+
+.abstandh3   {margin-top: 70;}
+
+
+.nomargintop {margin-top: 0;}
+
+
+main {margin-left: 100px;}
+
+footer {
+         margin-top: 100px;
+         text-align: center;}
+
+h1  {text-align: center;}
+
+h2  {text-align: center;}
+
+
+
+#scrollToTopBtn {
+         position: fixed;
+         bottom: 20px;
+         right: 20px;
+         background-color: #007BFF;
+         color: white;
+         border: none;
+         padding: 15px;
+         border-radius: 5px;
+         font-size: 20px;
+         cursor: pointer;
+         display: none;
+         z-index: 1000;}
+
+#scrollToTopBtn:hover {
+         background-color: #0056b3;}
+
+.bau {
+         text-align: center;
+         margin-top: 50px;}
+
+.QuellStrich {
+         width:30%;
+         align:left;
+         margin-top:80px;}
+
+.Quellen {
+         text-align:center;
+         list-style: none;}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;  /* Flexbox Layout für den Hauptinhalt und die Navigation */
+    justify-content: flex-start;  /* Um sicherzustellen, dass alles am Anfang der Seite beginnt */
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+}
+
+nav {
+    margin-top: 150px;
+    width: 150px;
+    max-height: 310px;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    order: 2;
+    border-left: 1px dashed #11113A;
+    border-bottom: 1px dashed #11113A;
+    border-top: 1px dashed #11113A;
+    padding-top: 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    margin: 5px 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    display: block;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: #ddd;
+}
