@@ -1,113 +1,222 @@
-.einzug {
-         display: block;
-         margin-left: 20px;}
-
-
-
-ul, ol {margin-top: 0;}
-
-
-.abstandh3   {margin-top: 70;}
-
-
-.nomargintop {margin-top: 0;}
-
-
-main {margin-left: 100px;}
-
-footer {
-         margin-top: 100px;
-         text-align: center;}
-
-h1  {text-align: center;}
-
-h2  {text-align: center;}
-
-
-
-#scrollToTopBtn {
-         position: fixed;
-         bottom: 20px;
-         right: 20px;
-         background-color: #007BFF;
-         color: white;
-         border: none;
-         padding: 15px;
-         border-radius: 5px;
-         font-size: 20px;
-         cursor: pointer;
-         display: none;
-         z-index: 1000;}
-
-#scrollToTopBtn:hover {
-         background-color: #0056b3;}
-
-.bau {
-         text-align: center;
-         margin-top: 50px;}
-
-.QuellStrich {
-         width:30%;
-         align:left;
-         margin-top:80px;}
-
-.Quellen {
-         text-align:center;
-         list-style: none;}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    display: flex;  /* Flexbox Layout f√ºr den Hauptinhalt und die Navigation */
-    justify-content: flex-start;  /* Um sicherzustellen, dass alles am Anfang der Seite beginnt */
+.main-nav li {
+    display: inline-block; /* Inline aber mit Blockverhalten */
+    margin-left: 10px; /* Abst‰nde zwischen den Links */
 }
 
-.container {
-    display: flex;
+.main-nav a {
+    color: #000; /* Farbe der Links */
+    text-decoration: none; /* Keine Unterstreichung */
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 5px;
+    position: relative;
+    transition: transform 0.4s ease-out;
+}
+
+.main-nav a:hover::after {
+    transform: scaleX(1);
+}
+
+/* Hier wird die Unterstreichung von links nach rechts angezeigt */
+.main-nav a::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    justify-content: flex-start;
+    height: 2px;
+    background-color: #000;
+    transform: scaleX(0);
+    transform-origin: bottom left;
+    transition: transform 0.4s ease-out;
 }
 
-main {
-    flex: 1;
+/* Springe-zu Style bleibt unver‰ndert */
+.springe-zu {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background-color: #fff;
     padding: 20px;
-}
-
-nav {
-    margin-top: 150px;
-    width: 150px;
-    max-height: 310px;
-    background-color: #ffffff;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    order: 2;
+    border-radius: 5px;
+    z-index: 1000;
     border-left: 1px dashed #11113A;
     border-bottom: 1px dashed #11113A;
     border-top: 1px dashed #11113A;
-    padding-top: 0;
 }
 
-nav ul {
+.springe-zu ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-nav ul li {
-    margin: 5px 0;
+.springe-zu ul li {
+    margin: 0px 0;
 }
 
-nav a {
+.springe-zu a {
+    color: #000;
     text-decoration: none;
-    color: #333;
     font-weight: bold;
     display: block;
     padding: 8px;
     border-radius: 5px;
     transition: background-color 0.3s;
+    position: relative;
 }
 
-nav a:hover {
+.springe-zu a:hover {
     background-color: #ddd;
+}
+
+
+
+
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lora', serif;
+    box-sizing: border-box;
+}
+
+.header-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 200px;
+    padding: 20px;
+}
+
+.kopf {
+    width: auto;
+    height: 225px;
+    margin-left: 100px;
+}
+
+.main-nav {
+    margin-left: 30px;
+    text-align: left;
+}
+
+.header-links {
+    text-align:center; }
+
+.header-links li {
+    display: inline;
+    list-style-type: none;
+    margin-left: 50px;  }
+
+
+.springe-zu {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    border-left: 1px dashed #11113A;
+    border-bottom: 1px dashed #11113A;
+    border-top: 1px dashed #11113A;
+}
+
+.springe-zu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.springe-zu ul li {
+    margin: 0px 0;
+}
+
+
+.main-content {
+    padding: 20px;
+    font-size: 1.2rem;
+}
+
+.allgemeiner-deutscher {
+    font-family: Arial, sans-serif;
+    font-size: 30px;
+}
+
+.internetauftritt {
+    font-family: 'Charmonman', cursive;
+    font-size: 30px;
+    margin-top: -0.5em;
+    margin-left: 15px;
+}
+
+.einzug {
+    display: block;
+    margin-left: 20px;
+}
+
+ul, ol {
+    margin-top: 0;
+}
+
+.abstandh3 {
+    margin-top: 70px;
+}
+
+.nomargintop {
+    margin-top: 0;
+}
+
+main {
+    margin-left: 100px;
+    margin-top: 100px;
+}
+
+footer {
+    margin-top: 100px;
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+#scrollToTopBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    z-index: 1000;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #0056b3;
+}
+
+.bau {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.QuellStrich {
+    width: 30%;
+    align: left;
+    margin-top: 80px;
+}
+
+.Quellen {
+    text-align: center;
+    list-style: none;
 }
