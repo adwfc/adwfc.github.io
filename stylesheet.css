@@ -58,7 +58,7 @@ h2  {text-align: center;}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    display: flex;  /* Flexbox Layout fÃ¼r den Hauptinhalt und die Navigation */
+    display: flex;  /* Flexbox Layout für den Hauptinhalt und die Navigation */
     justify-content: flex-start;  /* Um sicherzustellen, dass alles am Anfang der Seite beginnt */
 }
 
@@ -71,10 +71,12 @@ body {
 main {
     flex: 1;
     padding: 20px;
+    font-family: 'Lora', serif;
+    margin-top: 0px;
 }
 
 nav {
-    margin-top: 150px;
+    margin-top: 100px;
     width: 150px;
     max-height: 310px;
     background-color: #ffffff;
@@ -111,3 +113,7 @@ nav a {
 nav a:hover {
     background-color: #ddd;
 }
+
+.kopf {
+   margin-top: 80px;
+   }
