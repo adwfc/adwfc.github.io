@@ -58,7 +58,7 @@ h2  {text-align: center;}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    display: flex;  /* Flexbox Layout für den Hauptinhalt und die Navigation */
+    display: flex;  /* Flexbox Layout fÃ¼r den Hauptinhalt und die Navigation */
     justify-content: flex-start;  /* Um sicherzustellen, dass alles am Anfang der Seite beginnt */
 }
 
