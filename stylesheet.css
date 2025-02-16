@@ -100,6 +100,17 @@
     background-color: #ddd;
 }
 
+main ul, ol {
+    margin-left:40px;
+}
+
+main li {
+    margin-top: 0.5em;
+}
+
+main p {
+    margin-top: 0.5em;
+}
 
 
 
