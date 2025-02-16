@@ -1,11 +1,47 @@
+                                                 /***mobile Version***/
+/***mobile Version***/
+@media (max-width: 768px) {
+    .main-nav ul {
+        display: block; /* Listenelemente als Block-Elemente */
+        text-align: center; /* Links zentrieren */
+        padding: 0;
+        margin-top: 10px;
+    }
+
+    .main-nav li {
+        display: block; /* Links untereinander anstatt nebeneinander */
+        margin: 5px;
+    }
+
+    .header-container {
+        flex-direction: column; /* Stellt sicher, dass Bild und Text untereinander angeordnet werden */
+        align-items: center; /* Bild und Text zentriert */
+    }
+
+    .internetauftritt {
+        display: block; /* Stellt sicher, dass der Untertitel unter der Hauptüberschrift bleibt */
+    }
+}
+
+
+
+
+
+
+                                                 /***main-nav***/
+.main-nav {
+    margin-left: 30px;
+    text-align: left;
+}
+
 .main-nav li {
-    display: inline-block; /* Inline aber mit Blockverhalten */
-    margin-left: 10px; /* Abstände zwischen den Links */
+    display: inline-block;
+    margin-left: 10px;
 }
 
 .main-nav a {
-    color: #000; /* Farbe der Links */
-    text-decoration: none; /* Keine Unterstreichung */
+    color: #000;
+    text-decoration: none;
     font-weight: bold;
     padding: 8px;
     border-radius: 5px;
@@ -17,7 +53,7 @@
     transform: scaleX(1);
 }
 
-/* Hier wird die Unterstreichung von links nach rechts angezeigt */
+
 .main-nav a::after {
     content: "";
     position: absolute;
@@ -31,8 +67,7 @@
     transition: transform 0.4s ease-out;
 }
 
-/* Springe-zu Style bleibt unverändert */
-.springe-zu {
+.springe-zu {                                    /***springe-zu***/
     position: fixed;
     top: 100px;
     right: 20px;
@@ -73,7 +108,6 @@
 
 
 
-
 body {
     margin: 0;
     padding: 0;
@@ -96,42 +130,7 @@ body {
     margin-left: 100px;
 }
 
-.main-nav {
-    margin-left: 30px;
-    text-align: left;
-}
 
-.header-links {
-    text-align:center; }
-
-.header-links li {
-    display: inline;
-    list-style-type: none;
-    margin-left: 50px;  }
-
-
-.springe-zu {
-    position: fixed;
-    top: 100px;
-    right: 20px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    z-index: 1000;
-    border-left: 1px dashed #11113A;
-    border-bottom: 1px dashed #11113A;
-    border-top: 1px dashed #11113A;
-}
-
-.springe-zu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.springe-zu ul li {
-    margin: 0px 0;
-}
 
 
 .main-content {
@@ -186,6 +185,7 @@ h2 {
     text-align: center;
 }
 
+                                                 /***unten***/
 #scrollToTopBtn {
     position: fixed;
     bottom: 20px;
