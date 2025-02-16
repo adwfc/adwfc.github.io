@@ -23,7 +23,7 @@
     .header-container {
         flex-direction: column; /* Stellt sicher, dass Bild und Text untereinander angeordnet werden */
         align-items: center; /* Bild und Text zentriert */
-        text-align: center;
+        margin-left: 10px;
     }
 
     .internetauftritt {
