@@ -13,15 +13,105 @@
         margin: 5px;
     }
 
+    .allgemeiner-deutscher {
+        text-align: left;
+        font-size: 20px !important;
+        margin-top: 10px;
+        margin-left: 50px;
+    }
+
     .header-container {
         flex-direction: column; /* Stellt sicher, dass Bild und Text untereinander angeordnet werden */
         align-items: center; /* Bild und Text zentriert */
     }
 
     .internetauftritt {
-        display: block; /* Stellt sicher, dass der Untertitel unter der Hauptüberschrift bleibt */
+       font-size: 20px !important;
+       margin-top: 5px !important;
+       margin-left: 50px !important;
     }
+
+    .kopf {
+    width: auto;
+    height: 225px;
+    margin-left: 0px;
+    }
+
+    body {
+    margin-top: 0px;
+    }
+
+    h3 {
+    margin-top: 450px;
+    }
+
+    .header-container {
+    padding: 0;
+    }
+
+    body{
+    margin-top: 20px !important;
+    margin-left: -50px !important;}
+
+
+.springe-zu {
+    display: flex;
+    justify-content: space-between; /* Listen nebeneinander */
+    align-items: flex-start; /* Text linksbündig */
+    width: 100%;
+    background-color: #fff;
+    padding: 10px 20px;
+    border-bottom: 1px dashed #11113A;
+    border-top: 1px dashed #11113A;
+    box-sizing: border-box;
+    position: relative !important; /* Überschreibt evtl. position: fixed */
+    left: 50px; /* Korrigiert die Verschiebung */
+    top: 20px !important;
 }
+
+.springe-rechts {
+    margin-top: 20px !important;
+}
+
+
+.springe-zu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1; /* Beide Listen nehmen gleich viel Platz ein */
+}
+
+.springe-zu ul li {
+    text-align: left; /* Links ausgerichtet */
+}
+
+
+.springe-zu a {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    display: block;
+}
+
+.springe-zu a:hover {
+    background-color: #ddd;
+}
+
+
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    }
+
+
+}
+
 
 
 
@@ -107,9 +197,9 @@
 
 
 
-
 body {
-    margin: 0;
+
+    margin-top: 100px;
     padding: 0;
     font-family: 'Lora', serif;
     box-sizing: border-box;
