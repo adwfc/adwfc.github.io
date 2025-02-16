@@ -65,7 +65,7 @@
     border-top: 1px dashed #11113A;
     box-sizing: border-box;
     position: relative !important; /* Überschreibt evtl. position: fixed */
-    left: 10px; /* Korrigiert die Verschiebung */
+    left: 50px; /* Korrigiert die Verschiebung */
     top: 20px !important;
 }
 
