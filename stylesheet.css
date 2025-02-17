@@ -6,12 +6,11 @@
         text-align: center; /* Links zentrieren */
         padding: 0;
         margin-top: 10px;
-        margin-left: 0px !important; 
     }
 
     .main-nav li {
         display: block; /* Links untereinander anstatt nebeneinander */
-        margin: 5px;
+        margin: 0px;
     }
 
     .allgemeiner-deutscher {
