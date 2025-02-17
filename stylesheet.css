@@ -6,7 +6,7 @@
         text-align: center; /* Links zentrieren */
         padding: 0;
         margin-top: 10px;
-        margin-left: 0px; 
+        margin-left: 0px !important; 
     }
 
     .main-nav li {
