@@ -6,12 +6,36 @@
          <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
          <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        <style>
+        #passwordForm {
+            display: block; /* Passwortformular wird standardm&auml;&szlig;ig angezeigt */
+        }
+        #protectedContent {
+            display: none; /* Gesch&uuml;tzter Inhalt wird standardm&auml;&szlig;ig ausgeblendet */
+        }
+        </style>
 
 </head>
+
 <body>
 
-  <header class="header-container">                                                      <!-- main-nav -->
+    <h2>Seite mit Passwortschutz</h2>
+
+    <!-- Passwortabfrage Formular -->
+    <div id="passwordForm">
+        <h3>Bitte gib das Passwort ein:</h3>
+        <input type="password" id="passwordInput" placeholder="Passwort" required>
+        <button onclick="checkPassword()">Einloggen</button>
+    </div>
+
+    <!-- Hier kommt der Inhalt, der geschützt werden soll -->
+    <geschuetzt id="protectedContent">
+
+
+
+
+
+   <header class="header-container">                                                      <!-- main-nav -->
 <!----><img class="kopf" src="bilder/Kopf.jpeg" alt="Kopf">
 
 <!----><div class="main-nav">
@@ -41,7 +65,7 @@
               <li><a href="#Zuk&uuml;nftiges">Zuk&uuml;nftiges</a></li>
           </ul>
       </nav>
-  </header>
+   </header>
 
 
 
@@ -247,8 +271,33 @@
    </script>
 
 
-    <footer>
 
+
+
+   </geschuetzt>
+
+
+
+
+
+    <script>
+        // Das richtige Passwort
+        const correctPassword = "geheimesPasswort";
+
+        // Funktion zur Passwortüberprüfung
+        function checkPassword() {
+            const enteredPassword = document.getElementById("passwordInput").value;
+
+            // Wenn das Passwort korrekt ist
+            if (enteredPassword === correctPassword) {
+                document.getElementById("passwordForm").style.display = "none";  // Passwortformular ausblenden
+                document.getElementById("protectedContent").style.display = "block";  // Geschützten Inhalt anzeigen
+            } else {
+                alert("Falsches Passwort! Bitte versuche es erneut.");
+            }
+        }
+    </script>
 
 </body>
+
 </html>
