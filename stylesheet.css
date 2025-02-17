@@ -6,6 +6,7 @@
         text-align: center; /* Links zentrieren */
         padding: 0;
         margin-top: 10px;
+        margin-left: 0px; 
     }
 
     .main-nav li {
@@ -66,7 +67,7 @@
     border-top: 1px dashed #11113A;
     box-sizing: border-box;
     position: relative !important; /* Überschreibt evtl. position: fixed */
-    left: 0px; /* Korrigiert die Verschiebung */
+    left: 50px; /* Korrigiert die Verschiebung */
     top: 20px !important;
 }
 
