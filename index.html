@@ -6,29 +6,27 @@
          <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
          <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-        #passwordForm {
-            display: block; /* Passwortformular wird standardm&auml;&szlig;ig angezeigt */
-        }
-        #protectedContent {
-            display: none; /* Gesch&uuml;tzter Inhalt wird standardm&auml;&szlig;ig ausgeblendet */
-        }
-        </style>
 
+         <style>
+          #passwordForm, #protectedContent {
+          display: none; /* Beide Abschnitte standardm&auml;&szlig;ig ausblenden */
+          }
+         </style>
 </head>
 
 <body>
 
-    <h2>Seite mit Passwortschutz</h2>
-
     <!-- Passwortabfrage Formular -->
     <div id="passwordForm">
-        <h3>Bitte gib das Passwort ein:</h3>
-        <input type="password" id="passwordInput" placeholder="Passwort" required>
-        <button onclick="checkPassword()">Einloggen</button>
+        <h2>Seite im Bau</h2>
+        <img src="Bilder/lego-construction.jpeg" alt="" border="0" width="auto" height="400">
+        <p class="passwordForm-eins">Politische Ungeheuerlichkeiten, fatale Fehler im Code oder doch eher ein Beauty-Update? <br> In jedem Fall braucht es noch ein weinig Zeit,
+        in sp&auml;testens ein paar Tagen ist die Seite dann wieder erreichbar. <br> Wir bitten um Entschuldigung.</p>
+        <p class="passwordForm-zwei">Sonderinspektor auf Fahndung nach DIN EN ISO/IEC 27001 (Informationssicherheitsmanagementsysteme)? Dann sei krass und best&auml;tige mit deinem Parallel
+        Interconnection Nexus (PIN):</p>
+        <input type="number" id="passwordInput" placeholder="PIN" required>
+        <button class="h&auml;kchen" onclick="checkPassword()">&#10004;</button>
     </div>
-
-    <!-- Hier kommt der Inhalt, der geschützt werden soll -->
     <geschuetzt id="protectedContent">
 
 
@@ -275,29 +273,71 @@
 
 
    </geschuetzt>
+   <!--             Ende geschützter Inhalt           -->
 
+<script>
+    const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
+    const enablePasswordProtection = true;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
 
+    function autoLogout() {
+        setTimeout(function() {
+            sessionStorage.removeItem('loggedIn');
+            document.getElementById('protectedContent').style.display = 'none';
+            document.getElementById('passwordForm').style.display = 'block';
+            alert("LOL - automatische Abmeldung nach 20min - Technikgott (gar nich ausm Internet geklaut");
+        }, 1200000); // 1200000 Millisekunden = 20 Minuten
+    }
 
+    async function checkPassword() {
+        const enteredPassword = document.getElementById("passwordInput").value;
 
+        // Passwort-Hash berechnen
+        const hashBuffer = await sha256(enteredPassword);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const enteredPasswordHash = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
 
-    <script>
-        // Das richtige Passwort
-        const correctPassword = "geheimesPasswort";
+        if (enteredPasswordHash === correctPasswordHash) {
+            document.getElementById("passwordForm").style.display = "none";
+            document.getElementById("protectedContent").style.display = "block";
+            sessionStorage.setItem('loggedIn', 'true');
+            autoLogout(); // Startet den automatischen Logout-Timer
+        } else {
+            alert("Falsches Passwort!");
+        }
+    }
 
-        // Funktion zur Passwortüberprüfung
-        function checkPassword() {
-            const enteredPassword = document.getElementById("passwordInput").value;
+    async function sha256(message) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(message);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        return hashBuffer;
+    }
 
-            // Wenn das Passwort korrekt ist
-            if (enteredPassword === correctPassword) {
-                document.getElementById("passwordForm").style.display = "none";  // Passwortformular ausblenden
-                document.getElementById("protectedContent").style.display = "block";  // Geschützten Inhalt anzeigen
+    window.onload = function() {
+        // Wenn Passwortschutz deaktiviert ist, zeige den Inhalt ohne Passwortabfrage
+        if (!enablePasswordProtection) {
+            document.getElementById('protectedContent').style.display = 'block';  // Geschützten Inhalt direkt anzeigen
+            document.getElementById('passwordForm').style.display = 'none';  // Passwortformular ausblenden
+        } else {
+            // Überprüfen, ob der Benutzer eingeloggt ist
+            if (sessionStorage.getItem('loggedIn') === 'true') {
+                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschützten Inhalt
+                document.getElementById('passwordForm').style.display = 'none'; // Versteckt das Passwortformular
+                autoLogout(); // Startet den Logout-Timer, wenn der Benutzer eingeloggt ist
             } else {
-                alert("Falsches Passwort! Bitte versuche es erneut.");
+                document.getElementById('passwordForm').style.display = 'block'; // Zeigt das Passwortformular
+                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschützten Inhalt
             }
         }
-    </script>
 
+        // Event-Listener für die Enter-Taste
+        document.getElementById("passwordInput").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                checkPassword();  // Führt die Passwortüberprüfung beim Drücken der Enter-Taste aus
+            }
+        });
+    };
+</script>
 </body>
 
 </html>

@@ -5,7 +5,7 @@
         display: block; /* Listenelemente als Block-Elemente */
         text-align: center; /* Links zentrieren */
         padding: 0;
-        margin-top: 10px;
+        margin-top: 30px;
         margin-left: 15px !important;
     }
 
@@ -24,7 +24,7 @@
     .header-container {
         flex-direction: column; /* Stellt sicher, dass Bild und Text untereinander angeordnet werden */
         align-items: center; /* Bild und Text zentriert */
-        margin-left: 0px;
+        margin-left: 10px;
     }
 
     .internetauftritt {
@@ -59,14 +59,14 @@
 .springe-zu {
     display: flex;
     justify-content: space-between; /* Listen nebeneinander */
-    align-items: flex-start; /* Text linksbÃ¼ndig */
+    align-items: flex-start; /* Text linksbündig */
     width: 100%;
     background-color: #fff;
     padding: 10px 20px;
     border-bottom: 1px dashed #11113A;
     border-top: 1px dashed #11113A;
     box-sizing: border-box;
-    position: relative !important; /* Ãœberschreibt evtl. position: fixed */
+    position: relative !important; /* Überschreibt evtl. position: fixed */
     left: 50px; /* Korrigiert die Verschiebung */
     top: 20px !important;
 }
@@ -127,9 +127,61 @@ main p {
 
 
 
+                                                 /**Passwort-Form**/
+#passwordForm {
+    text-align: center;
+    font-family: 'Lora', serif;
+}
 
+.passwordForm-eins {
+   font-size: 18px;
+}
 
+.passwordForm-zwei {
+   font-size: 1em;
+   margin-top: 50px;
+}
 
+.häkchen {
+   color: green;
+   border: 0;
+   background-color: white;
+}
+
+.häkchen:hover {
+   color: white;
+   background-color: green;
+   border-radius: 10px;
+
+}
+
+#passwordInput {
+    width: 100%; /* Setzt die Breite des Eingabefeldes auf 100% des Containers */
+    max-width: 300px; /* Maximale Breite, um es nicht zu groß zu machen */
+    padding: 12px 15px; /* Größeres Innenpolster */
+    font-size: 18px; /* Größere Schrift */
+    border: 2px solid transparent; /* Transparenter Standardrand */
+    border-radius: 5px; /* Abgerundete Ecken */
+    box-sizing: border-box; /* sorgt dafür, dass Padding und Border in der Gesamtbreite enthalten sind */
+}
+
+#passwordInput:hover {
+    border: 2px dashed transparent; /* Transparenter Rand */
+    border-radius: 5px;
+    border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
+    outline: none; /* Kein Standardfokusrahmen */
+    box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kräftiges Orange) */
+}
+
+#passwordInput:focus {
+    border: 2px dashed transparent; /* Transparenter Rand */
+    border-radius: 5px;
+    border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
+    outline: none; /* Kein Standardfokusrahmen */
+    box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kräftiges Orange) */
+}
 
                                                  /***main-nav***/
 .main-nav {
@@ -211,9 +263,9 @@ main p {
 
 
 body {
-
     margin-top: 100px;
-    padding: 0;
+    text-align: left;
+    padding: 0px;
     font-family: 'Lora', serif;
     box-sizing: border-box;
 }
@@ -231,6 +283,7 @@ body {
     width: auto;
     height: 225px;
     margin-left: 100px;
+    border-radius: 15px;
 }
 
 
