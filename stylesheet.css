@@ -58,51 +58,49 @@
     margin-left: -50px !important;}
 
 
-.springe-zu {
-    display: flex;
-    justify-content: space-between; /* Listen nebeneinander */
-    align-items: flex-start; /* Text linksb√ºndig */
-    width: 100%;
-    background-color: #fff;
-    padding: 10px 20px;
-    border-bottom: 1px dashed #11113A;
-    border-top: 1px dashed #11113A;
-    box-sizing: border-box;
-    position: relative !important; /* √úberschreibt evtl. position: fixed */
-    left: 50px; /* Korrigiert die Verschiebung */
-    top: 20px !important;
-}
+   .springe-zu {
+        display: flex;                      /* Flexbox f¸r bessere Kontrolle */
+        justify-content: space-between;      /* Nebeneinander */
+        align-items: flex-start;             /* Linksb¸ndige Ausrichtung */
+        width: 100%;
+        background-color: #fff;
+        padding: 10px 20px;
+        border-bottom: 1px dashed #11113A;
+        border-top: 1px dashed #11113A;
+        box-sizing: border-box;
+        position: relative !important;       /* ‹berschreibt evtl. position: fixed */
+        left: 50px;                          /* Korrigiert die Verschiebung */
+        top: 20px !important;
+    }
 
-.springe-rechts {
-    margin-top: 20px !important;
-}
+    .springe-rechts {
+        margin-top: 20px !important;
+    }
 
+    .springe-zu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex: 1;                             /* Beide Listen nehmen gleich viel Platz ein */
+    }
 
-.springe-zu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex: 1; /* Beide Listen nehmen gleich viel Platz ein */
-}
+    .springe-zu ul li {
+        text-align: left;                    /* Links ausgerichtet */
+    }
 
-.springe-zu ul li {
-    text-align: left; /* Links ausgerichtet */
-}
+    .springe-zu a {
+        color: #000;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 8px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        display: block;
+    }
 
-
-.springe-zu a {
-    color: #000;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 8px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-    display: block;
-}
-
-.springe-zu a:hover {
-    background-color: #ddd;
-}
+    .springe-zu a:hover {
+        background-color: #ddd;
+    }
 
 main ul, ol {
     margin-left:40px;
@@ -138,14 +136,51 @@ main p {
    margin-top: 20px;
 }
 
-  .abstandh3 {
+.abstandh3 {
    margin-top: 450px !important;
 }
-  
+
+    #cookieBanner {
+        width: 90%;
+        bottom: 10px;
+        font-size: 14px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #cookieBanner button {
+        width: 100%;
+        margin-top: 5px;
+    }
+
 }
 
 
 
+#cookieBanner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+}
+
+#cookieBanner button {
+    background: #ffd700;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+}
                                                  /**Passwort-Form**/
 .lego-construction {
     width: auto;
@@ -166,13 +201,13 @@ main p {
    margin-top: 50px;
 }
 
-.h√§kchen {
+.h‰kchen {
    color: green;
    border: 0;
    background-color: white;
 }
 
-.h√§kchen:hover {
+.h‰kchen:hover {
    color: white;
    background-color: green;
    border-radius: 10px;
@@ -181,12 +216,12 @@ main p {
 
 #passwordInput {
     width: 100%; /* Setzt die Breite des Eingabefeldes auf 100% des Containers */
-    max-width: 300px; /* Maximale Breite, um es nicht zu gro√ü zu machen */
-    padding: 12px 15px; /* Gr√∂√üeres Innenpolster */
-    font-size: 18px; /* Gr√∂√üere Schrift */
+    max-width: 300px; /* Maximale Breite, um es nicht zu groﬂ zu machen */
+    padding: 12px 15px; /* Grˆﬂeres Innenpolster */
+    font-size: 18px; /* Grˆﬂere Schrift */
     border: 2px solid transparent; /* Transparenter Standardrand */
     border-radius: 5px; /* Abgerundete Ecken */
-    box-sizing: border-box; /* sorgt daf√ºr, dass Padding und Border in der Gesamtbreite enthalten sind */
+    box-sizing: border-box; /* sorgt daf¸r, dass Padding und Border in der Gesamtbreite enthalten sind */
 }
 
 #passwordInput:hover {
@@ -195,7 +230,7 @@ main p {
     border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
     outline: none; /* Kein Standardfokusrahmen */
     box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
-    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr√§ftiges Orange) */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr‰ftiges Orange) */
 }
 
 #passwordInput:focus {
@@ -204,7 +239,7 @@ main p {
     border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
     outline: none; /* Kein Standardfokusrahmen */
     box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
-    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr√§ftiges Orange) */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr‰ftiges Orange) */
 }
 
                                                  /***main-nav***/

@@ -35,6 +35,11 @@
 
 
 
+<div id="cookieBanner">
+    <p>Diese Website verwendet Cookies, um die Benutzererfahrung zu verbessern.</p>
+    <button onclick="hideCookieBanner()">Okay</button>
+</div>
+
 
    <header class="header-container">                                                      <!-- main-nav -->
 <!----><img class="kopf" src="bilder/Kopf.jpeg" alt="Kopf">
@@ -314,6 +319,14 @@
             }
         });
     };
+
+    function hideCookieBanner() {
+        document.getElementById("cookieBanner").style.opacity = "0";
+        setTimeout(() => document.getElementById("cookieBanner").style.display = "none", 1000);
+    }
+
+    // Banner nach 5 Sekunden automatisch ausblenden
+    setTimeout(hideCookieBanner, 5000);
 </script>
 </body>
 
