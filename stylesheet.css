@@ -43,8 +43,10 @@
     margin-top: 0px;
     }
 
-    h3 {
+    .konstitution {
     margin-top: 450px;
+    margin-bottom: 25px;
+    text-align: center;
     }
 
     .header-container {
@@ -304,8 +306,9 @@ body {
     border-radius: 15px;
 }
 
-
-
+.konstitution {
+    text-align: center;
+}
 
 .main-content {
     padding: 20px;
