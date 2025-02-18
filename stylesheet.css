@@ -115,12 +115,20 @@ main p {
 }
 
 
-
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     }
+
+.lego-construction {
+    width: 100 !important;
+    height: auto;
+}
+
+#passwordForm {
+    margin-left: 100px;
+}
 
 
 }
@@ -128,6 +136,11 @@ main p {
 
 
                                                  /**Passwort-Form**/
+.lego-construction {
+    width: auto;
+    height: 400px;
+}
+
 #passwordForm {
     text-align: center;
     font-family: 'Lora', serif;

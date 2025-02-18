@@ -19,7 +19,7 @@
     <!-- Passwortabfrage Formular -->
     <div id="passwordForm">
         <h2>Seite im Bau</h2>
-        <img src="Bilder/lego-construction.jpeg" alt="" border="0" width="auto" height="400">
+        <img src="Bilder/lego-construction.jpeg" class="lego-construction">
         <p class="passwordForm-eins">Politische Ungeheuerlichkeiten, fatale Fehler im Code oder doch eher ein Beauty-Update? <br> In jedem Fall braucht es noch ein weinig Zeit,
         in sp&auml;testens ein paar Tagen ist die Seite dann wieder erreichbar. <br> Wir bitten um Entschuldigung.</p>
         <p class="passwordForm-zwei">Sonderinspektor auf Fahndung nach DIN EN ISO/IEC 27001 (Informationssicherheitsmanagementsysteme)? Dann sei krass und best&auml;tige mit deinem Parallel
@@ -284,7 +284,7 @@
             sessionStorage.removeItem('loggedIn');
             document.getElementById('protectedContent').style.display = 'none';
             document.getElementById('passwordForm').style.display = 'block';
-            alert("LOL - automatische Abmeldung nach 20min - Technikgott (gar nich ausm Internet geklaut");
+            alert("LOL - automatische Abmeldung nach 20min - Technikgott (auf keinen Fall aus'm Internet geklaut ;)");
         }, 1200000); // 1200000 Millisekunden = 20 Minuten
     }
 
