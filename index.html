@@ -27,8 +27,9 @@
         <input type="number" id="passwordInput" placeholder="PIN" required>
         <button class="h&auml;kchen" onclick="checkPassword()">&#10004;</button>
     </div>
-    <geschuetzt id="protectedContent">
 
+    <geschuetzt id="protectedContent">
+   <!--             Anfang geschützter Inhalt           -->
 
 
 
@@ -242,10 +243,10 @@
         <p>Website, (Instagram-Account?), eigene Memes, Maskottchen, Pr&auml;ambel, Flagge/Logo, Erkennungszeichen/-wortlaut/-handzeichen, Antrag an EU/Gurkistan, Abzeichen </p>
         <p>Medienempfehlung: <br> zum H&ouml;ren: Chaosradio (CCC), MDR Kultur (MDR), Fritz (rbb)</p>
 
-
+   <footer>
          <hr size="1" noshade>
          <p >&copy; 2025 by &Eacute;mile Jeremias Ruff</p>
-         </footer>
+   </footer>
 
    </main>
 
@@ -277,7 +278,7 @@
 
 <script>
     const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
-    const enablePasswordProtection = true;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
+    const enablePasswordProtection = false;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
 
     function autoLogout() {
         setTimeout(function() {

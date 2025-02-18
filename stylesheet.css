@@ -59,14 +59,14 @@
 .springe-zu {
     display: flex;
     justify-content: space-between; /* Listen nebeneinander */
-    align-items: flex-start; /* Text linksb√ºndig */
+    align-items: flex-start; /* Text linksb¸ndig */
     width: 100%;
     background-color: #fff;
     padding: 10px 20px;
     border-bottom: 1px dashed #11113A;
     border-top: 1px dashed #11113A;
     box-sizing: border-box;
-    position: relative !important; /* √úberschreibt evtl. position: fixed */
+    position: relative !important; /* ‹berschreibt evtl. position: fixed */
     left: 50px; /* Korrigiert die Verschiebung */
     top: 20px !important;
 }
@@ -132,7 +132,7 @@ main p {
     font-size: 15px;
 }
 
-  #passwordInput {
+#passwordInput {
    margin-top: 20px;
 }
 
@@ -160,13 +160,13 @@ main p {
    margin-top: 50px;
 }
 
-.h√§kchen {
+.h‰kchen {
    color: green;
    border: 0;
    background-color: white;
 }
 
-.h√§kchen:hover {
+.h‰kchen:hover {
    color: white;
    background-color: green;
    border-radius: 10px;
@@ -175,12 +175,12 @@ main p {
 
 #passwordInput {
     width: 100%; /* Setzt die Breite des Eingabefeldes auf 100% des Containers */
-    max-width: 300px; /* Maximale Breite, um es nicht zu gro√ü zu machen */
-    padding: 12px 15px; /* Gr√∂√üeres Innenpolster */
-    font-size: 18px; /* Gr√∂√üere Schrift */
+    max-width: 300px; /* Maximale Breite, um es nicht zu groﬂ zu machen */
+    padding: 12px 15px; /* Grˆﬂeres Innenpolster */
+    font-size: 18px; /* Grˆﬂere Schrift */
     border: 2px solid transparent; /* Transparenter Standardrand */
     border-radius: 5px; /* Abgerundete Ecken */
-    box-sizing: border-box; /* sorgt daf√ºr, dass Padding und Border in der Gesamtbreite enthalten sind */
+    box-sizing: border-box; /* sorgt daf¸r, dass Padding und Border in der Gesamtbreite enthalten sind */
 }
 
 #passwordInput:hover {
@@ -189,7 +189,7 @@ main p {
     border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
     outline: none; /* Kein Standardfokusrahmen */
     box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
-    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr√§ftiges Orange) */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr‰ftiges Orange) */
 }
 
 #passwordInput:focus {
@@ -198,7 +198,7 @@ main p {
     border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
     outline: none; /* Kein Standardfokusrahmen */
     box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
-    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr√§ftiges Orange) */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kr‰ftiges Orange) */
 }
 
                                                  /***main-nav***/
