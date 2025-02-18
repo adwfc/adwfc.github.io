@@ -1,57 +1,148 @@
-<html>
+<!DOCTYPE html>
 <head>
-         <title>ADWFC - Aktuelles</title>
+         <title>Mitglieder ADWFC</title>
          <meta name="author" content="&Eacute;mile Jeremias Ruff">
          <link rel="stylesheet" href="../stylesheet.css" type="text/css">
+         <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
          <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-         <div style="height: 100px;"></div>
-
+         <style>
+          #passwordForm, #protectedContent {
+          display: none; /* Beide Abschnitte standardm&auml;&szlig;ig ausblenden */
+          }
+         </style>
 </head>
-<body>
-  <header class="header-container">
-    <img class="kopf" src="../bilder/Kopf.jpeg" alt="Kopf">                               <!-- main-nav -->
 
-    <div class="main-nav">
-        <h1 class="allgemeiner-deutscher">Allgemeiner Deutscher Wanderer und Fahrradfahrer Club &#x1F474; &#x1F97E;</h1>
-        <p class="internetauftritt">- Internetauftritt der WaFas</p>
-        <ul class="header-links">
-            <li><a href="../index.html">Homepage</a></li>
-            <li><b>|</b></li>
-            <li><a href="Aktuelles.html">Aktuelles</a></li>
-            <li><b>|</b></li>
-            <li><a href="Mitglieder.html">Mitglieder</a></li>
-        </ul>
+<body>
+
+    <!-- Passwortabfrage Formular -->
+    <div id="passwordForm">
+        <h2>Seite im Bau</h2>
+        <img src="../bilder/lego-construction.jpeg" class="lego-construction">
+        <p class="passwordForm-eins">Politische Ungeheuerlichkeiten, fatale Fehler im Code oder doch eher ein Beauty-Update? <br> In jedem Fall braucht es noch ein weinig Zeit,
+        in sp&auml;testens ein paar Tagen ist die Seite dann wieder erreichbar. <br> Wir bitten um Entschuldigung.</p>
+        <p class="passwordForm-zwei">Sonderinspektor auf Fahndung nach DIN EN ISO/IEC 27001 (Informationssicherheitsmanagementsysteme)? Dann sei krass und best&auml;tige mit deinem Parallel
+        Interconnection Nexus (PIN):</p>
+        <input type="number" id="passwordInput" placeholder="PIN" required>
+        <button class="h&auml;kchen" onclick="checkPassword()">&#10004;</button>
     </div>
 
-    <nav class="springe-zu">                                                             <!-- Springe zu -->
-        <ul>
-            <li>Springe zu:</li>
-        </ul>
-    </nav>
-  </header>
+    <geschuetzt id="protectedContent">
+    <!--             Anfang geschützter Inhalt           -->
 
+
+
+   <header class="header-container">                                                      <!-- main-nav -->
+<!----><img class="kopf" src="../bilder/Kopf.jpeg" alt="Kopf">
+
+<!----><div class="main-nav">
+          <h1 class="allgemeiner-deutscher">Allgemeiner Deutscher Wanderer und Fahrradfahrer Club &#x1F474; &#x1F97E;</h1>
+          <!--h1 class="allgemeiner-deutscher">ADWFC &#x1F474; &#x1F97E;</h1-->
+          <p class="internetauftritt">- Internetauftritt der WaFas</p>
+          <ul>
+              <li><a href="../index.html">Homepage</a></li>
+              <li><b>|</b></li>
+              <li><a href="Aktuelles.html">Aktuelles</a></li>
+              <li><b>|</b></li>
+              <li><a href="Mitglieder.html">Mitglieder</a></li>
+          </ul>
+      </div>
+
+<!----><nav class="springe-zu">                                                             <!-- Springe zu -->
+          <ul class="springe-links">
+              <li>Springe zu:</li>
+          </ul>
+          <ul class="springe-rechts">
+          </ul>
+      </nav>
+   </header>
 
   <article class="bau">
-  <img src="../bilder/underconstruction.png" alt="under construction" border="0" width="5%" height="auto">
-  <p>Under Construction</p>
-  <p>Lieber Nutzer, </p>
-  <p>aktuell befindet sich diese Seite im Bau.</p>
+         <img src="../bilder/construction.png" alt="under construction" border="0" width="5%" height="auto">
+         <p><i>Under Construction</i></p>
+         <p>Lieber Nutzer, </p>
+         <p>aktuell befindet sich diese Seite im Bau.</p>
   </article>
 
 
   <hr size="3" noshade class="QuellStrich">
-     <p class="Quellen">Quellen:</p>
-     <ul class="Quellen">
-     <li>CopyrightFreePictures (pixabay)</li>
-     </ul>
-
-  <footer>
-
-  <hr size="1" noshade>
-  <p >&copy; 2025 by &Eacute;mile Jeremias Ruff</p>
-  </footer>
+         <p class="Quellen">Quellen:</p>
+         <ul class="Quellen"><li>CopyrightFreePictures (pixabay)</li>
+         </ul>
 
 
+   <footer>
+         <hr size="1" noshade>
+         <p >&copy; 2025 by &Eacute;mile Jeremias Ruff</p>
+   </footer>
+
+   <!--             Ende geschützter Inhalt           -->
+   </geschuetzt>
+
+
+<script>
+    const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
+    const enablePasswordProtection = false;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
+
+    function autoLogout() {
+        setTimeout(function() {
+            sessionStorage.removeItem('loggedIn');
+            document.getElementById('protectedContent').style.display = 'none';
+            document.getElementById('passwordForm').style.display = 'block';
+            alert("LOL - automatische Abmeldung nach 20min - Technikgott (auf keinen Fall aus'm Internet geklaut ;)");
+        }, 1200000); // 1200000 Millisekunden = 20 Minuten
+    }
+
+    async function checkPassword() {
+        const enteredPassword = document.getElementById("passwordInput").value;
+
+        // Passwort-Hash berechnen
+        const hashBuffer = await sha256(enteredPassword);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const enteredPasswordHash = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+
+        if (enteredPasswordHash === correctPasswordHash) {
+            document.getElementById("passwordForm").style.display = "none";
+            document.getElementById("protectedContent").style.display = "block";
+            sessionStorage.setItem('loggedIn', 'true');
+            autoLogout(); // Startet den automatischen Logout-Timer
+        } else {
+            alert("Falsches Passwort!");
+        }
+    }
+
+    async function sha256(message) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(message);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        return hashBuffer;
+    }
+
+    window.onload = function() {
+        // Wenn Passwortschutz deaktiviert ist, zeige den Inhalt ohne Passwortabfrage
+        if (!enablePasswordProtection) {
+            document.getElementById('protectedContent').style.display = 'block';  // Geschützten Inhalt direkt anzeigen
+            document.getElementById('passwordForm').style.display = 'none';  // Passwortformular ausblenden
+        } else {
+            // Überprüfen, ob der Benutzer eingeloggt ist
+            if (sessionStorage.getItem('loggedIn') === 'true') {
+                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschützten Inhalt
+                document.getElementById('passwordForm').style.display = 'none'; // Versteckt das Passwortformular
+                autoLogout(); // Startet den Logout-Timer, wenn der Benutzer eingeloggt ist
+            } else {
+                document.getElementById('passwordForm').style.display = 'block'; // Zeigt das Passwortformular
+                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschützten Inhalt
+            }
+        }
+
+        // Event-Listener für die Enter-Taste
+        document.getElementById("passwordInput").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                checkPassword();  // Führt die Passwortüberprüfung beim Drücken der Enter-Taste aus
+            }
+        });
+    };
+</script>
 </body>
 </html>
