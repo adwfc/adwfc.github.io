@@ -125,9 +125,11 @@ main p {
     width: 80% !important;
     height: auto !important;
 }
-  
+
 #passwordForm {
-    margin-left: 50px;
+    margin-left: 70px;
+    margin-right: 30px;
+    font-size: 15px;
 }
 
 
