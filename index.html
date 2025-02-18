@@ -31,13 +31,14 @@
     </div>
 
     <geschuetzt id="protectedContent">
-   <!--             Anfang geschützter Inhalt           -->
+   <!--             Anfang geschÃ¼tzter Inhalt           -->
 
 
 
 <div id="cookieBanner">
-    <p>Diese Website verwendet Cookies, um die Benutzererfahrung zu verbessern.</p>
-    <button onclick="hideCookieBanner()">Okay</button>
+    <p>Unsere Cookies bleiben schÃ¶n bei uns! &#127850; <br><br> Deshalb finden sich auch keine auf dieser Website, es werden jediglich Logins fÃ¼r 20min <br> im Session Storage
+    gespeichert sowie die Bildschrimbreite ermittelt. &#128190;&#128274;</p>
+    <button onclick="hideCookieBanner()">Top &#128591;</button>
 </div>
 
 
@@ -176,7 +177,7 @@
 
 
 
-        <h3 id="Strafma&szlig;nahmen" class="abstandh3">Strafma&szlig;nahmen (Sm)</h3>          <!-- Strafmaßnahmen -->
+        <h3 id="Strafma&szlig;nahmen" class="abstandh3">Strafma&szlig;nahmen (Sm)</h3>          <!-- StrafmaÃŸnahmen -->
 
         <p><ol>  <li>k&ouml;rperliche Z&uuml;chtigung durch Exekutive
                          <ul>    <li>normale M betreffend: bei leichten Vergehen leicher Schulterknuff</li>
@@ -193,7 +194,7 @@
 
 
 
-        <h3 id="Erg&auml;nzungen" class="abstandh3">Erg&auml;nzungen (Erg&auml;)</h3>              <!-- Ergänzungen -->
+        <h3 id="Erg&auml;nzungen" class="abstandh3">Erg&auml;nzungen (Erg&auml;)</h3>              <!-- ErgÃ¤nzungen -->
 
         <p><ol>  <li><b>Backen</b>
                  <span class="nomargintop" class="einzug"><br>
@@ -219,7 +220,7 @@
 
 
 
-        <h3 id="Zuk&uuml;nftiges" class="abstandh3">Zuk&uuml;nftiges</h3>          <!-- Zukünftiges -->
+        <h3 id="Zuk&uuml;nftiges" class="abstandh3">Zuk&uuml;nftiges</h3>          <!-- ZukÃ¼nftiges -->
 
         <p>Website, (Instagram-Account?), eigene Memes, Maskottchen, Pr&auml;ambel, Flagge/Logo, Erkennungszeichen/-wortlaut/-handzeichen, Antrag an EU/Gurkistan, Abzeichen </p>
         <p>Medienempfehlung: <br> zum H&ouml;ren: Chaosradio (CCC), MDR Kultur (MDR), Fritz (rbb)</p>
@@ -245,8 +246,8 @@
         };
 
         mybutton.onclick = function() {
-            document.body.scrollTop = 0; // Für Safari
-            document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
+            document.body.scrollTop = 0; // FÃ¼r Safari
+            document.documentElement.scrollTop = 0; // FÃ¼r Chrome, Firefox, IE und Opera
         }
    </script>
 
@@ -255,7 +256,7 @@
 
 
    </geschuetzt>
-   <!--             Ende geschützter Inhalt           -->
+   <!--             Ende geschÃ¼tzter Inhalt           -->
 
 <script>
     const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
@@ -298,24 +299,24 @@
     window.onload = function() {
         // Wenn Passwortschutz deaktiviert ist, zeige den Inhalt ohne Passwortabfrage
         if (!enablePasswordProtection) {
-            document.getElementById('protectedContent').style.display = 'block';  // Geschützten Inhalt direkt anzeigen
+            document.getElementById('protectedContent').style.display = 'block';  // GeschÃ¼tzten Inhalt direkt anzeigen
             document.getElementById('passwordForm').style.display = 'none';  // Passwortformular ausblenden
         } else {
-            // Überprüfen, ob der Benutzer eingeloggt ist
+            // ÃœberprÃ¼fen, ob der Benutzer eingeloggt ist
             if (sessionStorage.getItem('loggedIn') === 'true') {
-                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschützten Inhalt
+                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschÃ¼tzten Inhalt
                 document.getElementById('passwordForm').style.display = 'none'; // Versteckt das Passwortformular
                 autoLogout(); // Startet den Logout-Timer, wenn der Benutzer eingeloggt ist
             } else {
                 document.getElementById('passwordForm').style.display = 'block'; // Zeigt das Passwortformular
-                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschützten Inhalt
+                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschÃ¼tzten Inhalt
             }
         }
 
-        // Event-Listener für die Enter-Taste
+        // Event-Listener fÃ¼r die Enter-Taste
         document.getElementById("passwordInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                checkPassword();  // Führt die Passwortüberprüfung beim Drücken der Enter-Taste aus
+                checkPassword();  // FÃ¼hrt die PasswortÃ¼berprÃ¼fung beim DrÃ¼cken der Enter-Taste aus
             }
         });
     };
