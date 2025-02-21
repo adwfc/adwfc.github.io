@@ -260,6 +260,34 @@ h2 {
 }
 
 
+.para-liste {
+  list-style: none;
+  counter-reset: paragraph-counter;
+  margin-left: 0px; /* Linker Abstand für die gesamte Liste */
+  padding: 0;
+}
+
+.para-liste > li {
+  counter-increment: paragraph-counter;
+  position: relative;
+  padding-left: 2em; /* Platz für das §-Symbol */
+}
+
+.para-liste > li::before {
+  content: "§" counter(paragraph-counter) " ";
+  position: absolute;
+  left: 0;
+}
+
+.para-liste ul {
+  list-style-type: disc; /* Bullet Points */
+  margin-left: 0em; /* Einrückung */
+  padding-left: 0; /* Verhindert doppeltes Padding */
+}
+
+.para-liste ul li {
+  padding-left: 0.5em; /* Leichter Abstand zum Bullet Point */
+}
 
                                                  /***mobile Version***/
 /***mobile Version***/
@@ -377,7 +405,6 @@ main p {
 main {
    margin-left: 40px;
 }
-
 
 * {
     box-sizing: border-box;
