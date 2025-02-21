@@ -28,7 +28,6 @@
     height: 400px;
 }
 
-
 .passwordForm-eins {
    font-size: 18px;
 }
@@ -38,13 +37,23 @@
    margin-top: 50px;
 }
 
-.hÃ¤kchen {
+#passwordForm {
+    text-align: center;
+    font-family: 'Lora', serif;
+}
+
+#passwordInput {
+   margin-top: 20px;
+}
+
+
+.häkchen {
    color: green;
    border: 0;
    background-color: white;
 }
 
-.hÃ¤kchen:hover {
+.häkchen:hover {
    color: white;
    background-color: green;
    border-radius: 10px;
@@ -53,12 +62,12 @@
 
 #passwordInput {
     width: 100%; /* Setzt die Breite des Eingabefeldes auf 100% des Containers */
-    max-width: 300px; /* Maximale Breite, um es nicht zu groÃŸ zu machen */
-    padding: 12px 15px; /* GrÃ¶ÃŸeres Innenpolster */
-    font-size: 18px; /* GrÃ¶ÃŸere Schrift */
+    max-width: 300px; /* Maximale Breite, um es nicht zu groß zu machen */
+    padding: 12px 15px; /* Größeres Innenpolster */
+    font-size: 18px; /* Größere Schrift */
     border: 2px solid transparent; /* Transparenter Standardrand */
     border-radius: 5px; /* Abgerundete Ecken */
-    box-sizing: border-box; /* sorgt dafÃ¼r, dass Padding und Border in der Gesamtbreite enthalten sind */
+    box-sizing: border-box; /* sorgt dafür, dass Padding und Border in der Gesamtbreite enthalten sind */
 }
 
 #passwordInput:hover {
@@ -67,7 +76,7 @@
     border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
     outline: none; /* Kein Standardfokusrahmen */
     box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
-    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (krÃ¤ftiges Orange) */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kräftiges Orange) */
 }
 
 #passwordInput:focus {
@@ -76,7 +85,7 @@
     border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1; /* Feineres Wechselmuster */
     outline: none; /* Kein Standardfokusrahmen */
     box-shadow: 0 0 5px orange; /* Etwas mehr Leuchten beim Fokussieren */
-    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (krÃ¤ftiges Orange) */
+    border-right: 3px solid #ff4500; /* Farbiger Rand rechts (kräftiges Orange) */
 }
 
                                                  /***main-nav***/
@@ -263,25 +272,25 @@ h2 {
 .para-liste {
   list-style: none;
   counter-reset: paragraph-counter;
-  margin-left: 0px; /* Linker Abstand fÃ¼r die gesamte Liste */
+  margin-left: 0px; /* Linker Abstand für die gesamte Liste */
   padding: 0;
 }
 
 .para-liste > li {
   counter-increment: paragraph-counter;
   position: relative;
-  padding-left: 2em; /* Platz fÃ¼r das Â§-Symbol */
+  padding-left: 2em; /* Platz für das §-Symbol */
 }
 
 .para-liste > li::before {
-  content: "Â§" counter(paragraph-counter) " ";
+  content: "§" counter(paragraph-counter) " ";
   position: absolute;
   left: 0;
 }
 
 .para-liste ul {
   list-style-type: disc; /* Bullet Points */
-  margin-left: -0.5em; /* EinrÃ¼ckung */
+  margin-left: -0.5em; /* Einrückung */
   padding-left: 0; /* Verhindert doppeltes Padding */
 }
 
@@ -346,16 +355,16 @@ h2 {
 
 
    .springe-zu {
-        display: flex;                      /* Flexbox fÃ¼r bessere Kontrolle */
+        display: flex;                      /* Flexbox für bessere Kontrolle */
         justify-content: space-between;      /* Nebeneinander */
-        align-items: flex-start;             /* LinksbÃ¼ndige Ausrichtung */
+        align-items: flex-start;             /* Linksbündige Ausrichtung */
         width: 100%;
         background-color: #fff;
         padding: 10px 20px;
         border-bottom: 1px dashed #11113A;
         border-top: 1px dashed #11113A;
         box-sizing: border-box;
-        position: relative !important;       /* Ãœberschreibt evtl. position: fixed */
+        position: relative !important;       /* Überschreibt evtl. position: fixed */
         left: 50px;
         right: 50px;                       /* Korrigiert die Verschiebung */
         top: 20px;
@@ -418,9 +427,9 @@ main {
 }
 
 #passwordForm {
-    font-size: 15px;
-    margin-top: -70px !important;
-    margin-left: 30px !important;
+    font-size: 14px;
+    margin-top: 50px;
+    margin-left: 30px;
     margin-right: 30px !important;
     text-align: center;
     font-family: 'Lora', serif;
