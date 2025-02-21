@@ -36,11 +36,7 @@
     .kopf {
     width: auto;
     height: 225px;
-    margin-right: 10px;
-    }
-
-    body {
-    margin-top: 0px;
+    margin-left: 40px !important;
     }
 
     .konstitution {
@@ -53,9 +49,8 @@
     padding: 0;
     }
 
-    body{
-    margin-top: 20px !important;
-    margin-left: -50px !important;}
+    body {
+    margin-top: 20px;        }
 
 
    .springe-zu {
@@ -137,7 +132,7 @@ main p {
 }
 
 .abstandh3 {
-   margin-top: 70px !important;
+   margin-top: 325px !important;
 }
 
     #cookieBanner {
