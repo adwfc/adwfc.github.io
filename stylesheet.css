@@ -25,6 +25,8 @@
         flex-direction: column; /* Stellt sicher, dass Bild und Text untereinander angeordnet werden */
         align-items: center; /* Bild und Text zentriert */
         margin-left: 10px;
+        height: 200px !important;
+        padding: 20px !important;
     }
 
     .internetauftritt {
@@ -85,7 +87,7 @@
     }
 
     .springe-zu ul li {
-        text-align: left;                    /* Links ausgerichtet */
+        text-align: left;
     }
 
     .springe-zu a {
@@ -137,7 +139,7 @@ main p {
 }
 
 .abstandh3 {
-   margin-top: 450px !important;
+   margin-top: 70px !important;
 }
 
     #cookieBanner {
@@ -324,7 +326,6 @@ main p {
 body {
     margin-top: 100px;
     text-align: left;
-    padding: 0px;
     font-family: 'Lora', serif;
     box-sizing: border-box;
 }
@@ -334,8 +335,6 @@ body {
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-    height: 200px;
-    padding: 20px;
 }
 
 .kopf {
