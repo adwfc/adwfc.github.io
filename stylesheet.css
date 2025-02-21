@@ -23,10 +23,8 @@
 
     .header-container {
         flex-direction: column; /* Stellt sicher, dass Bild und Text untereinander angeordnet werden */
-        align-items: center; /* Bild und Text zentriert */
-        margin-left: 10px;
         height: 200px !important;
-        padding: 20px !important;
+        padding: 10px !important;
     }
 
     .internetauftritt {
@@ -38,7 +36,7 @@
     .kopf {
     width: auto;
     height: 225px;
-    margin-left: 0px;
+    margin-right: 10px;
     }
 
     body {
