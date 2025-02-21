@@ -31,7 +31,7 @@
     </div>
 
     <geschuetzt id="protectedContent">
-    <!--             Ende geschützter Inhalt           -->
+    <!--             Ende geschÃ¼tzter Inhalt           -->
 
 
 
@@ -96,12 +96,12 @@
    </footer>
 
    </geschuetzt>
-   <!--             Ende geschützter Inhalt           -->
+   <!--             Ende geschÃ¼tzter Inhalt           -->
 
 
 <script>
     const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
-    const enablePasswordProtection = false;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
+    const enablePasswordProtection = true;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
 
     function autoLogout() {
         setTimeout(function() {
@@ -140,24 +140,24 @@
     window.onload = function() {
         // Wenn Passwortschutz deaktiviert ist, zeige den Inhalt ohne Passwortabfrage
         if (!enablePasswordProtection) {
-            document.getElementById('protectedContent').style.display = 'block';  // Geschützten Inhalt direkt anzeigen
+            document.getElementById('protectedContent').style.display = 'block';  // GeschÃ¼tzten Inhalt direkt anzeigen
             document.getElementById('passwordForm').style.display = 'none';  // Passwortformular ausblenden
         } else {
-            // Überprüfen, ob der Benutzer eingeloggt ist
+            // ÃœberprÃ¼fen, ob der Benutzer eingeloggt ist
             if (sessionStorage.getItem('loggedIn') === 'true') {
-                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschützten Inhalt
+                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschÃ¼tzten Inhalt
                 document.getElementById('passwordForm').style.display = 'none'; // Versteckt das Passwortformular
                 autoLogout(); // Startet den Logout-Timer, wenn der Benutzer eingeloggt ist
             } else {
                 document.getElementById('passwordForm').style.display = 'block'; // Zeigt das Passwortformular
-                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschützten Inhalt
+                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschÃ¼tzten Inhalt
             }
         }
 
-        // Event-Listener für die Enter-Taste
+        // Event-Listener fÃ¼r die Enter-Taste
         document.getElementById("passwordInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                checkPassword();  // Führt die Passwortüberprüfung beim Drücken der Enter-Taste aus
+                checkPassword();  // FÃ¼hrt die PasswortÃ¼berprÃ¼fung beim DrÃ¼cken der Enter-Taste aus
             }
         });
     };
