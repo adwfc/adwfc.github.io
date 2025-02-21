@@ -183,11 +183,6 @@ body {
     text-align: center;
 }
 
-.main-content {
-    padding: 20px;
-    font-size: 1.2rem;
-}
-
 .allgemeiner-deutscher {
     font-family: Arial, sans-serif;
     font-size: 30px;
@@ -205,17 +200,10 @@ body {
     margin-left: 20px;
 }
 
-ul, ol {
-    margin-top: 0;
-}
-
 .abstandh3 {
     margin-top: 70px;
 }
 
-.nomargintop {
-    margin-top: 0;
-}
 
 main {
     margin-left: 100px;
@@ -387,7 +375,7 @@ main p {
 }
 
 main {
-   margin-left: 40px !important;
+   margin-left: 40px;
 }
 
 
@@ -416,7 +404,19 @@ main {
 }
 
 .abstandh3 {
-   margin-top: 325px !important;
+   margin-top: 50px;
+}
+
+.abstand-reg {
+   margin-top: 20px;
+}
+
+.abstand-nm li {
+  margin-top: 0px;
+}
+
+.konstitution {
+   margin-top: 400px;
 }
 
     #cookieBanner {

@@ -4,14 +4,14 @@
          <meta name="author" content="&Eacute;mile Jeremias Ruff">
          <link rel="icon" type="image/png" href="favicon.ico">
 
-         <link rel="stylesheet" href="stylesheet.css?v=<?= filemtime('style.css'); ?" type="text/css">
+         <link rel="stylesheet" href="stylesheet.css?v=<?= filemtime('style.css'); ?>" type="text/css">
          <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
          <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
          <style>
           #passwordForm, #protectedContent {
-          display: none; /* Beide Abschnitte standardm&auml;&szlig;ig ausblenden */
+          display: none;
           }
          </style>
 </head>
@@ -31,15 +31,15 @@
     </div>
 
     <geschuetzt id="protectedContent">
-   <!--             Anfang geschÃ¼tzter Inhalt           -->
+   <!--             Anfang geschützter Inhalt           -->
 
 
 
-<div id="cookieBanner">
-    <p>Unsere Cookies bleiben schÃ¶n bei uns! &#127850; <br><br> Deshalb finden sich auch keine auf dieser Website, es werden jediglich Logins fÃ¼r 20min <br> im Session Storage
-    gespeichert sowie die Bildschrimbreite ermittelt. &#128190;&#128274;</p>
-    <button onclick="hideCookieBanner()">Top &#128591;</button>
-</div>
+    <div id="cookieBanner">
+         <p>Unsere Cookies bleiben sch&ouml;n bei uns! &#127850; <br><br> Deshalb finden sich auch keine auf dieser Website, es werden jediglich Logins f&uuml;r 20min <br> im Session Storage
+         gespeichert sowie die Bildschrimbreite ermittelt. &#128190;&#128274;</p>
+         <button onclick="hideCookieBanner()">Top &#128591;</button>
+    </div>
 
 
    <header class="header-container">                                                      <!-- main-nav -->
@@ -112,7 +112,7 @@
          <h3 id="Regelungen" class="abstandh3">Regelungen (Reg)</h3>              <!-- Regelungen -->
 
 
-<!---->  <p><b>&sect;1 Externe Inhalte</b><br>
+<!---->  <p class="abstand-reg"><b>&sect;1 Externe Inhalte</b><br>
                  <span class="einzug">Bei der Vermittlung von Inhalten des Internets (Zitieren, direktes Einbetten in Whatsabb, Watsabb URLsHyperlinks)
                  ist die Einhaltung folgender Beschr&auml;nkungen zu beachten. <br> Das Urteil liegt in Einzelf&auml;llen im Ermessen der Judikative. <br>
                  <ol>    <li>a) eigenserstellte Inhalte: keine Beschr&auml;nkungen<br>
@@ -121,36 +121,35 @@
                          <li>Nonsense von Dritten (zB. aus den "Sozialen Medien"): max. zwei Medien pro Woche   </li>
                  </ol></span></p>
 
-<!---->  <p><b>&sect;2 Wir sagen "Nein!" zu Drogen</b>
+<!---->  <p class="abstand-reg"><b>&sect;2 Wir sagen "Nein!" zu Drogen</b>
                  <span class="einzug">Auf Wanderungen (und Fahrradfahrten) sowie sonstigen Treffen im Rahmen der ADWFC ist von folgenden Drogen abzusehen: illegale Drogen, Cannabis, Tabak, <br>
                  Doping und Alkohol. Wodka, Zucker und Bier sind von dieser Regelung ausgenommen. Bei Missachtung kann bis zu h&ouml;chster Strafma&szlig;nahme geurteilt werden;
                  dem dauerhaften Klubausschluss.</span></p>
 
-<!---->  <p><b>&sect;3 Neue Mitglieder</b>
+<!---->  <p class="abstand-reg"><b>&sect;3 Neue Mitglieder</b>
                  <span class="einzug">Zur Aufnahme m&uuml;ssen folgende Bedingungen erf&uuml;llt werden:<br>
-                 <ul>    <li>Interesse am Sport</li>
-                         <li>eine zwischenmenschliche Beziehung zu mindestens einem der bestehenden GMs</li>
-                         <li>Wandertauglichkeit und ein Minimun an Ausdauer</li>
-                         <li>Humor</li>
-                         <li>Lust daran, in der Natur zu sein</li>
-                         <li>Antragsstellung eines GMs</li>
-                         <li>einfache Mehrheit bei Aufnahmeantrag sowie die Kenntnis aller GMs des Antrages</li>
-                         <li>Unterschreibung der Mitgliedervereinbarung</li>
+                 <ul class="abstand-nm"><li>Interesse am Sport</li>
+                                        <li>eine zwischenmenschliche Beziehung zu mindestens einem der bestehenden GMs</li>
+                                        <li>Humor</li>
+                                        <li>Lust daran, in der Natur zu sein</li>
+                                        <li>Antragsstellung eines GMs</li>
+                                        <li>einfache Mehrheit bei Aufnahmeantrag sowie die Kenntnis aller GMs des Antrages</li>
+                                        <li>Unterschreibung der Mitgliedervereinbarung</li>
                  </ul></span></p>
 
-<!----> <p><b>&sect;4 &Auml;nderungen klubrelevanter Texte</b>
+<!----> <p class="abstand-reg"><b>&sect;4 &Auml;nderungen klubrelevanter Texte</b>
                  <span class="einzug"> Zur &Auml;nderung im Klubnamen, den Regelungen und nachtr&auml;glich offiziellen Verlautbarungen ist eine einfache Mehrheit n&ouml;tig. Der Antrag muss <br>
                  von einem GM gestellt werden.<br>
                  Zur &Auml;nderung der Verfassung bedarf es einer Zweidrittelmehrheit. (siehe Erg&auml;. 2)<br>
                  Das &Auml;ndern selbst erfolgt unter Aufsicht mindestens eines VMs.</span></p>
 
-<!----> <p><b>&sect;5 Unerw&uuml;nschtes Verhalten</b>
+<!----> <p class="abstand-reg"><b>&sect;5 Unerw&uuml;nschtes Verhalten</b>
                  <span class="einzug">
                  <ul>    <li>Von Kraftausdr&uuml;cken ist abzusehen.</li>
                          <li>Exekutieren ohne Titel der Exekutive (BummBumm - AuaAua)</li>
                  </ul></span></p>
 
-<!----> <p>*ausgenommen sind folgende Creatoren: Kurzgesagt</p>
+<!----> <p class="abstand-reg">*ausgenommen sind folgende Creatoren: Kurzgesagt</p>
 
 
 
@@ -177,7 +176,7 @@
 
 
 
-        <h3 id="Strafma&szlig;nahmen" class="abstandh3">Strafma&szlig;nahmen (Sm)</h3>          <!-- StrafmaÃŸnahmen -->
+        <h3 id="Strafma&szlig;nahmen" class="abstandh3">Strafma&szlig;nahmen (Sm)</h3>          <!-- Strafmaßnahmen -->
 
         <p><ol>  <li>k&ouml;rperliche Z&uuml;chtigung durch Exekutive
                          <ul>    <li>normale M betreffend: bei leichten Vergehen leicher Schulterknuff</li>
@@ -194,7 +193,7 @@
 
 
 
-        <h3 id="Erg&auml;nzungen" class="abstandh3">Erg&auml;nzungen (Erg&auml;)</h3>              <!-- ErgÃ¤nzungen -->
+        <h3 id="Erg&auml;nzungen" class="abstandh3">Erg&auml;nzungen (Erg&auml;)</h3>              <!-- Ergänzungen -->
 
         <p><ol>  <li><b>Backen</b>
                  <span class="nomargintop" class="einzug"><br>
@@ -220,7 +219,7 @@
 
 
 
-        <h3 id="Zuk&uuml;nftiges" class="abstandh3">Zuk&uuml;nftiges</h3>          <!-- ZukÃ¼nftiges -->
+        <h3 id="Zuk&uuml;nftiges" class="abstandh3">Zuk&uuml;nftiges</h3>          <!-- Zukünftiges -->
 
         <p>Website, (Instagram-Account?), eigene Memes, Maskottchen, Pr&auml;ambel, Flagge/Logo, Erkennungszeichen/-wortlaut/-handzeichen, Antrag an EU/Gurkistan, Abzeichen </p>
         <p>Medienempfehlung: <br> zum H&ouml;ren: Chaosradio (CCC), MDR Kultur (MDR), Fritz (rbb)</p>
@@ -246,8 +245,8 @@
         };
 
         mybutton.onclick = function() {
-            document.body.scrollTop = 0; // FÃ¼r Safari
-            document.documentElement.scrollTop = 0; // FÃ¼r Chrome, Firefox, IE und Opera
+            document.body.scrollTop = 0; // Für Safari
+            document.documentElement.scrollTop = 0; // Für Chrome, Firefox, IE und Opera
         }
    </script>
 
@@ -256,7 +255,7 @@
 
 
    </geschuetzt>
-   <!--             Ende geschÃ¼tzter Inhalt           -->
+   <!--             Ende geschützter Inhalt           -->
 
 <script>
     const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
@@ -299,24 +298,24 @@
     window.onload = function() {
         // Wenn Passwortschutz deaktiviert ist, zeige den Inhalt ohne Passwortabfrage
         if (!enablePasswordProtection) {
-            document.getElementById('protectedContent').style.display = 'block';  // GeschÃ¼tzten Inhalt direkt anzeigen
+            document.getElementById('protectedContent').style.display = 'block';  // Geschützten Inhalt direkt anzeigen
             document.getElementById('passwordForm').style.display = 'none';  // Passwortformular ausblenden
         } else {
-            // ÃœberprÃ¼fen, ob der Benutzer eingeloggt ist
+            // Überprüfen, ob der Benutzer eingeloggt ist
             if (sessionStorage.getItem('loggedIn') === 'true') {
-                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschÃ¼tzten Inhalt
+                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschützten Inhalt
                 document.getElementById('passwordForm').style.display = 'none'; // Versteckt das Passwortformular
                 autoLogout(); // Startet den Logout-Timer, wenn der Benutzer eingeloggt ist
             } else {
                 document.getElementById('passwordForm').style.display = 'block'; // Zeigt das Passwortformular
-                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschÃ¼tzten Inhalt
+                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschützten Inhalt
             }
         }
 
-        // Event-Listener fÃ¼r die Enter-Taste
+        // Event-Listener für die Enter-Taste
         document.getElementById("passwordInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                checkPassword();  // FÃ¼hrt die PasswortÃ¼berprÃ¼fung beim DrÃ¼cken der Enter-Taste aus
+                checkPassword();  // Führt die Passwortüberprüfung beim Drücken der Enter-Taste aus
             }
         });
     };
