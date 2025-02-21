@@ -50,7 +50,8 @@
     }
 
     body {
-    margin-top: 20px;        }
+    margin-top: 20px;
+    }
 
 
    .springe-zu {
@@ -122,9 +123,10 @@ main p {
 }
 
 #passwordForm {
-    margin-left: 70px;
-    margin-right: 30px;
     font-size: 15px;
+    margin-top: 100px;
+    text-align: center;
+    font-family: 'Lora', serif;
 }
 
 #passwordInput {
@@ -182,10 +184,6 @@ main p {
     height: 400px;
 }
 
-#passwordForm {
-    text-align: center;
-    font-family: 'Lora', serif;
-}
 
 .passwordForm-eins {
    font-size: 18px;
