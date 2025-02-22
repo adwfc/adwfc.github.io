@@ -9,9 +9,10 @@
          <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+         <script src="script.js"></script>
          <style>
           #passwordForm, #protectedContent {
-          display: none; /* Beide Abschnitte standardm&auml;&szlig;ig ausblenden */
+                display: none;
           }
          </style>
 </head>
@@ -31,7 +32,7 @@
     </div>
 
     <geschuetzt id="protectedContent">
-    <!--             Ende geschützter Inhalt           -->
+    <!--             Anfang gesch�tzter Inhalt           -->
 
 
 
@@ -60,6 +61,7 @@
           </ul>
       </nav>
    </header>
+
 
    <main>
         <h3 id="Mitglieder" class="abstandh3">Mitglieder (VM_Vorstandsmitglied; GM_Gr&uuml;ndungsmitglied; MaZ_Mitglied auf Zeit; M_Mitglied)*</h3>          <!-- Mitglieder -->
@@ -96,71 +98,7 @@
    </footer>
 
    </geschuetzt>
-   <!--             Ende geschützter Inhalt           -->
+   <!--             Ende gesch�tzter Inhalt           -->
 
-
-<script>
-    const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";  // Beispiel SHA-256 Hash des richtigen Passworts
-    const enablePasswordProtection = true;  // Setze dies auf `false`, um den Passwortschutz auszuschalten
-
-    function autoLogout() {
-        setTimeout(function() {
-            sessionStorage.removeItem('loggedIn');
-            document.getElementById('protectedContent').style.display = 'none';
-            document.getElementById('passwordForm').style.display = 'block';
-            alert("LOL - automatische Abmeldung nach 20min - Technikgott (auf keinen Fall aus'm Internet geklaut ;)");
-        }, 1200000); // 1200000 Millisekunden = 20 Minuten
-    }
-
-    async function checkPassword() {
-        const enteredPassword = document.getElementById("passwordInput").value;
-
-        // Passwort-Hash berechnen
-        const hashBuffer = await sha256(enteredPassword);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const enteredPasswordHash = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-
-        if (enteredPasswordHash === correctPasswordHash) {
-            document.getElementById("passwordForm").style.display = "none";
-            document.getElementById("protectedContent").style.display = "block";
-            sessionStorage.setItem('loggedIn', 'true');
-            autoLogout(); // Startet den automatischen Logout-Timer
-        } else {
-            alert("Falsches Passwort!");
-        }
-    }
-
-    async function sha256(message) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(message);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-        return hashBuffer;
-    }
-
-    window.onload = function() {
-        // Wenn Passwortschutz deaktiviert ist, zeige den Inhalt ohne Passwortabfrage
-        if (!enablePasswordProtection) {
-            document.getElementById('protectedContent').style.display = 'block';  // Geschützten Inhalt direkt anzeigen
-            document.getElementById('passwordForm').style.display = 'none';  // Passwortformular ausblenden
-        } else {
-            // Überprüfen, ob der Benutzer eingeloggt ist
-            if (sessionStorage.getItem('loggedIn') === 'true') {
-                document.getElementById('protectedContent').style.display = 'block'; // Zeigt den geschützten Inhalt
-                document.getElementById('passwordForm').style.display = 'none'; // Versteckt das Passwortformular
-                autoLogout(); // Startet den Logout-Timer, wenn der Benutzer eingeloggt ist
-            } else {
-                document.getElementById('passwordForm').style.display = 'block'; // Zeigt das Passwortformular
-                document.getElementById('protectedContent').style.display = 'none'; // Versteckt den geschützten Inhalt
-            }
-        }
-
-        // Event-Listener für die Enter-Taste
-        document.getElementById("passwordInput").addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                checkPassword();  // Führt die Passwortüberprüfung beim Drücken der Enter-Taste aus
-            }
-        });
-    };
-</script>
 </body>
 </html>
