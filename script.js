@@ -1,4 +1,4 @@
-//blub
+// script.js
 
 
 // Passwortschutz aktivieren/deaktivieren
