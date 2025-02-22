@@ -12,6 +12,14 @@ header {
     width: 100%;
 }
 
+ul {
+    list-style-type: disc;
+}
+
+main {
+    font-family: Lora;
+}
+
 .kopf {
     width: auto;
     height: 225px;
