@@ -1,5 +1,6 @@
 // script.js
 
+
 // Passwortschutz aktivieren/deaktivieren
 const enablePasswordProtection = false; // true = aktiv, false = inaktiv
 
@@ -42,7 +43,7 @@ async function sha256(message) {
     return hashBuffer;
 }
 
-// Inhalte zeigen/verbergen
+// Inhalte + Cookies
 window.onload = function() {
     if (!enablePasswordProtection) {
         document.getElementById('protectedContent').style.display = 'block';
@@ -58,6 +59,14 @@ window.onload = function() {
         }
     }
 
+    const cookieBannerClosed = localStorage.getItem('cookieBannerClosed');
+    
+    if (cookieBannerClosed === 'true') {
+        document.getElementById("cookieBanner").style.display = "none";
+    } else {
+        setTimeout(hideCookieBanner, 30000); // 30 Sek
+    }
+
     // Enter-Taste
     document.getElementById("passwordInput").addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
@@ -66,10 +75,13 @@ window.onload = function() {
     });
 };
 
-// Cookie-Banner
+
+// Funktion, um den Banner manuell zu schließen
 function hideCookieBanner() {
     document.getElementById("cookieBanner").style.opacity = "0";
-    setTimeout(() => document.getElementById("cookieBanner").style.display = "none", 1000);
+    setTimeout(() => {
+        document.getElementById("cookieBanner").style.display = "none";
+        // Speichern, dass der Banner geschlossen wurde
+        localStorage.setItem('cookieBannerClosed', 'true');
+    }, 1000); // Verzögerung, damit die Ausblendung sichtbar ist
 }
-
-setTimeout(hideCookieBanner, 30000);
