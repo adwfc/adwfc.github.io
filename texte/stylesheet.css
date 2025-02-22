@@ -1,0 +1,502 @@
+body {
+    margin-top: 100px;
+    text-align: left;
+    font-family: 'Lora', serif;
+    box-sizing: border-box;
+}
+
+header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+ul {
+    list-style-type: disc;
+}
+
+main {
+    font-family: Lora;
+}
+
+.kopf {
+    width: auto;
+    height: 225px;
+    margin-left: 100px;
+    border-radius: 15px;
+}
+
+.konstitution {
+    text-align: center;
+}
+
+.allgemeiner-deutscher {
+    font-family: Arial, sans-serif;
+    font-size: 30px;
+}
+
+.internetauftritt {
+    font-family: 'Charmonman', cursive;
+    font-size: 30px;
+    margin-top: -0.5em;
+    margin-left: 15px;
+}
+
+
+/**/
+    .para-liste {
+      list-style: none;
+      counter-reset: paragraph-counter;
+      margin-left: 0px;
+      padding: 0;
+    }
+
+    .para-liste > li {
+      counter-increment: paragraph-counter;
+      position: relative;
+      padding-left: 2em;
+      margin-top: 0.5em;
+    }
+
+    .para-liste > li::before {
+      content: "§" counter(paragraph-counter) " ";
+      position: absolute;
+      left: 0;
+    }
+
+    .para-liste ul {
+      list-style-type: disc;
+      margin-left: -0.5em;
+      padding-left: 0;/
+    }
+
+    .para-liste ul li {
+      padding-left: 0.5em;
+    }
+/**/
+
+
+.ex-inhalte {
+    display: block;
+    margin-left: 20px;
+}
+
+h3:not(.verfassung) {
+    margin-top: 70px;
+}
+
+main {
+    margin-left: 100px;
+}
+
+footer {
+    margin-top: 100px;
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+
+/**/
+    .ergaenzungen p {
+        margin-top: 10px !important;
+    }
+
+    .ergaenzungen {
+        list-style: none; 
+        counter-reset: list-counter; 
+        margin-left: -40px !important;
+    }
+
+    .ergaenzungen li {
+        counter-increment: list-counter;
+        margin-top: 10px;
+    }
+
+    .ergaenzungen li::before {
+        content: counter(list-counter) ". "; 
+        font-weight: bold; 
+    }
+/**/
+
+
+/* ================
+    Passwort-Form
+   ================ */
+
+.lego-construction {
+    width: auto;
+    height: 400px;
+}
+
+.passwordForm-eins {
+    font-size: 18px;
+}
+
+.passwordForm-zwei {
+    font-size: 1em;
+    margin-top: 50px;
+}
+
+#passwordForm {
+    text-align: center;
+    font-family: 'Lora', serif;
+}
+
+#passwordInput {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 300px;
+    padding: 12px 15px;
+    font-size: 18px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#passwordInput:hover {
+    border: 2px dashed transparent;
+    border-radius: 5px;
+    border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1;
+    outline: none;
+    box-shadow: 0 0 5px orange;
+    border-right: 3px solid #ff4500;
+}
+
+#passwordInput:focus {
+    border: 2px dashed transparent;
+    border-radius: 5px;
+    border-image: linear-gradient(45deg, orange 12.5%, white 12.5%, white 25%, orange 25%, orange 37.5%, white 37.5%, white 50%, orange 50%, orange 62.5%, white 62.5%, white 75%, orange 75%, orange) 1;
+    outline: none;
+    box-shadow: 0 0 5px orange;
+    border-right: 3px solid #ff4500;
+}
+
+.haekchen {
+    color: green;
+    font-size: 25px;
+    width: 50px;
+    border: 0;
+    background-color: white;
+}
+
+.haekchen:hover {
+    color: white;
+    background-color: green;
+    border-radius: 45px;
+}
+
+.regelungen p {
+    margin-top: 30px;
+}
+
+
+
+/* ================
+       main-nav
+   ================ */
+.main-nav {
+    margin-left: 30px;
+    text-align: left;
+}
+
+.main-nav li {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.main-nav a {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 5px;
+    position: relative;
+    transition: transform 0.4s ease-out;
+}
+
+.main-nav a:hover::after {
+    transform: scaleX(1);
+}
+
+.main-nav a::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #000;
+    transform: scaleX(0);
+    transform-origin: bottom left;
+    transition: transform 0.4s ease-out;
+}
+
+
+/* ================
+    Scroll-Button
+   ================ */
+#scrollToTopBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    z-index: 2;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #0056b3;
+}
+
+
+/* ================
+      Springe-zu
+   ================ */
+.springe-zu {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1;
+    border-left: 1px dashed #11113A;
+    border-bottom: 1px dashed #11113A;
+    border-top: 1px dashed #11113A;
+}
+
+.springe-zu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.springe-zu ul li {
+    margin: 0px 0;
+}
+
+.springe-zu a {
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    display: block;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+.springe-zu a:hover {
+    background-color: #ddd;
+}
+
+
+/* ================
+       Cookies
+   ================ */
+#cookieBanner {
+    position: fixed;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+    z-index: 3;
+}
+
+#cookieBanner button {
+    background: #ffd700;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+
+/* ================
+        Mobil
+   ================ */
+@media (max-width: 768px) {
+    body {
+        margin-top: 0px;
+        padding-bottom: 100px;
+    }
+
+    .header-container {
+        flex-direction: column;
+        height: 200px !important;
+        margin-top: 25px;
+        padding: 0;
+        text-align: center;
+    }
+
+    .kopf {
+        margin-left: 50px;
+        width: auto;
+        height: 225px;
+    }
+
+    .lego-construction {
+        width: 80% !important;
+        height: auto !important;
+    }
+
+
+/*main*/
+    main {
+        margin-left: 40px;
+    }
+
+    main ul, ol {
+        margin-left: -20px;
+    }
+
+    main li {
+        margin-top: 0.5em;
+    }
+
+    main p {
+        margin-top: 0.5em;
+    }
+    .main-nav ul {
+        display: block;
+        text-align: center;
+        padding: 0;
+        margin-top: 30px;
+        margin-left: 15px !important;
+    }
+
+    .main-nav li {
+        margin: 0px;
+    }
+
+
+/*springe-zu*/
+    .springe-zu {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+        background-color: #fff;
+        padding: 10px 20px;
+        border-bottom: 1px dashed #11113A;
+        border-top: 1px dashed #11113A;
+        box-sizing: border-box;
+        position: relative !important;
+        left: 50px;
+        right: 50px;
+        top: 20px;
+    }
+
+    .springe-rechts {
+        margin-top: 20px !important;
+    }
+
+    .springe-zu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex: 1;
+    }
+
+    .springe-zu ul li {
+        text-align: left;
+    }
+
+    .springe-zu a {
+        color: #000;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 8px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        display: block;
+    }
+
+    .springe-zu a:hover {
+        background-color: #ddd;
+    }
+/**/
+
+
+    #passwordForm {
+        font-size: 14px;
+        margin-top: 50px;
+        margin-left: 30px;
+        margin-right: 30px !important;
+        text-align: center;
+        font-family: 'Lora', serif;
+    }
+
+    #passwordInput {
+        margin-top: 20px;
+        width: 70%;
+    }
+
+    .haekchen {
+        font-size: 15px;
+        width: 30px;
+    }
+
+    #cookieBanner {
+        width: 90%;
+        bottom: 10px;
+        font-size: 14px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    #cookieBanner button {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .allgemeiner-deutscher {
+        text-align: left;
+        font-size: 20px !important;
+        margin-top: 10px;
+        margin-left: 20px;
+    }
+
+    .internetauftritt {
+        font-size: 20px !important;
+        margin-top: 5px !important;
+        margin-left: 20px !important;
+    }
+
+    .konstitution {
+        margin-top: 450px !important;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .abstand-reg {
+        margin-top: 30px;
+    }
+
+    .abstand-nm li {
+        margin-top: 0px;
+    }
+
+    #Mitglieder {
+        margin-top: 350px
+    }
+}
