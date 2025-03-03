@@ -60,7 +60,7 @@ main {
     }
 
     .para-liste > li::before {
-      content: "ง" counter(paragraph-counter) " ";
+      content: "ยง" counter(paragraph-counter) " ";
       position: absolute;
       left: 0;
     }
@@ -496,7 +496,9 @@ h2 {
         margin-top: 0px;
     }
 
-    #Mitglieder {
+    .abstand-top {
         margin-top: 350px
     }
+
+    
 }
