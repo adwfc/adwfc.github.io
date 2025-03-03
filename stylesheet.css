@@ -497,7 +497,7 @@ h2 {
     }
 
     #mitglieder, #kontakt {
-        margin-top: 350px;
+        margin-top: 350px !important;
     }
 
     
