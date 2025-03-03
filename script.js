@@ -1,10 +1,6 @@
 // script.js
 
-
-// Passwortschutz aktivieren/deaktivieren
 const enablePasswordProtection = false; // true = aktiv, false = inaktiv
-
-// Der SHA-256 Hash des richtigen Passworts
 const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
 // Auto-Logout
@@ -31,7 +27,7 @@ async function checkPassword() {
         sessionStorage.setItem('loggedIn', 'true');
         autoLogout(); 
     } else {
-        alert("Falsches Passwort!");
+        alert("LOL - frage doch den mächtigen Guru (V)");
     }
 }
 
@@ -76,12 +72,11 @@ window.onload = function() {
 };
 
 
-// Funktion, um den Banner manuell zu schließen
+// manuelles Schließen Cookies
 function hideCookieBanner() {
     document.getElementById("cookieBanner").style.opacity = "0";
     setTimeout(() => {
         document.getElementById("cookieBanner").style.display = "none";
-        // Speichern, dass der Banner geschlossen wurde
         localStorage.setItem('cookieBannerClosed', 'true');
-    }, 1000); // Verzögerung, damit die Ausblendung sichtbar ist
+    }, 1000);
 }
