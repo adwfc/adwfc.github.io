@@ -107,6 +107,20 @@ h2 {
     text-align: center;
 }
 
+.mitglieder-container {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.vertikale-linie {
+    width: 1px;
+    height: 150px;
+    background-color: black;
+    margin-left: 100px;
+    margin-right: 20px;
+}
+
+
 
 /**/
     .ergaenzungen p {
@@ -368,11 +382,11 @@ h2 {
     }
 
     .desktop {
-        display: none; /* Versteckt die Desktop-Inhalte auf mobilen Geräten */
+        display: none;
     }
 
     .mobil {
-        display: block; /* Zeigt die mobilen Inhalte */
+        display: block;
     }
 
 /*main*/
@@ -514,6 +528,17 @@ h2 {
     #mitglieder, #kontakt {
         margin-top: 350px;
     }
+
+    .mitglieder-container {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .vertikale-linie {
+        width: 0px;
+        height: 0px;
+    }
+
 
     
 }
