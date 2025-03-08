@@ -535,8 +535,8 @@ h2 {
     }
 
     .vertikale-linie {
-        width: 0px;
-        height: 0px;
+        width: 100px;
+        height: 1px;
     }
 
 
