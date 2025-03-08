@@ -20,6 +20,14 @@ main {
     font-family: Lora;
 }
 
+.desktop {
+  display: block;
+}
+
+.mobil {
+  display: none;  /* Mobil-Inhalte werden standardmäßig verborgen */
+}
+
 .kopf {
     width: auto;
     height: 225px;
@@ -359,6 +367,13 @@ h2 {
         height: auto !important;
     }
 
+    .desktop {
+        display: none; /* Versteckt die Desktop-Inhalte auf mobilen Geräten */
+    }
+
+    .mobil {
+        display: block; /* Zeigt die mobilen Inhalte */
+    }
 
 /*main*/
     main {
