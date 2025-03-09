@@ -23,57 +23,26 @@
     </div>
 
     <script>
-        const authConfig = {
-            domain: "dev-8ywvc6vxej5g5aok.eu.auth0.com",
-            clientId: "P9ZNQdN2txM4EXak8rFtndqrwCTYSjnL",
-            redirect_uri: window.location.origin + "/auth.html"
-        };
+async function initializeAuth0() {
+    try {
+        console.log("🔄 Initialisiere Auth0...");
+        auth0Client = await createAuth0Client(authConfig);
 
-        let auth0Client;
+        console.log("✅ Auth0 Client erstellt");
 
-        async function initializeAuth0() {
-            auth0Client = await createAuth0Client(authConfig);
-            
-            // Wenn ein Redirect zurückkommt, Callback verarbeiten
-            if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, "/auth.html"); // URL bereinigen
-            }
-
-            updateUI();
+        if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+            console.log("🔄 Verarbeite Redirect-Callback...");
+            await auth0Client.handleRedirectCallback();
+            console.log("✅ Redirect-Callback erfolgreich verarbeitet");
+            window.history.replaceState({}, document.title, "/auth.html");
         }
 
-        async function updateUI() {
-            const isAuthenticated = await auth0Client.isAuthenticated();
+        updateUI();
+    } catch (err) {
+        console.error("❌ Fehler bei Auth0-Initialisierung:", err);
+    }
+}
 
-            if (isAuthenticated) {
-                document.getElementById("login-btn").style.display = "none";
-                document.getElementById("logout-btn").style.display = "inline-block";
-                document.getElementById("profile").style.display = "block";
-
-                // Benutzerdaten abrufen
-                const user = await auth0Client.getUser();
-                document.getElementById("profile-data").textContent = JSON.stringify(user, null, 2);
-            } else {
-                document.getElementById("login-btn").style.display = "inline-block";
-                document.getElementById("logout-btn").style.display = "none";
-                document.getElementById("profile").style.display = "none";
-            }
-        }
-
-        async function login() {
-            await auth0Client.loginWithRedirect();
-        }
-
-        async function logout() {
-            auth0Client.logout({ returnTo: window.location.origin + "/auth.html" });
-        }
-
-        document.getElementById("login-btn").addEventListener("click", login);
-        document.getElementById("logout-btn").addEventListener("click", logout);
-
-        // Auth0 initialisieren
-        initializeAuth0();
     </script>
 </body>
 </html>
