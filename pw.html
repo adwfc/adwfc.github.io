@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passwort ändern</title>
+</head>
+<body>
+    <h1>Passwort ändern</h1>
+    <form id="password-form">
+        <label for="username">Benutzername:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="old-password">Altes Passwort:</label>
+        <input type="password" id="old-password" name="old-password" required><br><br>
+
+        <label for="new-password">Neues Passwort:</label>
+        <input type="password" id="new-password" name="new-password" required><br><br>
+
+        <button type="submit">Passwort ändern</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        document.getElementById('password-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+
+            const response = await fetch('/.netlify/functions/update-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    oldPassword: oldPassword,
+                    newPassword: newPassword
+                })
+            });
+
+            const data = await response.json();
+            document.getElementById('message').textContent = data.message;
+        });
+    </script>
+</body>
+</html>
