@@ -3,103 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auth0 Login Demo</title>
+    <title>Auth0 Login</title>
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .btn {
-            padding: 10px 20px;
-            margin: 10px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .btn-logout {
-            background-color: #f44336;
-        }
-        #user-profile {
-            margin-top: 20px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; cursor: pointer; background-color: #007BFF; color: white; border: none; border-radius: 5px; }
+        .btn-logout { background-color: #DC3545; }
+        #profile { display: none; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h1>Auth0 Login Demo</h1>
-    <div id="auth-buttons">
-        <button class="btn" id="login-btn">Login</button>
-        <button class="btn btn-logout" id="logout-btn" style="display: none;">Logout</button>
-    </div>
-    <div id="user-profile" style="display: none;">
-        <h2>Benutzerprofil</h2>
+    <h1>Auth0 Login</h1>
+    <button class="btn" id="login-btn">Login</button>
+    <button class="btn btn-logout" id="logout-btn" style="display:none;">Logout</button>
+    
+    <div id="profile">
+        <h2>Profil</h2>
         <pre id="profile-data"></pre>
     </div>
 
     <script>
-        // Auth0 Konfiguration
-        const domain = "dev-8ywvc6vxej5g5aok.eu.auth0.com";
-        const clientId = "P9ZNQdN2txM4EXak8rFtndqrwCTYSjnL";
-
-        let auth0Client = null;
-
-        // Auth0-Client initialisieren
-        const initAuth0 = async () => {
-            auth0Client = await createAuth0Client({
-                domain: domain,
-                client_id: clientId,
-                redirect_uri: window.location.href
-            });
+        const authConfig = {
+            domain: "dev-8ywvc6vxej5g5aok.eu.auth0.com",
+            clientId: "P9ZNQdN2txM4EXak8rFtndqrwCTYSjnL",
+            redirect_uri: window.location.origin + "/auth.html"
         };
 
-        // UI aktualisieren
-        const updateUI = async () => {
+        let auth0Client;
+
+        async function initializeAuth0() {
+            auth0Client = await createAuth0Client(authConfig);
+            
+            // Wenn ein Redirect zurückkommt, Callback verarbeiten
+            if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+                await auth0Client.handleRedirectCallback();
+                window.history.replaceState({}, document.title, "/auth.html"); // URL bereinigen
+            }
+
+            updateUI();
+        }
+
+        async function updateUI() {
             const isAuthenticated = await auth0Client.isAuthenticated();
 
             if (isAuthenticated) {
                 document.getElementById("login-btn").style.display = "none";
                 document.getElementById("logout-btn").style.display = "inline-block";
-                document.getElementById("user-profile").style.display = "block";
+                document.getElementById("profile").style.display = "block";
 
-                // Benutzerprofil holen
+                // Benutzerdaten abrufen
                 const user = await auth0Client.getUser();
                 document.getElementById("profile-data").textContent = JSON.stringify(user, null, 2);
             } else {
                 document.getElementById("login-btn").style.display = "inline-block";
                 document.getElementById("logout-btn").style.display = "none";
-                document.getElementById("user-profile").style.display = "none";
+                document.getElementById("profile").style.display = "none";
             }
-        };
+        }
 
-        // Login-Funktion
-        const login = async () => {
+        async function login() {
             await auth0Client.loginWithRedirect();
-        };
+        }
 
-        // Logout-Funktion
-        const logout = () => {
-            auth0Client.logout({
-                returnTo: window.location.href
-            });
-        };
+        async function logout() {
+            auth0Client.logout({ returnTo: window.location.origin + "/auth.html" });
+        }
 
-        // Event-Listener für Login und Logout
         document.getElementById("login-btn").addEventListener("click", login);
         document.getElementById("logout-btn").addEventListener("click", logout);
 
-        // Auth0 initialisieren und UI beim Laden der Seite aktualisieren
-        initAuth0().then(() => {
-            updateUI();
-        });
-
-        // Prüfen, ob ein Redirect nach dem Login erfolgt und die Seite entsprechend aktualisieren
-        if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-            auth0Client.handleRedirectCallback().then(() => {
-                updateUI();
-            });
-        }
+        // Auth0 initialisieren
+        initializeAuth0();
     </script>
 </body>
 </html>
