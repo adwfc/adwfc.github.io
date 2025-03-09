@@ -1,2 +1,68 @@
-auth seite
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.min.js"></script>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.min.js"></script>
+</head>
+<body>
+  <h1>Bitte melde dich an</h1>
+  
+  <!-- Buttons für Login und Logout -->
+  <button id="login">Login mit Auth0</button>
+  <button id="logout" style="display:none;">Logout</button>
+
+  <script>
+    // Deine Auth0-Domain und Client-ID
+    const domain = 'DEINE_AUTH0_DOMAIN';  // z.B. 'dev-xyz.auth0.com'
+    const clientId = 'DEIN_AUTH0_CLIENT_ID';  // z.B. '123456abcdef'
+    
+    let auth0 = null;
+
+    // Auth0-Client initialisieren
+    async function initializeAuth0() {
+      auth0 = await createAuth0Client({
+        domain: domain,
+        client_id: clientId,
+        redirect_uri: window.location.href
+      });
+
+      // Überprüfen, ob der Benutzer bereits authentifiziert ist
+      const isAuthenticated = await auth0.isAuthenticated();
+
+      if (isAuthenticated) {
+        showLogoutButton();  // Zeige Logout-Button, wenn eingeloggt
+      } else {
+        showLoginButton();   // Zeige Login-Button, wenn nicht eingeloggt
+      }
+    }
+
+    // Buttons anzeigen
+    function showLoginButton() {
+      document.getElementById('login').style.display = 'inline-block';
+      document.getElementById('logout').style.display = 'none';
+    }
+
+    function showLogoutButton() {
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('logout').style.display = 'inline-block';
+    }
+
+    // Login-Button klick
+    document.getElementById('login').addEventListener('click', async () => {
+      await auth0.loginWithRedirect();
+    });
+
+    // Logout-Button klick
+    document.getElementById('logout').addEventListener('click', async () => {
+      await auth0.logout({
+        returnTo: window.location.href
+      });
+    });
+
+    // Auth0 initialisieren
+    initializeAuth0();
+  </script>
+</body>
+</html>
