@@ -15,9 +15,15 @@
 <body>
     <h1>Auth0 Login</h1>
 
-    <!-- Login-Button, der den Benutzer zu Auth0 weiterleitet -->
+    <!-- Komplexer Login-Button (JavaScript-basierte Methode) -->
     <button class="btn" id="loginButton">Login mit Auth0</button>
 
+    <!-- Einfacher Login-Button (direkter Link) -->
+    <a href="https://adwfc.eu.auth0.com/authorize?response_type=code&client_id=ygTflHlxAF8wgi27yZK0byrz4Uy3bRvL&redirect_uri=https://adwfc.github.io/auth.html">
+        <button class="btn">Alternativ Login mit Auth0 (Direktlink)</button>
+    </a>
+
+    <!-- Profilanzeige nach erfolgreichem Login -->
     <div id="profile">
         <h2>Profil</h2>
         <pre id="profile-data"></pre>
@@ -25,18 +31,17 @@
     </div>
 
     <script>
-        // Auth0 Konfigurationsdaten
+        // Auth0 Konfiguration
         const authConfig = {
             domain: 'adwfc.eu.auth0.com',
             client_id: 'ygTflHlxAF8wgi27yZK0byrz4Uy3bRvL',
-            redirect_uri: 'https://adwfc.github.io/auth.html',  // Diese URL muss in den Allowed Callback URLs bei Auth0 konfiguriert sein
-            audience: 'https://adwfc.eu.auth0.com/userinfo',
+            redirect_uri: 'https://adwfc.github.io/auth.html',  // Stelle sicher, dass dies in den Allowed Callback URLs registriert ist
             scope: 'openid profile'
         };
 
         let auth0Client = null;
 
-        // Initialisiere Auth0
+        // Auth0-Client initialisieren
         async function initializeAuth0() {
             try {
                 console.log("🔄 Initialisiere Auth0...");
@@ -48,22 +53,21 @@
 
                 console.log("✅ Auth0 Client erstellt");
 
-                // Wenn wir zurückgeleitet werden, verarbeiten wir den Code
+                // Wenn der Benutzer nach dem Login zurückkommt, verarbeite den Redirect
                 if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-                    console.log("🔄 Verarbeite Redirect-Callback...");
+                    console.log("🔄 Verarbeite Redirect...");
                     await auth0Client.handleRedirectCallback();
-                    console.log("✅ Redirect-Callback erfolgreich verarbeitet");
-                    window.history.replaceState({}, document.title, "/auth.html");  // URL aktualisieren
+                    console.log("✅ Redirect verarbeitet");
+                    window.history.replaceState({}, document.title, "/auth.html"); // URL aktualisieren
                 }
 
-                // Update der UI nach Initialisierung
                 updateUI();
             } catch (err) {
                 console.error("❌ Fehler bei Auth0-Initialisierung:", err);
             }
         }
 
-        // Funktion zur UI-Aktualisierung
+        // UI basierend auf Loginstatus aktualisieren
         async function updateUI() {
             const isAuthenticated = await auth0Client.isAuthenticated();
 
@@ -90,11 +94,11 @@
         // Logout-Button klickt
         document.getElementById('logoutButton').addEventListener('click', () => {
             auth0Client.logout({
-                returnTo: window.location.origin  // Nach Logout zurück zur Startseite
+                returnTo: window.location.origin  // Zur Startseite nach Logout
             });
         });
 
-        // Initialisierung von Auth0 bei Seitenaufruf
+        // Initialisiere Auth0 bei Seitenaufruf
         initializeAuth0();
     </script>
 </body>
