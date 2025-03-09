@@ -1,17 +1,101 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Weiterleitung</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth0 Login</title>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; cursor: pointer; background-color: #007BFF; color: white; border: none; border-radius: 5px; }
+        .btn-logout { background-color: #DC3545; }
+        #profile { display: none; margin-top: 20px; }
+    </style>
 </head>
 <body>
-  <button id="loginButton">Login mit Auth0</button>
-  
-  <script>
-    document.getElementById('loginButton').addEventListener('click', function() {
-      window.location.href = 'https://adwfc.eu.auth0.com/authorize?client_id=ygTflHlxAF8wgi27yZK0byrz4Uy3bRvL&response_type=token&scope=openid';
-    });
-  </script>
+    <h1>Auth0 Login</h1>
+
+    <!-- Login-Button, der den Benutzer zu Auth0 weiterleitet -->
+    <button class="btn" id="loginButton">Login mit Auth0</button>
+
+    <div id="profile">
+        <h2>Profil</h2>
+        <pre id="profile-data"></pre>
+        <button class="btn btn-logout" id="logoutButton">Logout</button>
+    </div>
+
+    <script>
+        // Auth0 Konfigurationsdaten
+        const authConfig = {
+            domain: 'adwfc.eu.auth0.com',
+            client_id: 'ygTflHlxAF8wgi27yZK0byrz4Uy3bRvL',
+            redirect_uri: 'https://adwfc.github.io/auth.html',  // Diese URL muss in den Allowed Callback URLs bei Auth0 konfiguriert sein
+            audience: 'https://adwfc.eu.auth0.com/userinfo',
+            scope: 'openid profile'
+        };
+
+        let auth0Client = null;
+
+        // Initialisiere Auth0
+        async function initializeAuth0() {
+            try {
+                console.log("🔄 Initialisiere Auth0...");
+                auth0Client = await createAuth0Client({
+                    domain: authConfig.domain,
+                    client_id: authConfig.client_id,
+                    redirect_uri: authConfig.redirect_uri
+                });
+
+                console.log("✅ Auth0 Client erstellt");
+
+                // Wenn wir zurückgeleitet werden, verarbeiten wir den Code
+                if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+                    console.log("🔄 Verarbeite Redirect-Callback...");
+                    await auth0Client.handleRedirectCallback();
+                    console.log("✅ Redirect-Callback erfolgreich verarbeitet");
+                    window.history.replaceState({}, document.title, "/auth.html");  // URL aktualisieren
+                }
+
+                // Update der UI nach Initialisierung
+                updateUI();
+            } catch (err) {
+                console.error("❌ Fehler bei Auth0-Initialisierung:", err);
+            }
+        }
+
+        // Funktion zur UI-Aktualisierung
+        async function updateUI() {
+            const isAuthenticated = await auth0Client.isAuthenticated();
+
+            if (isAuthenticated) {
+                const user = await auth0Client.getUser();
+                document.getElementById('profile-data').textContent = JSON.stringify(user, null, 2);
+                document.getElementById('profile').style.display = 'block';
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('logoutButton').style.display = 'block';
+            } else {
+                document.getElementById('loginButton').style.display = 'block';
+                document.getElementById('logoutButton').style.display = 'none';
+            }
+        }
+
+        // Login-Button klickt
+        document.getElementById('loginButton').addEventListener('click', async () => {
+            await auth0Client.loginWithRedirect({
+                redirect_uri: authConfig.redirect_uri,
+                scope: authConfig.scope
+            });
+        });
+
+        // Logout-Button klickt
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            auth0Client.logout({
+                returnTo: window.location.origin  // Nach Logout zurück zur Startseite
+            });
+        });
+
+        // Initialisierung von Auth0 bei Seitenaufruf
+        initializeAuth0();
+    </script>
 </body>
 </html>
