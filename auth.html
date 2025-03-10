@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login mit Firebase</title>
+  <title>Login</title>
+
   <script type="module">
-    // Firebase SDKs importieren
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    // Deine Firebase Konfiguration
     const firebaseConfig = {
       apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
       authDomain: "auth-adfwc.firebaseapp.com",
@@ -19,49 +18,72 @@
       appId: "1:221420792742:web:f75515331cb4c5b4603d67"
     };
 
-    // Firebase initialisieren
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Funktion für den Login
-    const loginUser = (email, password) => {
-      signInWithEmailAndPassword(auth, email, password)
+    const loginUser = (username, password) => {
+      const emailAsUsername = username + "@example.com"; // Dummy-Domain anhängen
+
+      signInWithEmailAndPassword(auth, emailAsUsername, password)
         .then((userCredential) => {
           // Login erfolgreich, weiter zur geschützten Seite
           const user = userCredential.user;
-          window.location.href = "/geschuetzte-seite";  // Weiterleitung nach erfolgreichem Login
+          window.location.href = "https:www.wdrmaus.de";  // Weiterleitung nach erfolgreichem Login
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          alert(`Fehler beim Login: ${errorMessage}`);
+          alert(`LOL iwas is schief gelaufen: ${errorMessage}`);
         });
     }
 
-    // EventListener für den Login-Button
     document.getElementById("login-button").addEventListener("click", () => {
-      // Beispiel für den Login: du solltest hier Benutzereingaben statt hart codierter Daten verwenden
-      const email = document.getElementById("email").value;
+      const username = document.getElementById("username").value;  // Benutzername statt E-Mail
       const password = document.getElementById("password").value;
-      if (email && password) {
-        loginUser(email, password);
+      if (username && password) {
+        loginUser(username, password);
       } else {
-        alert("Bitte gib sowohl E-Mail als auch Passwort ein.");
+        alert("Beide Daten sind erforderlich");
+      }
+    });
+
+    document.getElementById("username").addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        if (username && password) {
+          loginUser(username, password);
+        } else {
+          alert("Beide Daten sind erforderlich");
+        }
+      }
+    });
+
+    document.getElementById("password").addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        if (username && password) {
+          loginUser(username, password);
+        } else {
+          alert("Beide Daten sind erforderlich");
+        }
       }
     });
   </script>
+
 </head>
 <body>
 
   <h1>Willkommen zum Login!</h1>
 
   <div>
-    <label for="email">Benutzername (E-Mail):</label>
-    <input type="text" id="email" placeholder="Benutzername" required>
+    <label for="username">Benutzername:</label>
+    <input type="text" id="username" placeholder="hier fancy shit eintragen" required>
   </div>
   <div>
     <label for="password">Passwort:</label>
-    <input type="password" id="password" placeholder="Passwort" required>
+    <input type="password" id="password" placeholder="und wehe du speiherst mit Google" required>
   </div>
 
   <button id="login-button">Login</button>
