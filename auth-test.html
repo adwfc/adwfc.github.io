@@ -5,54 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login TEST</title>
 
-    
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-  // Deine Firebase Konfiguration
-  const firebaseConfig = {
-    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-    authDomain: "auth-adfwc.firebaseapp.com",
-    projectId: "auth-adfwc",
-    storageBucket: "auth-adfwc.firebasestorage.app",
-    messagingSenderId: "221420792742",
-    appId: "1:221420792742:web:f75515331cb4c5b4603d67"
-  };
+    // Deine Firebase Konfiguration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.firebasestorage.app",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+    };
 
-  // Firebase initialisieren
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    // Firebase initialisieren
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  // Funktion für den Login
-  const loginUser = (username, password) => {
-    // Benutzernamen als E-Mail behandeln
-    const emailAsUsername = username + "@example.com"; // Dummy-Domain anhängen
+    // Funktion für den Login
+    const loginUser = (username, password) => {
+      // Benutzernamen als E-Mail behandeln
+      const emailAsUsername = username + "@example.com"; // Dummy-Domain anhängen
 
-    signInWithEmailAndPassword(auth, emailAsUsername, password)
-      .then((userCredential) => {
-        // Login erfolgreich, weiter zur geschützten Seite
-        const user = userCredential.user;
-        window.location.href = "/geschuetzte-seite";  // Weiterleitung nach erfolgreichem Login
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        alert(`Fehler beim Login: ${errorMessage}`);
-      });
-  }
-
-  // EventListener für den Login-Button
-  document.getElementById("login-button").addEventListener("click", () => {
-    const username = document.getElementById("username").value;  // Benutzername statt E-Mail
-    const password = document.getElementById("password").value;
-    if (username && password) {
-      loginUser(username, password);
-    } else {
-      alert("Bitte gib sowohl Benutzername als auch Passwort ein.");
+      signInWithEmailAndPassword(auth, emailAsUsername, password)
+        .then((userCredential) => {
+          // Login erfolgreich, weiter zur geschützten Seite
+          const user = userCredential.user;
+          window.location.href = "/geschuetzte-seite";  // Weiterleitung nach erfolgreichem Login
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert(`Fehler beim Login: ${errorMessage}`);
+        });
     }
-  });
-</script>
+
+    // EventListener für den Login-Button
+    document.getElementById("login-button").addEventListener("click", () => {
+      const username = document.getElementById("username").value;  // Benutzername statt E-Mail
+      const password = document.getElementById("password").value;
+      if (username && password) {
+        loginUser(username, password);
+      } else {
+        alert("Bitte gib sowohl Benutzername als auch Passwort ein.");
+      }
+    });
+  </script>
 
 </head>
 <body>
@@ -60,8 +59,8 @@
   <h1>Willkommen zum Login!</h1>
 
   <div>
-    <label for="email">Benutzername (E-Mail):</label>
-    <input type="text" id="email" placeholder="Benutzername" required>
+    <label for="username">Benutzername:</label>
+    <input type="text" id="username" placeholder="Benutzername" required>
   </div>
   <div>
     <label for="password">Passwort:</label>
