@@ -15,6 +15,12 @@
   data-clerk-publishable-key="pk_test_c2V0dGxlZC10dXJrZXktMjkuY2xlcmsuYWNjb3VudHMuZGV2JA"
   src="https://settled-turkey-29.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
   type="text/javascript">
+    
+  window.addEventListener('load', async function () {
+    await Clerk.load()
+
+    console.log('ClerkJS is loaded')
+  })
 </script>
 
 </body>
