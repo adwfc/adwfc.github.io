@@ -1,38 +1,70 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login mit Firebase</title>
+  <script type="module">
+    // Firebase SDKs importieren
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    // Deine Firebase Konfiguration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.firebasestorage.app",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+    };
 
+    // Firebase initialisieren
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Funktion für den Login
+    const loginUser = (email, password) => {
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Login erfolgreich, weiter zur geschützten Seite
+          const user = userCredential.user;
+          window.location.href = "/geschuetzte-seite";  // Weiterleitung nach erfolgreichem Login
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert(`Fehler beim Login: ${errorMessage}`);
+        });
+    }
+
+    // EventListener für den Login-Button
+    document.getElementById("login-button").addEventListener("click", () => {
+      // Beispiel für den Login: du solltest hier Benutzereingaben statt hart codierter Daten verwenden
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      if (email && password) {
+        loginUser(email, password);
+      } else {
+        alert("Bitte gib sowohl E-Mail als auch Passwort ein.");
+      }
+    });
+  </script>
 </head>
 <body>
-    <h1>(:</h1>
-<script type="module">
 
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  <h1>Willkommen zum Login!</h1>
 
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-  // Your web app's Firebase configuration
+  <div>
+    <label for="email">Benutzername (E-Mail):</label>
+    <input type="text" id="email" placeholder="Benutzername" required>
+  </div>
+  <div>
+    <label for="password">Passwort:</label>
+    <input type="password" id="password" placeholder="Passwort" required>
+  </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-    authDomain: "auth-adfwc.firebaseapp.com",
-    projectId: "auth-adfwc",
-    storageBucket: "auth-adfwc.firebasestorage.app",
-    messagingSenderId: "221420792742",
-    appId: "1:221420792742:web:f75515331cb4c5b4603d67"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-
-</script>
+  <button id="login-button">Login</button>
 
 </body>
 </html>
