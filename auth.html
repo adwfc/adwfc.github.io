@@ -4,32 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+
 </head>
 <body>
     <h1>(:</h1>
+<script type="module">
 
-<script
-  async
-  crossorigin="anonymous"
-  data-clerk-publishable-key="pk_live_Y2xlcmsuYWR3ZmMuZ2l0aHViLmlvJA"
-  src="https://settled-turkey-29.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
-  type="text/javascript">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+  // Your web app's Firebase configuration
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.firebasestorage.app",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
 </script>
-
-    <!-- Script, das wartet, bis das SDK geladen ist -->
-    <script>
-      window.addEventListener('load', async function () {
-        await Clerk.load(); // Lade Clerk SDK
-
-        console.log('ClerkJS ist geladen'); // Nur zu Testzwecken in der Konsole anzeigen
-
-        // Du kannst hier eine Weiterleitung einbauen, wenn der Benutzer angemeldet ist
-        // Beispiel:
-        if (Clerk.user) {
-          window.location.href = 'www.wdrmaus.de';  // Weiterleitung zu einer anderen Seite
-        }
-      });
-    </script>
 
 </body>
 </html>
