@@ -3,13 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login TEST</title>
+  <title>Login Test</title>
+</head>
+<body>
+
+  <h1>Login</h1>
+  <div>
+    <label for="username">Benutzername:</label>
+    <input type="text" id="username" placeholder="Benutzername" required>
+  </div>
+  <div>
+    <label for="password">Passwort:</label>
+    <input type="password" id="password" placeholder="Passwort" required>
+  </div>
+  <button id="login-button">Login</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    // Deine Firebase Konfiguration
+    // Firebase-Konfiguration
     const firebaseConfig = {
       apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
       authDomain: "auth-adfwc.firebaseapp.com",
@@ -22,52 +36,53 @@
     // Firebase initialisieren
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Funktion für den Login
-    const loginUser = (username, password) => {
-      // Benutzernamen als E-Mail behandeln
-      const emailAsUsername = username + "@example.com"; // Dummy-Domain anhängen
+    // Login-Funktion
+    async function loginUser(username, password) {
+      const emailAsUsername = username + "@example.com"; // Dummy-Domain für Firebase
 
-      signInWithEmailAndPassword(auth, emailAsUsername, password)
-        .then((userCredential) => {
-          // Login erfolgreich, weiter zur geschützten Seite
-          const user = userCredential.user;
-          window.location.href = "/geschuetzte-seite";  // Weiterleitung nach erfolgreichem Login
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          alert(`Fehler beim Login: ${errorMessage}`);
-        });
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, emailAsUsername, password);
+        const user = userCredential.user;
+        console.log("Login erfolgreich!", user.uid);
+
+        // Redirect-URL aus Firestore abrufen
+        const userRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+          const redirectUrl = docSnap.data().redirectUrl;
+          console.log("Weiterleitung zu:", redirectUrl);
+          window.location.href = redirectUrl;  // Automatische Weiterleitung
+        } else {
+          alert("Keine Weiterleitungs-URL gefunden!");
+        }
+
+      } catch (error) {
+        alert("Fehler beim Login: " + error.message);
+      }
     }
 
-    // EventListener für den Login-Button
+    // EventListener für Login-Button
     document.getElementById("login-button").addEventListener("click", () => {
-      const username = document.getElementById("username").value;  // Benutzername statt E-Mail
+      const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
       if (username && password) {
         loginUser(username, password);
       } else {
-        alert("Bitte gib sowohl Benutzername als auch Passwort ein.");
+        alert("Bitte gib Benutzername und Passwort ein.");
       }
     });
+
+    // Enter-Taste für Login
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        document.getElementById("login-button").click();
+      }
+    });
+
   </script>
-
-</head>
-<body>
-
-  <h1>Willkommen zum Login!</h1>
-
-  <div>
-    <label for="username">Benutzername:</label>
-    <input type="text" id="username" placeholder="Benutzername" required>
-  </div>
-  <div>
-    <label for="password">Passwort:</label>
-    <input type="password" id="password" placeholder="Passwort" required>
-  </div>
-
-  <button id="login-button">Login</button>
 
 </body>
 </html>
