@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Test (Global Redirect)</title>
+</head>
+<body>
+
+  <h1>Login</h1>
+  <div>
+    <label for="username">Benutzername:</label>
+    <input type="text" id="username" placeholder="Benutzername" required>
+  </div>
+  <div>
+    <label for="password">Passwort:</label>
+    <input type="password" id="password" placeholder="Passwort" required>
+  </div>
+  <button id="login-button">Login</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    // Firebase-Konfiguration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.firebasestorage.app",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+    };
+
+    // Firebase initialisieren
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Login-Funktion
+    async function loginUser(username, password) {
+      const emailAsUsername = username + "@example.com"; // Dummy-Domain für Firebase
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, emailAsUsername, password);
+        console.log("Login erfolgreich!");
+
+        // Globale Redirect-URL aus Firestore abrufen
+        const configRef = doc(db, "config", "global");
+        const configSnap = await getDoc(configRef);
+
+        if (configSnap.exists()) {
+          const globalRedirectUrl = configSnap.data().redirectUrl;
+          console.log("Globale Weiterleitung zu:", globalRedirectUrl);
+          window.location.href = globalRedirectUrl;
+        } else {
+          alert("Fehler: Keine globale Weiterleitungs-URL gefunden!");
+        }
+
+      } catch (error) {
+        alert("Fehler beim Login: " + error.message);
+      }
+    }
+
+    // EventListener für Login-Button
+    document.getElementById("login-button").addEventListener("click", () => {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username && password) {
+        loginUser(username, password);
+      } else {
+        alert("Bitte gib Benutzername und Passwort ein.");
+      }
+    });
+
+    // Enter-Taste für Login
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        document.getElementById("login-button").click();
+      }
+    });
+
+  </script>
+
+</body>
+</html>
+
