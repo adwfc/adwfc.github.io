@@ -1,14 +1,49 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+
+  <title>ADWFC Login</title>
+  <meta name="author" content="&Eacute;mile Jeremias Ruff">
+  <link rel="icon" type="image/png" href="favicon.ico">
+
+  <link rel="stylesheet" href="stylesheet.css?v=<?= filemtime('style.css'); ?>" type="text/css">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+
+</head>
+
+
+<body>
+
+  <div class ="login">
+
+      <h2>Login ADWFC</h2>
+
+      <p class="login-text">Hier kannst du dich in den geschützten Mitgliederbereich des ADWFC einloggen 🔐</p>
+      <br>
+      
+      <div class="login-eingabe">
+          <div>
+            <label for="username">Benutzername:</label>
+            <input type="text" id="username" placeholder="hier fancy shit eintragen" required></div>
+      
+          <div class="login-pw">
+            <label for="password">Passwort:</label>
+            <input type="password" id="password" placeholder="🗝️" required>
+            <button id="login-button">&#10004;</button></div>
+
+      </div>
+  
+  </div>
+  
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
+    // Firebase-Konfiguration
     const firebaseConfig = {
       apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
       authDomain: "auth-adfwc.firebaseapp.com",
@@ -18,75 +53,56 @@
       appId: "1:221420792742:web:f75515331cb4c5b4603d67"
     };
 
+    // Firebase initialisieren
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const loginUser = (username, password) => {
-      const emailAsUsername = username + "@example.com"; // Dummy-Domain anhängen
+    // Login-Funktion
+    async function loginUser(username, password) {
+      const emailAsUsername = username + "@example.com"; // Dummy-Domain für Firebase
 
-      signInWithEmailAndPassword(auth, emailAsUsername, password)
-        .then((userCredential) => {
-          // Login erfolgreich, weiter zur geschützten Seite
-          const user = userCredential.user;
-          window.location.href = "https:www.wdrmaus.de";  // Weiterleitung nach erfolgreichem Login
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          alert(`LOL iwas is schief gelaufen: ${errorMessage}`);
-        });
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, emailAsUsername, password);
+        console.log("Login erfolgreich!");
+
+        // Globale Redirect-URL aus Firestore abrufen
+        const configRef = doc(db, "config", "global");
+        const configSnap = await getDoc(configRef);
+
+        if (configSnap.exists()) {
+          const globalRedirectUrl = configSnap.data().redirectUrl;
+          console.log("Globale Weiterleitung zu:", globalRedirectUrl);
+          window.location.href = globalRedirectUrl;
+        } else {
+          alert("Fehler: Keine globale Weiterleitungs-URL gefunden!");
+        }
+
+      } catch (error) {
+        alert("Fehler beim Login: " + error.message);
+      }
     }
 
+    // EventListener für Login-Button
     document.getElementById("login-button").addEventListener("click", () => {
-      const username = document.getElementById("username").value;  // Benutzername statt E-Mail
+      const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
       if (username && password) {
         loginUser(username, password);
       } else {
-        alert("Beide Daten sind erforderlich");
+        alert("Bitte gib Benutzername und Passwort ein.");
       }
     });
 
-    document.getElementById("username").addEventListener("keypress", (event) => {
+    // Enter-Taste für Login
+    document.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-        if (username && password) {
-          loginUser(username, password);
-        } else {
-          alert("Beide Daten sind erforderlich");
-        }
+        document.getElementById("login-button").click();
       }
     });
 
-    document.getElementById("password").addEventListener("keypress", (event) => {
-      if (event.key === "Enter") {
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-        if (username && password) {
-          loginUser(username, password);
-        } else {
-          alert("Beide Daten sind erforderlich");
-        }
-      }
-    });
   </script>
-
-</head>
-<body>
-
-  <h1>Willkommen zum Login!</h1>
-
-  <div>
-    <label for="username">Benutzername:</label>
-    <input type="text" id="username" placeholder="hier fancy shit eintragen" required>
-  </div>
-  <div>
-    <label for="password">Passwort:</label>
-    <input type="password" id="password" placeholder="und wehe du speiherst mit Google" required>
-  </div>
-
-  <button id="login-button">Login</button>
 
 </body>
 </html>
+
