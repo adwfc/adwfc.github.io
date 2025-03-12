@@ -399,7 +399,7 @@ h2 {
     background-color: white;
 }
 
-.login-button:hover {
+.login-button:focus {
     color: white;
     background-color: green;
     border-radius: 45px;
