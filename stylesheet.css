@@ -120,6 +120,10 @@ h2 {
     margin-right: 20px;
 }
 
+.regelungen p {    
+    margin-top: 30px;
+}
+
 
 
 /**/
@@ -210,12 +214,6 @@ h2 {
     background-color: green;
     border-radius: 45px;
 }
-
-.regelungen p {
-    margin-top: 30px;
-}
-
-
 
 /* ================
        main-nav
@@ -352,6 +350,7 @@ h2 {
     border-radius: 5px;
 }
 
+
 /* ================
         Login
    ================ */
@@ -399,11 +398,12 @@ h2 {
     background-color: white;
 }
 
-.login-button:focus {
+.login-button:focus { /*funktioniert iwie nich*/
     color: white;
     background-color: green;
     border-radius: 45px;
 }
+
 
 /* ================
         Mobil
