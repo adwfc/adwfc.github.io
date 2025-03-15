@@ -1,6 +1,6 @@
 // script.js
 
-const enablePasswordProtection = true; // true = aktiv, false = inaktiv
+const enablePasswordProtection = false; // true = aktiv, false = inaktiv
 const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
 // Auto-Logout
@@ -80,3 +80,37 @@ function hideCookieBanner() {
         localStorage.setItem('cookieBannerClosed', 'true');
     }, 1000);
 }
+
+//Darkmode
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    
+    // Dark Mode aktiv?
+    const isDarkMode = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", isDarkMode);
+
+    // Meta-Tag für die Browserfarbe anpassen
+    let themeColor = document.querySelector('meta[name="theme-color"]');
+    if (!themeColor) {
+        themeColor = document.createElement('meta');
+        themeColor.setAttribute("name", "theme-color");
+        document.head.appendChild(themeColor);
+    }
+    themeColor.setAttribute("content", isDarkMode ? "#121212" : "#ffffff");
+}
+
+// Dark Mode beim Laden der Seite setzen
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+
+        // Theme-Color setzen
+        let themeColor = document.querySelector('meta[name="theme-color"]');
+        if (!themeColor) {
+            themeColor = document.createElement('meta');
+            themeColor.setAttribute("name", "theme-color");
+            document.head.appendChild(themeColor);
+        }
+        themeColor.setAttribute("content", "#070f1b");
+    }
+});
