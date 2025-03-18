@@ -183,10 +183,22 @@ header button {
 
 .dark-mode #scrollToTopBtn {
     border: 1px dashed #2e66b9;
-    background-color: #ffffffbd;
+    background-image: url('/bilder/bg_dark_springe-zu.png') !important;
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-  
+.dark-mode #username, .dark-mode #password {
+    background-color: #070f1b !important;
+}
+
+.dark-mode #login-button {
+    color: green !important;
+    background-color: #070f1b !important;
+}
+
+
 /* ================
     Passwort-Form
    ================ */
