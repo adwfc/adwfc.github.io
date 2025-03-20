@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ja/Nein Abstimmung</title>
+    <style>
+        #chart { 
+            width: 100%; 
+            height: 30px; 
+            background: lightgray; 
+            position: relative; 
+            display: none; /* Anfangs versteckt */
+        }
+        #ja-bar, #nein-bar { 
+            height: 100%; 
+            position: absolute; 
+            width: 0%; 
+        }
+        #ja-bar { background: green; }
+        #nein-bar { background: red; right: 0; }
+    </style>
+</head>
+<body>
+    <h1>Abstimmung: Ja oder Nein?</h1>
+    <button id="ja">Ja</button>
+    <button id="nein">Nein</button>
+
+    <h2>Ergebnisse</h2>
+    <div id="chart">
+        <div id="ja-bar"></div>
+        <div id="nein-bar"></div>
+    </div>
+    <p id="status">Lade Ergebnisse...</p>
+
+    <script>
+        const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
+        const API_KEY = "b6fd1da2-69cc-4768-a9ff-102b5b50db2e";
+
+        // Prüfen, ob der User schon abgestimmt hat
+        function hasVoted() {
+            return localStorage.getItem("hasVoted") === "true";
+        }
+
+        // Abstimmungs-Buttons deaktivieren, wenn schon abgestimmt
+        function disableButtons() {
+            document.getElementById("ja").disabled = true;
+            document.getElementById("nein").disabled = true;
+        }
+
+        async function fetchResults() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                const totalVotes = data.ja + data.nein;
+
+                if (totalVotes > 0) {
+                    document.getElementById("chart").style.display = "block"; // Balken anzeigen
+                }
+
+                const jaPercent = (data.ja / totalVotes) * 100 || 0;
+                const neinPercent = (data.nein / totalVotes) * 100 || 0;
+
+                document.getElementById('ja-bar').style.width = jaPercent + "%";
+                document.getElementById('nein-bar').style.width = neinPercent + "%";
+                document.getElementById('status').innerText = `Ja: ${Math.round(jaPercent)}% | Nein: ${Math.round(neinPercent)}%`;
+
+                if (hasVoted()) {
+                    disableButtons(); // Buttons deaktivieren, wenn User schon abgestimmt hat
+                }
+            } catch (error) {
+                console.error("Fehler beim Abrufen der Daten:", error);
+                document.getElementById('status').innerText = "Fehler beim Laden der Ergebnisse.";
+            }
+        }
+
+        async function vote(choice) {
+            if (hasVoted()) {
+                alert("Du hast bereits abgestimmt!");
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL);
+                let data = await response.json();
+                data[choice]++;
+
+                await fetch(`${API_URL}?apiKey=${API_KEY}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                localStorage.setItem("hasVoted", "true"); // Speichert, dass der User abgestimmt hat
+                disableButtons(); // Buttons deaktivieren
+                document.getElementById("chart").style.display = "block"; // Balken anzeigen
+                fetchResults();
+            } catch (error) {
+                console.error("Fehler beim Speichern der Stimme:", error);
+            }
+        }
+
+        document.getElementById("ja").addEventListener("click", () => vote("ja"));
+        document.getElementById("nein").addEventListener("click", () => vote("nein"));
+
+        fetchResults();
+    </script>
+</body>
+</html>
