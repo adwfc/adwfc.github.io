@@ -18,7 +18,8 @@ async function checkPassword() {
     const enteredPassword = document.getElementById("passwordInput").value;
 
     const hashBuffer = await sha256(enteredPassword);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashArray = Array.from(new Uint8Array(ha
+    shBuffer));
     const enteredPasswordHash = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
 
     if (enteredPasswordHash === correctPasswordHash) {
@@ -99,7 +100,6 @@ function toggleDarkMode() {
     themeColor.setAttribute("content", isDarkMode ? "#121212" : "#ffffff");
 }
 
-// Dark Mode beim Laden der Seite setzen
 document.addEventListener("DOMContentLoaded", () => {
     if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
@@ -114,3 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
         themeColor.setAttribute("content", "#070f1b");
     }
 });
+
+// Abstimmungen
+
