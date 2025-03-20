@@ -5,35 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ja/Nein Abstimmung</title>
     <style>
-        #chart, #status { 
-            display: none; /* Anfangs beides versteckt */
+        #results { 
+            display: none; /* Alles auf einmal verstecken */
         }
+        
         #chart { 
             width: 100%; 
             height: 30px; 
             background: lightgray; 
             position: relative; 
         }
+        
         #ja-bar, #nein-bar { 
             height: 100%; 
             position: absolute; 
             width: 0%; 
         }
-        #ja-bar { background: green; }
-        #nein-bar { background: red; right: 0; }
+        
+        #ja-bar {background: green;}
+        #nein-bar {background: red; right: 0;}
     </style>
 </head>
 <body>
-    <h1>Abstimmung: Ja oder Nein?</h1>
     <button id="ja">Ja</button>
     <button id="nein">Nein</button>
 
-    <h2>Ergebnisse</h2>
-    <div id="chart">
-        <div id="ja-bar"></div>
-        <div id="nein-bar"></div>
+    <div id="results">
+        <div id="chart">
+            <div id="ja-bar"></div>
+            <div id="nein-bar"></div>
+        </div>
+        <p id="status"></p>
     </div>
-    <p id="status"></p>
 
     <script>
         const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
@@ -55,8 +58,7 @@
                 const totalVotes = data.ja + data.nein;
 
                 if (hasVoted()) {  
-                    document.getElementById("chart").style.display = "block";
-                    document.getElementById("status").style.display = "block"; // Status anzeigen
+                    document.getElementById("results").style.display = "block"; // Alles anzeigen
                 }
 
                 const jaPercent = (data.ja / totalVotes) * 100 || 0;
@@ -70,13 +72,13 @@
                     disableButtons();
                 }
             } catch (error) {
-                console.error("Fehler beim Abrufen der Daten:", error);
+                console.error("Frage den mächtigen Guru (V), es gab einen Fehler mit der Datenbank:", error);
             }
         }
 
         async function vote(choice) {
             if (hasVoted()) {
-                alert("Du hast bereits abgestimmt!");
+                alert("Wollen doch demokratisch bleiben (;");
                 return;
             }
 
@@ -93,11 +95,10 @@
 
                 localStorage.setItem("hasVoted", "true");
                 disableButtons();
-                document.getElementById("chart").style.display = "block"; 
-                document.getElementById("status").style.display = "block"; // Status anzeigen
+                document.getElementById("results").style.display = "block"; // Alles anzeigen
                 fetchResults();
             } catch (error) {
-                console.error("Fehler beim Speichern der Stimme:", error);
+                console.error("Frage doch den mächtigen Guru (V), es gab einen Fehler beim Speichern deiner Stimme:", error);
             }
         }
 
