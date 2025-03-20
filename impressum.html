@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ja/Nein Abstimmung</title>
     <style>
+        #chart, #status { 
+            display: none; /* Anfangs beides versteckt */
+        }
         #chart { 
             width: 100%; 
             height: 30px; 
             background: lightgray; 
             position: relative; 
-            display: none; /* Anfangs unsichtbar */
         }
         #ja-bar, #nein-bar { 
             height: 100%; 
@@ -31,7 +33,7 @@
         <div id="ja-bar"></div>
         <div id="nein-bar"></div>
     </div>
-    <p id="status">Lade Ergebnisse...</p>
+    <p id="status"></p>
 
     <script>
         const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
@@ -53,7 +55,8 @@
                 const totalVotes = data.ja + data.nein;
 
                 if (hasVoted()) {  
-                    document.getElementById("chart").style.display = "block"; // Balken nur anzeigen, wenn Nutzer abgestimmt hat
+                    document.getElementById("chart").style.display = "block";
+                    document.getElementById("status").style.display = "block"; // Status anzeigen
                 }
 
                 const jaPercent = (data.ja / totalVotes) * 100 || 0;
@@ -68,7 +71,6 @@
                 }
             } catch (error) {
                 console.error("Fehler beim Abrufen der Daten:", error);
-                document.getElementById('status').innerText = "Fehler beim Laden der Ergebnisse.";
             }
         }
 
@@ -91,7 +93,8 @@
 
                 localStorage.setItem("hasVoted", "true");
                 disableButtons();
-                document.getElementById("chart").style.display = "block"; // Erst nach Abstimmung sichtbar
+                document.getElementById("chart").style.display = "block"; 
+                document.getElementById("status").style.display = "block"; // Status anzeigen
                 fetchResults();
             } catch (error) {
                 console.error("Fehler beim Speichern der Stimme:", error);
