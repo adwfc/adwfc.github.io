@@ -10,7 +10,7 @@
             height: 30px; 
             background: lightgray; 
             position: relative; 
-            display: none; /* Anfangs versteckt */
+            display: none; /* Anfangs unsichtbar */
         }
         #ja-bar, #nein-bar { 
             height: 100%; 
@@ -37,12 +37,10 @@
         const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
         const API_KEY = "b6fd1da2-69cc-4768-a9ff-102b5b50db2e";
 
-        // Prüfen, ob der User schon abgestimmt hat
         function hasVoted() {
             return localStorage.getItem("hasVoted") === "true";
         }
 
-        // Abstimmungs-Buttons deaktivieren, wenn schon abgestimmt
         function disableButtons() {
             document.getElementById("ja").disabled = true;
             document.getElementById("nein").disabled = true;
@@ -54,8 +52,8 @@
                 const data = await response.json();
                 const totalVotes = data.ja + data.nein;
 
-                if (totalVotes > 0) {
-                    document.getElementById("chart").style.display = "block"; // Balken anzeigen
+                if (hasVoted()) {  
+                    document.getElementById("chart").style.display = "block"; // Balken nur anzeigen, wenn Nutzer abgestimmt hat
                 }
 
                 const jaPercent = (data.ja / totalVotes) * 100 || 0;
@@ -66,7 +64,7 @@
                 document.getElementById('status').innerText = `Ja: ${Math.round(jaPercent)}% | Nein: ${Math.round(neinPercent)}%`;
 
                 if (hasVoted()) {
-                    disableButtons(); // Buttons deaktivieren, wenn User schon abgestimmt hat
+                    disableButtons();
                 }
             } catch (error) {
                 console.error("Fehler beim Abrufen der Daten:", error);
@@ -91,9 +89,9 @@
                     body: JSON.stringify(data)
                 });
 
-                localStorage.setItem("hasVoted", "true"); // Speichert, dass der User abgestimmt hat
-                disableButtons(); // Buttons deaktivieren
-                document.getElementById("chart").style.display = "block"; // Balken anzeigen
+                localStorage.setItem("hasVoted", "true");
+                disableButtons();
+                document.getElementById("chart").style.display = "block"; // Erst nach Abstimmung sichtbar
                 fetchResults();
             } catch (error) {
                 console.error("Fehler beim Speichern der Stimme:", error);
