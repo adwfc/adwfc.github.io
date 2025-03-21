@@ -4,33 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ja/Nein Abstimmung</title>
+    
+    <script src="script.js"></script>
+    
     <style>
         #results { 
             display: none; /* Alles auf einmal verstecken */
         }
-        
         #chart { 
             width: 100%; 
             height: 30px; 
             background: lightgray; 
             position: relative; 
         }
-        
         #ja-bar, #nein-bar { 
             height: 100%; 
             position: absolute; 
             width: 0%; 
         }
-        
-        #ja-bar {background: green;}
-        #nein-bar {background: red; right: 0;}
+        #ja-bar { background: green; }
+        #nein-bar { background: red; right: 0; }
     </style>
 </head>
 <body>
+    <h1>Abstimmung: Ja oder Nein?</h1>
     <button id="ja">Ja</button>
     <button id="nein">Nein</button>
 
+    <!-- Alles, was erst nach dem Abstimmen erscheinen soll -->
     <div id="results">
+        <h2>Ergebnisse</h2>
         <div id="chart">
             <div id="ja-bar"></div>
             <div id="nein-bar"></div>
@@ -38,75 +41,5 @@
         <p id="status"></p>
     </div>
 
-    <script>
-        const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
-        const API_KEY = "b6fd1da2-69cc-4768-a9ff-102b5b50db2e";
-
-        function hasVoted() {
-            return localStorage.getItem("hasVoted") === "true";
-        }
-
-        function disableButtons() {
-            document.getElementById("ja").disabled = true;
-            document.getElementById("nein").disabled = true;
-        }
-
-        async function fetchResults() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                const totalVotes = data.ja + data.nein;
-
-                if (hasVoted()) {  
-                    document.getElementById("results").style.display = "block"; // Alles anzeigen
-                }
-
-                const jaPercent = (data.ja / totalVotes) * 100 || 0;
-                const neinPercent = (data.nein / totalVotes) * 100 || 0;
-
-                document.getElementById('ja-bar').style.width = jaPercent + "%";
-                document.getElementById('nein-bar').style.width = neinPercent + "%";
-                document.getElementById('status').innerText = `Ja: ${Math.round(jaPercent)}% | Nein: ${Math.round(neinPercent)}%`;
-
-                if (hasVoted()) {
-                    disableButtons();
-                }
-            } catch (error) {
-                console.error("Frage den mächtigen Guru (V), es gab einen Fehler mit der Datenbank:", error);
-            }
-        }
-
-        async function vote(choice) {
-            if (hasVoted()) {
-                alert("Wollen doch demokratisch bleiben (;");
-                return;
-            }
-
-            try {
-                const response = await fetch(API_URL);
-                let data = await response.json();
-                data[choice]++;
-
-                await fetch(`${API_URL}?apiKey=${API_KEY}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
-
-                localStorage.setItem("hasVoted", "true");
-                disableButtons();
-                document.getElementById("results").style.display = "block"; // Alles anzeigen
-                fetchResults();
-            } catch (error) {
-                console.error("Frage doch den mächtigen Guru (V), es gab einen Fehler beim Speichern deiner Stimme:", error);
-            }
-        }
-
-        document.getElementById("ja").addEventListener("click", () => vote("ja"));
-        document.getElementById("nein").addEventListener("click", () => vote("nein"));
-
-        fetchResults();
-    </script>
 </body>
 </html>
-
