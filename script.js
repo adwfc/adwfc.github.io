@@ -1,5 +1,3 @@
-// script.js
-
 const enablePasswordProtection = false; // true = aktiv, false = inaktiv
 const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
@@ -10,7 +8,7 @@ function autoLogout() {
         document.getElementById('protectedContent').style.display = 'none';
         document.getElementById('passwordForm').style.display = 'block';
         alert("LOL - automatische Abmeldung nach 20min - Technikgott (auf keinen Fall aus'm Internet geklaut ;)");
-    }, 1200000); // 1200000 Millisekunden = 20 Minuten
+    }, 1200000);
 }
 
 // PW
@@ -18,15 +16,14 @@ async function checkPassword() {
     const enteredPassword = document.getElementById("passwordInput").value;
 
     const hashBuffer = await sha256(enteredPassword);
-    const hashArray = Array.from(new Uint8Array(ha
-    shBuffer));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
     const enteredPasswordHash = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
 
     if (enteredPasswordHash === correctPasswordHash) {
         document.getElementById("passwordForm").style.display = "none";
         document.getElementById("protectedContent").style.display = "block";
         sessionStorage.setItem('loggedIn', 'true');
-        autoLogout(); 
+        autoLogout();
     } else {
         alert("LOL - frage doch den mächtigen Guru (V)");
     }
@@ -41,17 +38,17 @@ async function sha256(message) {
 }
 
 // Inhalte + Cookies
-window.onload = function() {
+document.addEventListener("DOMContentLoaded", () => {
     if (!enablePasswordProtection) {
         document.getElementById('protectedContent').style.display = 'block';
         document.getElementById('passwordForm').style.display = 'none';
     } else {
         if (sessionStorage.getItem('loggedIn') === 'true') {
-            document.getElementById('protectedContent').style.display = 'block'; 
-            document.getElementById('passwordForm').style.display = 'none'; 
+            document.getElementById('protectedContent').style.display = 'block';
+            document.getElementById('passwordForm').style.display = 'none';
             autoLogout();
         } else {
-            document.getElementById('passwordForm').style.display = 'block'; 
+            document.getElementById('passwordForm').style.display = 'block';
             document.getElementById('protectedContent').style.display = 'none';
         }
     }
@@ -61,17 +58,17 @@ window.onload = function() {
     if (cookieBannerClosed === 'true') {
         document.getElementById("cookieBanner").style.display = "none";
     } else {
-        setTimeout(hideCookieBanner, 30000); // 30 Sek
+        setTimeout(hideCookieBanner, 30000);
     }
 
-    // Enter-Taste
-    document.getElementById("passwordInput").addEventListener("keydown", function(event) {
+    document.getElementById("passwordInput")?.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
-            checkPassword(); 
+            checkPassword();
         }
     });
-};
 
+    fetchResults();
+});
 
 // manuelles Schließen Cookies
 function hideCookieBanner() {
@@ -82,15 +79,13 @@ function hideCookieBanner() {
     }, 1000);
 }
 
-//Darkmode
+// Darkmode
 function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
-    
-    // Dark Mode aktiv?
+
     const isDarkMode = document.body.classList.contains("dark-mode");
     localStorage.setItem("darkMode", isDarkMode);
 
-    // Meta-Tag für die Browserfarbe anpassen
     let themeColor = document.querySelector('meta[name="theme-color"]');
     if (!themeColor) {
         themeColor = document.createElement('meta');
@@ -100,11 +95,11 @@ function toggleDarkMode() {
     themeColor.setAttribute("content", isDarkMode ? "#121212" : "#ffffff");
 }
 
+// Dark Mode beim Laden der Seite setzen
 document.addEventListener("DOMContentLoaded", () => {
     if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
 
-        // Theme-Color setzen
         let themeColor = document.querySelector('meta[name="theme-color"]');
         if (!themeColor) {
             themeColor = document.createElement('meta');
@@ -171,5 +166,9 @@ function disableButtons() {
     document.getElementById("nein").disabled = true;
 }
 
-document.getElementById("ja").addEventListener("click", () => vote("ja"));
-document.getElementById("nein").addEventListener("click", () => vote("nein"));
+document.addEventListener("DOMContentLoaded", () => {
+    fetchResults();
+    document.getElementById("ja").addEventListener("click", () => vote("ja"));
+    document.getElementById("nein").addEventListener("click", () => vote("nein"));
+});
+
