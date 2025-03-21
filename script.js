@@ -115,5 +115,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Abstimmungen
 
+// Abstimmungssystem
+const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
+const API_KEY = "b6fd1da2-69cc-4768-a9ff-102b5b50db2e";
+
+function hasVoted() {
+    return localStorage.getItem("hasVoted") === "true";
+}
+
+async function fetchResults() {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    const totalVotes = data.ja + data.nein;
+
+    if (hasVoted()) {
+        document.getElementById("results").style.display = "block";
+    }
+
+    const jaPercent = (data.ja / totalVotes) * 100 || 0;
+    const neinPercent = (data.nein / totalVotes) * 100 || 0;
+
+    document.getElementById('ja-bar').style.width = jaPercent + "%";
+    document.getElementById('nein-bar').style.width = neinPercent + "%";
+    document.getElementById('status').innerText = `Ja: ${Math.round(jaPercent)}% | Nein: ${Math.round(neinPercent)}%`;
+
+    if (hasVoted()) {
+        disableButtons();
+    }
+}
+
+async function vote(choice) {
+    if (hasVoted()) {
+        alert("Du hast bereits abgestimmt!");
+        return;
+    }
+
+    const response = await fetch(API_URL);
+    let data = await response.json();
+    data[choice]++;
+
+    await fetch(`${API_URL}?apiKey=${API_KEY}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    localStorage.setItem("hasVoted", "true");
+    document.getElementById("results").style.display = "block";
+    fetchResults();
+}
+
+function disableButtons() {
+    document.getElementById("ja").disabled = true;
+    document.getElementById("nein").disabled = true;
+}
+
+document.getElementById("ja").addEventListener("click", () => vote("ja"));
+document.getElementById("nein").addEventListener("click", () => vote("nein"));
