@@ -1,3 +1,5 @@
+// script.js
+
 const enablePasswordProtection = false; // true = aktiv, false = inaktiv
 const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
@@ -132,7 +134,7 @@ async function fetchResults() {
 
     document.getElementById('ja-bar').style.width = jaPercent + "%";
     document.getElementById('nein-bar').style.width = neinPercent + "%";
-    document.getElementById('status').innerText = `Ja: ${Math.round(jaPercent)}% | Nein: ${Math.round(neinPercent)}%`;
+    document.getElementById('status').innerText = `Türlich: ${Math.round(jaPercent)}% \u00A0 | \u00A0 Bekifft: ${Math.round(neinPercent)}%`;
 
     if (hasVoted()) {
         disableButtons();
