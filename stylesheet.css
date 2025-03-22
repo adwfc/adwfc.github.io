@@ -12,6 +12,10 @@ header {
     width: 100%;
 }
 
+a {
+    color: #000;
+}
+
 ul {
     list-style-type: disc;
 }
@@ -467,6 +471,88 @@ header button {
     border-radius: 45px;
 }
 
+
+/* ================
+        Impressum
+   ================ */
+.dark-mode #imp-ja, .dark-mode #imp-nein {
+    background-color: transparent !important;
+    color: #D5EDF6 !important;
+    border: 1px solid #D5EDF6;
+}
+
+.dark-mode #imp-ja:before, .dark-mode #imp-nein:before {
+    background-color: #122c46 !important;
+}
+
+#imp-ja, #imp-nein {
+  background-color: transparent;
+  border: 1px solid #266DB6;
+  box-sizing: border-box;
+  color: #00132C;
+  font-family: "Avenir Next LT W01 Bold",sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  padding: 16px 23px;
+  position: relative;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
+#imp-ja:hover, #imp-nein:hover,
+#imp-ja:active, #imp-nein:active {
+  outline: 0;
+}
+
+#imp-ja:hover, #imp-nein:hover {
+  background-color: transparent;
+  cursor: pointer;
+}
+
+#imp-ja:before, #imp-nein:before {
+  background-color: #D5EDF6;
+  content: "";
+  height: calc(100% + 3px);
+  position: absolute;
+  right: -7px;
+  top: -9px;
+  transition: background-color 300ms ease-in;
+  width: 100%;
+  z-index: -1;
+}
+
+#imp-ja:hover:before, #imp-nein:hover:before {
+  background-color: #6DCFF6;
+}
+
+  
+        #results { 
+            display: none; /* Alles auf einmal verstecken */
+        }
+        
+        #chart { 
+            width: 300px;
+            height: 30px; 
+            background: lightgray; 
+            position: relative; 
+            margin-top: 50px;
+        }
+        
+        #ja-bar, #nein-bar { 
+            height: 100%; 
+            position: absolute; 
+            width: 0%; 
+        }
+        
+        #ja-bar { background: green; }
+        #nein-bar { background: red; right: 0; }
+
+   
 /* ================
         Mobil
    ================ */
@@ -502,6 +588,10 @@ header button {
     .mobil {
         display: block;
     }
+    
+    .#imp-ja, #imp-nein {
+    padding: 16px 32px;
+  }
 
 /*main*/
     main {
@@ -649,6 +739,10 @@ header button {
 
     #mitglieder, #kontakt {
         margin-top: 350px;
+    }
+    
+    #impressum {
+        margin-top: 250px;
     }
 
     .mitglieder-container {

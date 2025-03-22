@@ -13,7 +13,7 @@ function autoLogout() {
 
 // PW
 async function checkPassword() {
-    const enteredPassword = document.getElementById("passwordInput").value;
+    const enteredPassword = document.getElementById("passwordInput")?.value;
 
     const hashBuffer = await sha256(enteredPassword);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -95,7 +95,6 @@ function toggleDarkMode() {
     themeColor.setAttribute("content", isDarkMode ? "#121212" : "#ffffff");
 }
 
-// Dark Mode beim Laden der Seite setzen
 document.addEventListener("DOMContentLoaded", () => {
     if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
@@ -110,8 +109,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-
 // Abstimmungssystem
+
 const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
 const API_KEY = "b6fd1da2-69cc-4768-a9ff-102b5b50db2e";
 
@@ -120,6 +119,8 @@ function hasVoted() {
 }
 
 async function fetchResults() {
+    console.log("Ergebnisse werden geladen...");
+
     const response = await fetch(API_URL);
     const data = await response.json();
     const totalVotes = data.ja + data.nein;
@@ -141,10 +142,35 @@ async function fetchResults() {
 }
 
 async function vote(choice) {
+    console.log("Vote-Funktion wurde aufgerufen");
+
+    // Debugging: Prüfen, ob localStorage richtig gespeichert ist
+    console.log("hasVoted():", hasVoted());
+    console.log("LocalStorage Wert:", localStorage.getItem("hasVoted"));
+
     if (hasVoted()) {
-        alert("Du hast bereits abgestimmt!");
+        console.log("Fehlermeldung: Nutzer hat bereits abgestimmt!");
+
+        // Überprüfung, ob das HTML-Element existiert
+        const errorBox = document.getElementById("error");
+        if (!errorBox) {
+            console.error("FEHLER: HTML-Element mit id='error' nicht gefunden!");
+        } else {
+            console.log("Fehlermeldung wird gesetzt...");
+            errorBox.innerText = "Du hast bereits abgestimmt!";
+            errorBox.style.display = "block";
+        }
+
+        // Falls alert blockiert wird, einen kleinen Timeout setzen
+        setTimeout(() => alert("Du hast bereits abgestimmt!"), 100);
+
         return;
     }
+
+    console.log("Abstimmung wird gezählt...");
+
+    // Setzt den LocalStorage-Wert direkt, um doppelte Klicks zu verhindern
+    localStorage.setItem("hasVoted", "true");
 
     const response = await fetch(API_URL);
     let data = await response.json();
@@ -156,19 +182,20 @@ async function vote(choice) {
         body: JSON.stringify(data)
     });
 
-    localStorage.setItem("hasVoted", "true");
     document.getElementById("results").style.display = "block";
     fetchResults();
 }
 
 function disableButtons() {
-    document.getElementById("ja").disabled = true;
-    document.getElementById("nein").disabled = true;
+    console.log("Buttons werden deaktiviert...");
+    document.getElementById("imp-ja").disabled = true;
+    document.getElementById("imp-nein").disabled = true;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("Seite geladen, Event Listener werden gesetzt...");
     fetchResults();
-    document.getElementById("ja").addEventListener("click", () => vote("ja"));
-    document.getElementById("nein").addEventListener("click", () => vote("nein"));
+    
+    document.getElementById("imp-ja").addEventListener("click", () => vote("ja"));
+    document.getElementById("imp-nein").addEventListener("click", () => vote("nein"));
 });
-
