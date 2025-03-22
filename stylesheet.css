@@ -14,6 +14,7 @@ header {
 
 a {
     color: #000;
+    text-decoration: none;
 }
 
 ul {
@@ -124,7 +125,9 @@ h2 {
     margin-right: 20px;
 }
 
-
+.impressum {
+    margin-top: 13px;
+}
 
 /**/
     .ergaenzungen p {
@@ -473,7 +476,7 @@ header button {
 
 
 /* ================
-        Impressum
+      Impressum
    ================ */
 .dark-mode #imp-ja, .dark-mode #imp-nein {
     background-color: transparent !important;
@@ -760,3 +763,4 @@ header button {
 
     
 }
+
