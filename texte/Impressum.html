@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+         <title>Impressum ADWFC</title>
+         <meta name="author" content="&Eacute;mile Jeremias Ruff">
+         <link rel="icon" type="image/png" href="favicon.ico">
+
+         <link rel="stylesheet" href="../stylesheet.css?v=<?= filemtime('style.css'); ?>" type="text/css">
+         <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+         <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         
+         <script src="../script.js"></script>
+    
+</head>
+<body>    
+    
+    <div id="cookieBanner">
+         <p>Unsere Cookies bleiben sch&ouml;n bei uns! &#127850; <br><br> Deshalb finden sich auch keine auf dieser Website, es werden jediglich Logins f&uuml;r 20min im Session Storage
+            gespeichert sowie die Bildschrimbreite ermittelt. &#128190;&#128274;</p>
+         <button onclick="hideCookieBanner()">Top &#128591;</button>
+    </div>
+
+
+   <header class="header-container">                                                        <!-- main-nav -->
+<!----><button onclick="toggleDarkMode()"><img class="kopf" src="bilder/Kopf.jpeg" alt="Kopf"></button>    
+         
+<!----><div class="main-nav">
+          <h1 class="allgemeiner-deutscher">Allgemeiner Deutscher Wanderer und Fahrradfahrer Club &#x1F474; &#x1F97E;</h1>
+          <p class="internetauftritt">- Internetauftritt der<a href="auth.html">WaFas</a></p>
+          <ul><li><a href="../index.html">Homepage</a></li>
+              <li><b>|</b></li>
+              <li><a href="Mitglieder.html">Mitglieder</a></li>
+              <li><b>|</b></li>
+              <li><a href="Kontakt.html">Kontakt</a></li>
+          </ul>
+       </div>
+       
+    </header>
+    
+    
+    <main>
+        
+    <h3 id="impressum"><s>Impressum</s></h3>
+    <p>haha dachten Sie wirklich, Sie finden hier nach TMG, BGB und DSGVO ein seriöses Impressum?</p>
+    <button id="imp-ja">Türlich!</button>
+    <button id="imp-nein">Bekifft?</button>
+
+    <div id="results">
+        <div id="chart">
+            <div id="ja-bar"></div>
+            <div id="nein-bar"></div>
+        </div>
+        <p id="status"></p>
+    </div>
+    
+    <p></p>
+    <p>Diese Website sollte von niemandem als seriös, vertrauenswürdig oder gar lustig bewertet werden.</p>
+    <p>Beschwerden, Sicherheitsbedenken oder Ähnliches können über das <a href="Kontaktformular">Kontaktformular</a> oder Github geäußert werden.</p>
+    
+    </main>
+    
+    
+   <footer>
+         <hr size="1" noshade>
+         <p>&copy; 2025 by &Eacute;mile Jeremias Ruff <br>
+         <a href=Impressum">Impressum</a></p>
+   </footer>   
+</body>
+</html>
