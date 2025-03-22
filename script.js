@@ -1,6 +1,6 @@
 // script.js
 
-const enablePasswordProtection = false; // true = aktiv, false = inaktiv
+const enablePasswordProtection = true; // true = aktiv, false = inaktiv
 const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
 // Auto-Logout
