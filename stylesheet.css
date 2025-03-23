@@ -6,10 +6,9 @@ body {
 }
 
 header {
-    display: flex;
+    display: flex;   
     justify-content: flex-start;
     align-items: center;
-    width: 100%;
 }
 
 a {
@@ -26,11 +25,11 @@ main {
 }
 
 .desktop {
-  display: block;
+    display: block;
 }
 
 .mobil {
-  display: none;  /* Mobil-Inhalte werden standardmäßig verborgen */
+    display: none;
 }
 
 .kopf {
@@ -101,6 +100,7 @@ h3:not(.verfassung) {
 
 main {
     margin-left: 100px;
+    margin-right: 100px;
 }
 
 footer {
@@ -155,7 +155,6 @@ h2 {
 /* ================
        Darkmode
    ================ */
-   
 body.dark-mode {
     background-color: #070f1b; /* #070f1b #121212 #070f1A */
     color: white;
@@ -209,7 +208,6 @@ header button {
 /* ================
     Passwort-Form
    ================ */
-
 .lego-construction {
     width: auto;
     height: 400px;
@@ -277,13 +275,12 @@ header button {
 }
 
 
-
 /* ================
        main-nav
    ================ */
 .main-nav {
-    margin-left: 30px;
     text-align: left;
+    margin-left: 30px;
 }
 
 .main-nav li {
@@ -421,10 +418,10 @@ header button {
     border-radius: 5px;
 }
 
+
 /* ================
         Login
    ================ */
-   
 .login {
     width: 320px;
     height: auto;
@@ -555,7 +552,7 @@ header button {
         #ja-bar { background: green; }
         #nein-bar { background: red; right: 0; }
 
-   
+
 /* ================
         Mobil
    ================ */
@@ -574,11 +571,15 @@ header button {
     }
 
     .kopf {
-        margin-left: 50px;
         width: auto;
-        height: 225px;
-    }
+        height: 200px;
+        margin-left: 0px;
+     }
 
+     .internetauftritt, .allgemeiner-deutscher {
+         margin-left: 40px !important;
+     }
+     
     .lego-construction {
         width: 80% !important;
         height: auto !important;
@@ -593,12 +594,15 @@ header button {
     }
     
     .#imp-ja, #imp-nein {
-    padding: 16px 32px;
+        padding: 16px 32px;
   }
 
 /*main*/
     main {
-        margin-left: 40px;
+        width: calc(100% - 40px);
+        margin: 0 auto;
+        padding: 10px;
+        box-sizing: border-box;
     }
 
     main ul, ol {
@@ -612,12 +616,16 @@ header button {
     main p {
         margin-top: 0.5em;
     }
+    
+    .main-nav {        
+        margin-left: 0px;
+    }
+    
     .main-nav ul {
         display: block;
         text-align: center;
         padding: 0;
         margin-top: 30px;
-        margin-left: 15px !important;
     }
 
     .main-nav li {
@@ -630,17 +638,16 @@ header button {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        width: 100%;
+        width: 90%;
+        max-width: 290px;
         background-color: #fff;
         padding: 10px 20px;
         border-bottom: 1px dashed #11113A;
         border-top: 1px dashed #11113A;
-        box-sizing: border-box;
-    width: calc(100% - 40px); /* 100% minus die Margins */
-    margin: 0 auto;
-    padding: 10px;
-    box-sizing: border-box;
+        position: sticky;
         top: 20px;
+        margin-left: 15%;
+        
     }
 
     .springe-rechts {
@@ -716,19 +723,17 @@ header button {
     .internetauftritt {
         font-size: 20px !important;
         margin-top: 5px !important;
-        margin-left: 20px !important;
     }
     
     .internetauftritt a {
-  all: inherit;
-  text-decoration: none;
-  display: inline;
-  margin: 0.2em;
-}
-
+        all: inherit;
+        text-decoration: none;
+        display: inline;
+        margin: 0.2em;
+    }
 
     .konstitution {
-        margin-top: 450px !important;
+        margin-top: 370px ! important;
         margin-bottom: 25px;
         text-align: center;
     }
@@ -764,4 +769,3 @@ header button {
 
     
 }
-
