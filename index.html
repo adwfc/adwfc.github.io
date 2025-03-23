@@ -13,7 +13,14 @@
          <meta http-equiv="Pragma" content="no-cache">
          <meta http-equiv="Expires" content="0">
         
-
+         <script>
+          let currentVersion = 'v2.1'; // Version ändern, wenn du Updates machst
+          if (localStorage.getItem('siteVersion') !== currentVersion) {
+          localStorage.setItem('siteVersion', currentVersion);
+          location.reload(true);
+          }
+         </script>
+        
          <script src="script.js"></script>
          <style>
           #passwordForm, #protectedContent {
