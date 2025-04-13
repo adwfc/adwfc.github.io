@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<head>
+         <title>Mitglieder ADWFC</title>
+         <meta name="author" content="&Eacute;mile Jeremias Ruff">
+         <link rel="icon" type="image/png" href="../favicon.ico">
+
+         <link rel="stylesheet" href="../stylesheet.css" type="text/css">
+         <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+         <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+         <script src="../script.js"></script>
+         <style>
+          #passwordForm, #protectedContent {
+                display: none;
+          }
+         </style>
+</head>
+
+<body>
+
+    <!-- Passwortabfrage Formular -->
+    <div id="passwordForm">
+        <h2>Seite im Bau</h2>
+        <img src="../b/lego-construction.jpeg" class="lego-construction">
+        <p class="passwordForm-eins">Politische Ungeheuerlichkeiten, fatale Fehler im Code oder doch eher ein Beauty-Update? <br> In jedem Fall braucht es noch ein weinig Zeit,
+                                     in sp&auml;testens ein paar Tagen ist die Seite dann wieder erreichbar. <br> Wir bitten um Entschuldigung.</p>
+        <p class="passwordForm-zwei">Sonderinspektor auf Fahndung nach DIN EN ISO/IEC 27001 (Informationssicherheitsmanagementsysteme)? Dann sei krass und best&auml;tige mit deinem Parallel
+                                     Interconnection Nexus (PIN):</p>
+        <input type="number" id="passwordInput" placeholder="PIN" required>
+        <button class="h&auml;kchen" onclick="checkPassword()">&#10004;</button>
+    </div>
+
+    <geschuetzt id="protectedContent">
+    <!--             Anfang geschützter Inhalt           -->
+
+
+
+    <div id="cookieBanner">
+         <p>Unsere Cookies bleiben sch&ouml;n bei uns! &#127850; <br><br> Deshalb finden sich auch keine auf dieser Website, es werden jediglich Logins f&uuml;r 20min im Web Storage (Session- & Local-)
+            gespeichert sowie die Bildschrimbreite ermittelt. &#128190;&#128274;</p>
+         <button onclick="hideCookieBanner()">Top &#128591;</button>
+    </div>
+
+
+   <header class="header-container">                                                      <!-- main-nav -->
+<!----><img class="kopf" src="../b/kopf.jpeg" alt="Kopf">
+
+<!----><div class="main-nav">
+          <h1 class="allgemeiner-deutscher">Allgemeiner Deutscher Wanderer und Fahrradfahrer Club &#x1F474; &#x1F97E;</h1>
+          <p class="internetauftritt">- Internetauftritt der<a href="../auth.html">WaFas</a></p>
+          <ul>
+              <li><a href="../index.html">Homepage</a></li>
+              <li><b>|</b></li>
+              <li><a href="mitglieder.html">Mitglieder</a></li>
+              <li><b>|</b></li>
+              <li><a href="kontakt.html">Kontakt</a></li>
+          </ul>
+      </div>
+
+<!----><nav class="springe-zu">                                                             <!-- Springe zu -->
+          <ul class="springe-links">
+              <li>Springe zu:</li>
+              <li><a href="#mitglieder">Mitglieder</a></li>
+          </ul>
+          <ul class="springe-rechts">
+              <li><a href="#m-titel">Titel</a></li>           
+          </ul>
+      </nav>
+   </header>
+
+
+
+   <main>
+   <h3 id="mitglieder">Mitglieder</h3>                                      <!-- Mitglieder -->
+
+   <div class="mitglieder-container">     
+    <table class="m-table" border="0" cellpadding="0" cellspacing="2">
+
+
+        <tr class="m-info" onclick="toggleDetails(this)">                    <!--Günther-->
+                    <td>&#x1F6B4;</td>                                      
+                    <td>Jerry, "Günther"</td></tr>
+
+                    <tr class="m-info-row" style="display: none;">
+                        <td colspan="2"><div class="m-grundinfo"><table><tr><td>/VM /GM /L</td>
+                                                                            <td>&#x1F7E2;</td></table></div>
+                                        <div class="m-info" id="QGZc81CbpnXF1HZuVa1Nw2UzgBK2"></div></td></tr>
+
+
+
+        <tr class="m-info" onclick="toggleDetails(this)">                    <!--Frank-->
+                    <td>&#x1F422;</td>                                      
+                    <td>Yannick &#x2764; ;), "Frank"</td></tr>
+
+                    <tr class="m-info-row" style="display: none;">
+                        <td colspan="2"><div class="m-grundinfo"><table><tr><td>/GM /L</td>
+                                                                            <td>&#x1F535;</td></table></div>
+                                        <div class="m-info" id="QBH6Uh84hEQ6Ld8DVlg4WoMIgnJ2"></div></td></tr>
+
+
+
+        <tr class="m-info" onclick="toggleDetails(this)">                    <!--Sabine-->
+                    <td>&#x1FA93;</td>                                      
+                    <td>Maren &#x2764; ;), "Sabine"</td></tr>
+
+                    <tr class="m-info-row" style="display: none;">
+                        <td colspan="2"><div class="m-grundinfo"><table><tr><td>/GM /E</td>
+                                                                            <td>&#x1F535;</td></table></div>
+                                        <div class="m-info" id="MHXhKhlBtJQi3USJVQmOe1lAouo2"></div></td></tr>
+
+
+
+        <tr class="m-info" onclick="toggleDetails(this)">                    <!--Paulus-->
+                    <td>&#x1F913;</td>                                      
+                    <td>Patrik, "Paulus"</td></tr>
+
+                    <tr class="m-info-row" style="display: none;">
+                        <td colspan="2"><div class="m-grundinfo"><table><tr><td>/M /J</td>
+                                                                            <td>&#x1F7E2;</td></table></div>
+                                        <div class="m-info" id="JKJQOmUxUANOQj8b8tGL7WAwSiq1"></div></td></tr>
+
+
+
+        <tr class="m-info" onclick="toggleDetails(this)">                    <!--Gertrude-->
+                    <td>&#x26F8;</td>                                      
+                    <td>Béa, "Gertrude"</td></tr>
+
+                    <tr class="m-info-row" style="display: none;">
+                        <td colspan="2"><div class="m-grundinfo"><table><tr><td>/M /J</td>
+                                                                            <td>&#x1F7E2;</td></table></div>
+                                        <div class="m-info" id="MnrOHTN6jgUoovUjCscKkOW7wqa2"></div></td></tr>
+
+ 
+
+        <tr class="m-info" onclick="toggleDetails(this)">                    <!--Gundula-->
+                    <td>&#x1F431;</td>                                      
+                    <td>Mathilda, "Gundula"</td></tr>
+
+                    <tr class="m-info-row" style="display: none;">
+                        <td colspan="2"><div class="m-grundinfo"><table><tr><td>/M /J</td>
+                                                                            <td>&#x1F7E2;</td></table></div>
+                                        <div class="m-info" id="XZSXhf3KjEWqvQ7Oh9rZvt9MT5H3"></div></td></tr>
+
+    </table>
+
+
+
+    <h3>Legende</h3>
+
+    <div class="vertikale-linie"></div>
+
+        <p><table id="m-titel" style="max-height: 150px;">
+            <tr><td>M</td>
+                <td>= &nbsp; Mitglied</td></tr>
+            <tr><td>VM</td>
+                <td>= &nbsp; Vorstandsmitglied</td></tr>
+            <tr><td>GM</td>
+                <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
+            <tr><td>MaZ</td>
+                <td>= &nbsp; Mitglied auf Zeit</td></tr>
+            <tr><td>OtM</td>
+                <td>= &nbsp; One-time-Mitglied</td></tr>
+        </table></p>
+    </div>
+
+
+
+    <p id="trigger">Mitgliedertitel <img id="toggle-img" src="../b/toggle-up.svg" alt="Bild"></p>
+        <table id="vs1" style="display: none; max-height: 150px;">
+            <tr><td>M</td>
+                <td>= &nbsp; Mitglied</td></tr>
+            <tr><td>VM</td>
+                <td>= &nbsp; Vorstandsmitglied</td></tr>
+            <tr><td>GM</td>
+                <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
+            <tr><td>MaZ</td>
+                <td>= &nbsp; Mitglied auf Zeit</td></tr>
+            <tr><td>OtM</td>
+                <td>= &nbsp; One-time-Mitglied</td></tr>
+        </table>
+
+    <p onclick="legende">Demokratische Institutionen</p>
+
+    <p onclick="legende">Aktivität (Farben)</p>
+
+        <p><table id="m-titel" style="max-height: 150px;">
+            <tr><td>M</td>
+                <td>= &nbsp; Mitglied</td></tr>
+            <tr><td>VM</td>
+                <td>= &nbsp; Vorstandsmitglied</td></tr>
+            <tr><td>GM</td>
+                <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
+            <tr><td>MaZ</td>
+                <td>= &nbsp; Mitglied auf Zeit</td></tr>
+            <tr><td>OtM</td>
+                <td>= &nbsp; One-time-Mitglied</td></tr>
+        </table></p>
+    </div>
+    </div>
+
+        <br>
+        <p>*Weiteres zu den verschiedenen &Auml;mtern kann auf der Homepage unter "<a href="../index.html#Mitgliedertitel">Mitgliedertitel</a>" nachgelesen werden.</p>
+
+   <footer>
+         <hr size="1" noshade>
+         <p class="impressum"><a href="t/impressum.html">Impressum</a></p>
+   </footer>
+
+   </main>
+
+
+   <button id="scrollToTopBtn" title="Zur&uuml;ck nach oben">&#11014;</button>              <!-- Button -->
+   <script>
+        var mybutton = document.getElementById("scrollToTopBtn");
+
+        window.onscroll = function() {
+            if (document.body.scrollTop > 700 || document.documentElement.scrollTop > 700) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+        };
+
+        mybutton.onclick = function() {
+                 window.scrollTo({
+                     top: 0,
+                     behavior: 'smooth'
+                 });
+             }
+   </script>
+             
+
+   </geschuetzt>
+   <!--             Ende geschützter Inhalt           -->
+
+
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.firebasestorage.app",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+    };
+ 
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadUserTexts() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        querySnapshot.forEach((docSnap) => {
+          const userId = docSnap.id;
+          const text = docSnap.data().inhalt || "(Noch kein Inhalt)";
+
+          const targetDiv = document.getElementById(`${userId}`);
+          if (targetDiv) {
+            targetDiv.textContent = text;
+          }
+        });
+      } catch (error) {
+        console.error("LOL - Frage doch den mächtigen Guru (V) - Fehler: Laden der Texte:", error);
+      }
+    }
+
+    loadUserTexts();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+         <title>Mitgliederinfo bearbeiten</title>
+         <meta name="author" content="&Eacute;mile Jeremias Ruff">
+         <link rel="icon" type="image/png" href="../favicon.ico">
+
+         <link rel="stylesheet" href="../stylesheet.css" type="text/css">
+         <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+         <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+         <script src="../script.js" defer></script>
+
+         <style>
+          #passwordForm, #protectedContent {
+                display: none;
+          }
+         </style>
+</head>
+
+<body>
+
+  <div id="cookieBanner">
+       <p>Unsere Cookies bleiben sch&ouml;n bei uns! &#127850; <br><br> Deshalb finden sich auch keine auf dieser Website, es werden jediglich Logins f&uuml;r 20min im Web Storage (Session- & Local-)
+          gespeichert sowie die Bildschrimbreite ermittelt. &#128190;&#128274;</p>
+       <button onclick="hideCookieBanner()">Top &#128591;</button>
+  </div>
+
+
+  <main>
+
+      <div class="mitglieder">
+        <h4>&#60; Mitgliederinfo bearbeiten &#62;</h4>
+
+        <p>Folgend ist dein persönlicher Infotext zu bearbeiten. Dieser ist für <b>jeden</b> auf der Mitgliederseite <b>&#246;ffentlich einsehbar</b>. <br>
+           Entsprechende Hinweise zur Zurückhaltung von sensiblen Informationen ergeben sich also von selbst.</p>          
+        <p>Ideen zur Gestaltung dieser Seite nimmt der mächtige Guru (V) <span class="rainbow-text" onclick="throwConfetti(event)">mit Freuden</span> an (:</p>
+
+        <p id="editable-text">Lade Text...</p>
+
+        <button id="edit-button" style="display: none;"><u>Text bearbeiten</u> <img class="click-svg" src="" alt=""></button>
+        <button id="logout-button" style="display: none;"><u>Logout</u> <img class="click-svg" src="" alt=""></button>
+      </div>
+
+  </main>
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.firebasestorage.app",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const textElement = document.getElementById("editable-text");
+    const editButton = document.getElementById("edit-button");
+    const logoutButton = document.getElementById("logout-button");
+
+    async function loadText(userId) {
+      const userDocRef = doc(db, "users", userId);
+      try {
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          const text = docSnap.data().inhalt || "Es wurde noch kein Text eingetragen.";
+          textElement.innerText = text;
+        } else {
+          textElement.innerText = "LOL - Frage doch den mächtigen Guru (V) - Fehler: Dok. nicht vorhanden";
+        }
+      } catch (error) {
+        textElement.innerText = "LOL - Frage doch den mächtigen Guru (V) - Fehler: Laden des Textes";
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        editButton.style.display = "inline-block";
+        logoutButton.style.display = "inline-block";
+        loadText(user.uid);
+      } else {
+        textElement.innerHTML = 'Du bist nicht eingeloggt. <a href="../../auth.html"><u>Zum Login</u></a>';
+      }
+    });
+
+    editButton.addEventListener("click", async () => {
+      const currentText = textElement.innerText;
+      const newText = prompt("Bearbeite den Text:", currentText);
+
+      if (newText !== null && newText !== currentText) {
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        try {
+          await updateDoc(userDocRef, { inhalt: newText });
+          textElement.innerText = newText;
+          alert("Text erfolgreich gespeichert ✓");
+        } catch (error) {
+          console.error("Fehler beim Speichern:", error);
+          alert("LOL - Frage doch den mächtigen Guru (V) - Fehler: Speichern des Textes");
+        }
+      }
+    });
+
+    logoutButton.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        alert("Erfolgreiche Abmeldung 🔒");
+        window.location.href = "../../auth.html";
+      } catch (error) {
+        alert("LOL - Frage doch den mächtigen Guru (V) - Fehler beim Logout: " + error.message);
+      }
+    });
+  </script>
+  
+</body>
+</html>
