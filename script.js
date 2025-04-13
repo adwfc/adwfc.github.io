@@ -1,5 +1,5 @@
 const enablePasswordProtection = true; // true = aktiv, false = inaktiv
-const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
+const correctPasswordHash = "8ecb5bcd8cd84cc3ffc6f5dc3076d81c0a457a6bd4b305a33f318b623d701c2e";
 
 // Auto-Logout
 function autoLogout() {
