@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-         <title>Mitglieder ADWFC</title>
+         <title>Mitglieder ADWFC - off</title>
          <meta name="author" content="&Eacute;mile Jeremias Ruff">
          <link rel="icon" type="image/png" href="../favicon.ico">
 
@@ -43,8 +43,8 @@
     </div>
 
 
-   <header class="header-container">                                                      <!-- main-nav -->
-<!----><img class="kopf" src="../b/kopf.jpeg" alt="Kopf">
+   <header class="header-container">                                         <!-- main-nav -->
+<!----><button onclick="toggleDarkMode()"><img class="kopf" src="../b/kopf.jpeg" alt="Flagge"></button> 
 
 <!----><div class="main-nav">
           <h1 class="allgemeiner-deutscher">Allgemeiner Deutscher Wanderer und Fahrradfahrer Club &#x1F474; &#x1F97E;</h1>
@@ -58,7 +58,7 @@
           </ul>
       </div>
 
-<!----><nav class="springe-zu">                                                             <!-- Springe zu -->
+<!----><nav class="springe-zu">                                              <!-- Springe zu -->
           <ul class="springe-links">
               <li>Springe zu:</li>
               <li><a href="#mitglieder">Mitglieder</a></li>
@@ -72,10 +72,10 @@
 
 
    <main>
-   <h3 id="mitglieder">Mitglieder</h3>                                      <!-- Mitglieder -->
+   <h3 id="mitglieder">Mitglieder</h3>                                       <!-- Mitglieder -->
 
    <div class="mitglieder-container">     
-    <table class="m-table" border="0" cellpadding="0" cellspacing="2">
+    <table class="m-table" style="max-height: 150px;" border="0" cellpadding="0" cellspacing="2">
 
 
         <tr class="m-info" onclick="toggleDetails(this)">                    <!--Günther-->
@@ -144,67 +144,68 @@
 
     </table>
 
-
-
-    <h3>Legende</h3>
-
     <div class="vertikale-linie"></div>
 
-        <p><table id="m-titel" style="max-height: 150px;">
-            <tr><td>M</td>
-                <td>= &nbsp; Mitglied</td></tr>
-            <tr><td>VM</td>
-                <td>= &nbsp; Vorstandsmitglied</td></tr>
-            <tr><td>GM</td>
-                <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
-            <tr><td>MaZ</td>
-                <td>= &nbsp; Mitglied auf Zeit</td></tr>
-            <tr><td>OtM</td>
-                <td>= &nbsp; One-time-Mitglied</td></tr>
-        </table></p>
+
+    <div style="display: block;">
+
+        <p class="toggleTrigger">Mitgliedertitel &nbsp; <img class="toggle-svg" src="../b/toggle-up.svg" alt="Bild"></p>
+            <table class="toggleContent" style="display: none;">
+                <tr><td>M</td>
+                    <td>= &nbsp; Mitglied</td></tr>
+
+                <tr><td>VM</td>
+                    <td>= &nbsp; Vorstandsmitglied</td></tr>
+
+                <tr><td>GM</td>
+                    <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
+
+                <tr><td>MaZ</td>
+                    <td>= &nbsp; Mitglied auf Zeit</td></tr>
+
+                <tr><td>OtM</td>
+                    <td>= &nbsp; One-time-Mitglied</td></tr>
+            </table>
+
+
+        <p class="toggleTrigger">Demokratische Institutionen &nbsp; <img class="toggle-svg" src="../b/toggle-up.svg" alt="Bild"</p>
+            <table class="toggleContent" style="display: none;">
+                <tr><td>L</td>
+                    <td>= &nbsp; Legislative</td></tr>
+
+                <tr><td>J</td>
+                    <td>= &nbsp;Judikative</td></tr>
+
+                <tr><td>E</td>
+                    <td>= &nbsp; Exekutive</td></tr>
+
+            </table>
+
+
+        <p class="toggleTrigger">Aktivität &nbsp; <img class="toggle-svg" src="../b/toggle-up.svg" alt="Bild"></p>   
+            <table class="toggleContent" style="display: none;">
+                <tr><td>&#x1F7E2;</td>
+                    <td>-> &nbsp; letzte drei Treffen min. 1x anwesend</td></tr>
+
+                <tr><td>&#x1F7E1;</td>
+                    <td>-> &nbsp; letzte drei Treffen abwesend</td></tr>
+
+                <tr><td>&#x1F7E0;</td>
+                    <td>-> &nbsp; letzte fünf Treffen abwesend</td></tr>
+
+                <tr><td>&#x1F535;</td>
+                    <td>-> &nbsp; wegen gesundheitlichen Gründen (o.ä.) länger abwesend</td></tr>
+
+            </table>
     </div>
-
-
-
-    <p id="trigger">Mitgliedertitel <img id="toggle-img" src="../b/toggle-up.svg" alt="Bild"></p>
-        <table id="vs1" style="display: none; max-height: 150px;">
-            <tr><td>M</td>
-                <td>= &nbsp; Mitglied</td></tr>
-            <tr><td>VM</td>
-                <td>= &nbsp; Vorstandsmitglied</td></tr>
-            <tr><td>GM</td>
-                <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
-            <tr><td>MaZ</td>
-                <td>= &nbsp; Mitglied auf Zeit</td></tr>
-            <tr><td>OtM</td>
-                <td>= &nbsp; One-time-Mitglied</td></tr>
-        </table>
-
-    <p onclick="legende">Demokratische Institutionen</p>
-
-    <p onclick="legende">Aktivität (Farben)</p>
-
-        <p><table id="m-titel" style="max-height: 150px;">
-            <tr><td>M</td>
-                <td>= &nbsp; Mitglied</td></tr>
-            <tr><td>VM</td>
-                <td>= &nbsp; Vorstandsmitglied</td></tr>
-            <tr><td>GM</td>
-                <td>= &nbsp; Gr&uuml;ndungsmitglied</td></tr>
-            <tr><td>MaZ</td>
-                <td>= &nbsp; Mitglied auf Zeit</td></tr>
-            <tr><td>OtM</td>
-                <td>= &nbsp; One-time-Mitglied</td></tr>
-        </table></p>
-    </div>
-    </div>
+   </div>
 
         <br>
-        <p>*Weiteres zu den verschiedenen &Auml;mtern kann auf der Homepage unter "<a href="../index.html#Mitgliedertitel">Mitgliedertitel</a>" nachgelesen werden.</p>
+        <p>*Weiteres zu den verschiedenen &Auml;mtern kann auf der Homepage unter "<a href="../index.html#Mitgliedertitel"><u>Mitgliedertitel</u></a>" nachgelesen werden.</p>
 
    <footer>
          <hr size="1" noshade>
-         <p class="impressum"><a href="t/impressum.html">Impressum</a></p>
+         <p class="impressum"><a href="impressum.html">Impressum</a></p>
    </footer>
 
    </main>
