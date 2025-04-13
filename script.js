@@ -1,5 +1,5 @@
-const enablePasswordProtection = true; // true = aktiv, false = inaktiv
-const correctPasswordHash = "8ecb5bcd8cd84cc3ffc6f5dc3076d81c0a457a6bd4b305a33f318b623d701c2e";
+const enablePasswordProtection = false; // true = aktiv, false = inaktiv
+const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
 // Auto-Logout
 function autoLogout() {
@@ -182,19 +182,36 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("imp-nein").addEventListener("click", () => vote("nein"));
 });
 
-// Legende
+// Mitglieder
+function toggleDetails(row) {
+  const nextRow = row.nextElementSibling;
+  if (nextRow && nextRow.classList.contains('m-info-row')) {
+    const isVisible = nextRow.style.display === 'table-row';
+    nextRow.style.display = isVisible ? 'none' : 'table-row';
+
+    const extraTd = row.querySelector('.m-extra');
+    if (extraTd) {
+      extraTd.style.visibility = isVisible ? 'hidden' : 'visible';
+    }
+  }
+}
+
+// Toggle-Funktion
 document.addEventListener('DOMContentLoaded', () => {
-  const trigger = document.getElementById('trigger');
-  const vs1 = document.getElementById('vs1');
-  const img = document.getElementById('toggle-img');
+  const triggers = document.querySelectorAll('.toggleTrigger');
 
-  trigger.addEventListener('click', () => {
-  const isHidden = window.getComputedStyle(vs1).display === 'none';
+  triggers.forEach(trigger => {
+    const table = trigger.nextElementSibling;
+    const svg = trigger.querySelector('.toggle-svg');
 
-  vs1.style.display = isHidden ? 'block' : 'none';
-  img.src = isHidden ? '../b/toggle-up.svg' : '../b/toggle-down.svg';
+    trigger.addEventListener('click', () => {
+      const isHidden = window.getComputedStyle(table).display === 'none';
+      table.style.display = isHidden ? 'block' : 'none';
+      svg.src = isHidden ? '../b/toggle-down.svg' : '../b/toggle-up.svg';
+    });
+  });
 });
-});
+
 
 // Konfetti
 window.throwConfetti = function(e) {
