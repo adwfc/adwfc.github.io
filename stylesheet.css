@@ -32,6 +32,34 @@ main {
     display: none;
 }
 
+.click-svg, .extern-svg {
+  width: 15px;
+  height: auto;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.rainbow-text {
+  background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+  background-size: 400% 400%;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: rainbow 5s ease infinite;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .kopf {
     width: auto;
     height: 225px;
@@ -112,22 +140,78 @@ h2 {
     text-align: center;
 }
 
-.mitglieder-container {
-    display: flex;
-    justify-content: flex-start;
-}
-
-.vertikale-linie {
-    width: 1px;
-    height: 150px;
-    background-color: black;
-    margin-left: 50px;
-    margin-right: 20px;
+h4 {
+    font-size: 25px;
 }
 
 .impressum {
     margin-top: 13px;
 }
+
+
+/**/
+    .mitglieder-container {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .m-info-row div {
+        margin-left: 50px;
+        margin-top: 2px;
+        margin-bottom: 20px;
+        border-left: 1px solid lightgrey;
+        padding-left: 5px;
+        max-width: 300px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        overflow: auto; /* scrollbar */
+        white-space: normal;
+    }
+
+    .m-info td:nth-child(2) {
+        border-radius: 5px;
+        position: relative;
+        transition: transform 0.4s ease-out;
+    }
+
+    .m-info td:nth-child(2):hover::after {
+        transform: scaleX(1);
+    }
+
+    .m-info td:nth-child(2)::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: #000;
+        transform: scaleX(0);
+        transform-origin: bottom left;
+        transition: transform 0.4s ease-out;
+    }
+
+    .vertikale-linie {
+        width: 1px;
+        height: 150px;
+        background-color: black;
+        margin-left: 150px;
+        margin-right: 20px;
+    }
+
+    #editable-text {
+        border: 1px dashed black;
+        border-radius: 8px;
+        width: 40%;
+        padding: 10px;
+        margin-top: 50px;
+
+    }
+
+    #edit-button, #logout-button {
+        background-color: white;
+        border: 0px;
+    }
 
 /**/
     .ergaenzungen p {
@@ -149,61 +233,7 @@ h2 {
         content: counter(list-counter) ". "; 
         font-weight: bold; 
     }
-/**/
-
-
-/* ================
-       Darkmode
-   ================ */
-body.dark-mode {
-    background-color: #070f1b; /* #070f1b #121212 #070f1A */
-    color: white;
-}
-
-header button {
-    background-color: white;
-    border: none;
-}
-
-.dark-mode header button {
-    background-color: #070f1b; 
-}
-
-.dark-mode .main-nav a::after {
-    background-color: white;
-}
-
-.dark-mode * {
-    color: white !important;
-}
-
-.dark-mode .springe-zu {
-    border-left: 1px dashed white;
-    border-bottom: 1px dashed white;
-    border-top: 1px dashed white;
-    background-image: url('/bilder/bg_dark_springe-zu.png') !important;
-    background-size: cover; 
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.dark-mode #scrollToTopBtn {
-    border: 1px dashed #2e66b9;
-    background-image: url('/bilder/bg_dark_springe-zu.png') !important;
-    background-size: cover; 
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.dark-mode #username, .dark-mode #password {
-    background-color: #070f1b !important;
-}
-
-.dark-mode #login-button {
-    color: green !important;
-    background-color: #070f1b !important;
-}
-
+    
 
 /* ================
     Passwort-Form
@@ -298,6 +328,10 @@ header button {
     transition: transform 0.4s ease-out;
 }
 
+.internetauftritt a {
+    font-weight: normal;
+}
+
 .dark-mode main-nav a {
     color: #ffffff !important;
 }
@@ -357,7 +391,7 @@ header button {
     border-left: 1px dashed #11113A;
     border-bottom: 1px dashed #11113A;
     border-top: 1px dashed #11113A;
-    background-image: url('/bilder/bg_bright_springe-zu.png');
+    background-image: url('/b/bg_bright_springe-zu.png');
     background-size: cover; 
     background-position: center;
     background-repeat: no-repeat;
@@ -456,6 +490,7 @@ header button {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 30px;
 }
 
 #login-button {
@@ -465,10 +500,53 @@ header button {
     background-color: white;
 }
 
-.login-button:hover {
+#login-button:hover {
     color: white;
     background-color: green;
     border-radius: 45px;
+}
+
+.login-buttons {
+    display: flex; 
+    gap: 30px;
+}
+
+#login-button-2, #members-button {
+    font-size: 15px;
+    border: 0px solid black;  
+    font-style: italic; 
+    color: black;
+    background-color: white;
+}
+
+#members-button:hover::after, #login-button-2:hover::after {
+    transform: scaleX(1);
+}
+
+#members-button::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: black;
+    transform: scaleX(0);
+    transform-origin: bottom left;
+    transition: transform 0.8s ease-out;
+}
+
+#login-button-2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: black;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.8s ease-out;
 }
 
 
@@ -531,26 +609,26 @@ header button {
 }
 
   
-        #results { 
-            display: none; /* Alles auf einmal verstecken */
-        }
-        
-        #chart { 
-            width: 300px;
-            height: 30px; 
-            background: lightgray; 
-            position: relative; 
-            margin-top: 50px;
-        }
-        
-        #ja-bar, #nein-bar { 
-            height: 100%; 
-            position: absolute; 
-            width: 0%; 
-        }
-        
-        #ja-bar { background: green; }
-        #nein-bar { background: red; right: 0; }
+#results { 
+    display: none; /* Alles auf einmal verstecken */
+}
+
+#chart { 
+    width: 300px;
+    height: 30px; 
+    background: lightgray; 
+    position: relative; 
+    margin-top: 50px;
+}
+
+#ja-bar, #nein-bar { 
+    height: 100%; 
+    position: absolute; 
+    width: 0%; 
+}
+
+#ja-bar { background: green; }
+#nein-bar { background: red; right: 0; }
 
 
 /* ================
@@ -560,6 +638,10 @@ header button {
     body {
         margin-top: 0px;
         padding-bottom: 100px;
+    }
+
+    h4 {
+        font-size: 20px;
     }
 
     .header-container {
@@ -595,7 +677,12 @@ header button {
     
     .#imp-ja, #imp-nein {
         padding: 16px 32px;
-  }
+    }
+
+    #editable-text {
+        width: 90%;
+    }
+
 
 /*main*/
     main {
@@ -746,8 +833,12 @@ header button {
         margin-top: 0px;
     }
 
-    #mitglieder, #kontakt {
+    #mitglieder {
         margin-top: 350px;
+    }
+
+    #kontakt {
+        margin-top: 275px;
     }
     
     #impressum {
@@ -768,4 +859,73 @@ header button {
 
 
     
+}
+
+/* ================
+       Darkmode
+   ================ */
+body.dark-mode {
+    background-color: #070f1b; /* #070f1b #121212 #070f1A */
+    color: white;
+}
+
+header button {
+    background-color: white;
+    border: none;
+}
+
+.dark-mode header button {
+    background-color: #070f1b; 
+}
+
+.dark-mode .main-nav a::after {
+    background-color: white;
+}
+
+.dark-mode *:not(.rainbow-text) {
+    color: white !important;
+}
+
+.dark-mode .springe-zu {
+    border-left: 1px dashed white;
+    border-bottom: 1px dashed white;
+    border-top: 1px dashed white;
+    background-image: url('/b/bg_dark_springe-zu.png') !important;
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.dark-mode #scrollToTopBtn {
+    border: 1px dashed #2e66b9;
+    background-image: url('/b/bg_dark_springe-zu.png') !important;
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.dark-mode #username, .dark-mode #password {
+    background-color: #070f1b !important;
+}
+
+.dark-mode #login-button {
+    color: green !important;
+    background-color: #070f1b !important;
+}
+
+.dark-mode #login-button-2, .dark-mode #members-button {
+    color: white;
+    background-color: #070f1b;
+}
+
+.dark-mode #edit-button, .dark-mode #logout-button {
+        background-color: #070f1b;
+}
+
+.dark-mode #editable-text {
+        border: 1px dashed white;
+}
+
+.dark-mode .click-svg {
+  content: url('../../bilder/click-dark.svg');
 }

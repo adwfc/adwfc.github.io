@@ -1,7 +1,5 @@
-// script.js
-
 const enablePasswordProtection = false; // true = aktiv, false = inaktiv
-const correctPasswordHash = "ee0d6c299a70d20946c1bbdba7e14d32bd0214291344fad4a050f42e0197f866";
+const correctPasswordHash = "fe7c8b93142029fafe356ee9b2dd09766e6f266141c0c1340b262fc633c16e10";
 
 // Auto-Logout
 function autoLogout() {
@@ -111,8 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-
-// Abstimmungen
+// Abstimmungssystem
 const API_URL = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/eb0a6cf0-5f4c-4f6e-a090-d267f10c5e39";
 const API_KEY = "b6fd1da2-69cc-4768-a9ff-102b5b50db2e";
 
@@ -134,7 +131,7 @@ async function fetchResults() {
 
     document.getElementById('ja-bar').style.width = jaPercent + "%";
     document.getElementById('nein-bar').style.width = neinPercent + "%";
-    document.getElementById('status').innerText = `Türlich: ${Math.round(jaPercent)}% \u00A0 | \u00A0 Bekifft: ${Math.round(neinPercent)}%`;
+    document.getElementById('status').innerText = `Ja: ${Math.round(jaPercent)}% | Nein: ${Math.round(neinPercent)}%`;
 
     if (hasVoted()) {
         disableButtons();
@@ -143,9 +140,20 @@ async function fetchResults() {
 
 async function vote(choice) {
     if (hasVoted()) {
+        const errorBox = document.getElementById("error");
+        if (!errorBox) {
+        } else {
+            errorBox.innerText = "Bitte nur ein Vote pro User";
+            errorBox.style.display = "block";
+        }
+
+        setTimeout(() => alert("Bitte nur ein Vote pro User"), 100);
+
         return;
     }
 
+
+    // Local-Storage
     localStorage.setItem("hasVoted", "true");
 
     const response = await fetch(API_URL);
@@ -172,4 +180,61 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.getElementById("imp-ja").addEventListener("click", () => vote("ja"));
     document.getElementById("imp-nein").addEventListener("click", () => vote("nein"));
+});
+
+// Legende
+document.addEventListener('DOMContentLoaded', () => {
+  const trigger = document.getElementById('trigger');
+  const vs1 = document.getElementById('vs1');
+  const img = document.getElementById('toggle-img');
+
+  trigger.addEventListener('click', () => {
+  const isHidden = window.getComputedStyle(vs1).display === 'none';
+
+  vs1.style.display = isHidden ? 'block' : 'none';
+  img.src = isHidden ? '../b/toggle-up.svg' : '../b/toggle-down.svg';
+});
+});
+
+// Konfetti
+window.throwConfetti = function(e) {
+  const rect = e.target.getBoundingClientRect();
+  confetti({
+    particleCount: 100,
+    spread: 60,
+    origin: {
+      x: (rect.left + rect.width / 2) / window.innerWidth,
+      y: (rect.top + rect.height / 2) / window.innerHeight
+    }
+  });
+};
+
+// click-svg
+window.addEventListener('DOMContentLoaded', () => {
+  const imgElements = document.querySelectorAll('.click-svg');
+  const isDark = document.body.classList.contains('dark-mode');
+  const imagePath = isDark ? '../b/click-dark.svg' : '../b/click-bright.svg';
+
+  imgElements.forEach(img => {
+    img.src = imagePath;
+
+    if (!img.hasAttribute('alt')) {
+      img.alt = 'Klick-Icon';
+    }
+  });
+});
+
+// extern-svg
+window.addEventListener('DOMContentLoaded', () => {
+  const imgElements = document.querySelectorAll('.extern-svg');
+  const isDark = document.body.classList.contains('dark-mode');
+  const imagePath = isDark ? '../b/extern-dark.svg' : '../b/extern-bright.svg';
+
+  imgElements.forEach(img => {
+    img.src = imagePath;
+
+    if (!img.hasAttribute('alt')) {
+      img.alt = 'Extern-Icon';
+    }
+  });
 });

@@ -1,51 +1,42 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-
   <title>ADWFC Login</title>
-  <meta name="author" content="&Eacute;mile Jeremias Ruff">
+  <meta name="author" content="Émile Jeremias Ruff">
   <link rel="icon" type="image/png" href="favicon.ico">
-
-  <link rel="stylesheet" href="stylesheet.css?v=<?= filemtime('style.css'); ?>" type="text/css">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Charmonman&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <link rel="stylesheet" href="stylesheet.css?v=<?= filemtime('style.css'); ?>" type="text/css">
   <script src="script.js"></script>
-  
 </head>
-
 
 <body>
 
-  <div class ="login" autocomplete="off">
+  <div class="login" autocomplete="off">
+    <h2>Login ADWFC</h2>
+    <p class="login-text">Hier kannst du dich in den geschützten Mitgliederbereich des ADWFC einloggen 🔐</p>
 
-      <h2>Login ADWFC</h2>
-
-      <p class="login-text">Hier kannst du dich in den geschützten Mitgliederbereich des ADWFC einloggen 🔐</p>
-      <br>
-      
-      <div class="login-eingabe">
-          <div>
-            <label for="username">Benutzername:</label>
+    <br>
+    <div class="login-eingabe">
+      <div> <label for="username">Benutzername:</label>
             <input type="text" id="username" placeholder="hier fancy shit eintragen" required></div>
-      
-          <div class="login-pw">
-            <label for="password">Passwort:</label>
-            <input type="password" id="password" placeholder="🗝️" required autocomplete="new-password">
-            <button id="login-button">&#10004;</button></div>
 
-      </div>
-  
+      <div class="login-pw">  <label for="password">Passwort:</label>
+                              <input type="password" id="password" placeholder="🗝️" required autocomplete="new-password">
+                              <button id="login-button">&#10004;</button></div>
+              
+      <hr size="1" noshade>
+      <div class="login-buttons"> <button id="members-button">⚙️ M.info bearbeiten</button>
+                                  <button id="login-button-2">🧭 Zur Eventseite</button></div>
+    </div>
   </div>
-  
+
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    // Firebase-Konfiguration
     const firebaseConfig = {
       apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
       authDomain: "auth-adfwc.firebaseapp.com",
@@ -55,56 +46,42 @@
       appId: "1:221420792742:web:f75515331cb4c5b4603d67"
     };
 
-    // Firebase initialisieren
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Login-Funktion
-    async function loginUser(username, password) {
-      const emailAsUsername = username + "@example.com"; // Dummy-Domain für Firebase
-
+    async function loginUserAndRedirect(username, password) {
+      const emailAsUsername = username + "@example.com";
       try {
+        await setPersistence(auth, browserSessionPersistence); 
         const userCredential = await signInWithEmailAndPassword(auth, emailAsUsername, password);
-        console.log("Login erfolgreich!");
 
-        // Globale Redirect-URL aus Firestore abrufen
-        const configRef = doc(db, "config", "global");
-        const configSnap = await getDoc(configRef);
-
-        if (configSnap.exists()) {
-          const globalRedirectUrl = configSnap.data().redirectUrl;
-          console.log("Globale Weiterleitung zu:", globalRedirectUrl);
-          window.location.href = globalRedirectUrl;
-        } else {
-          alert("Fehler: Keine globale Weiterleitungs-URL gefunden!");
-        }
-
+        window.location.href = "t/mitgliederinfo.html"; 
       } catch (error) {
-        alert("Fehler beim Login: " + error.message);
+        alert("LOL - Frage doch den mächtigen Guru (V) - Fehler beim Login: " + error.message);
       }
     }
 
-    // EventListener für Login-Button
     document.getElementById("login-button").addEventListener("click", () => {
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
       if (username && password) {
-        loginUser(username, password);
+        loginUserAndRedirect(username, password);
       } else {
-        alert("Bitte gib Benutzername und Passwort ein.");
+        alert("B.name + PW erforderlich");
       }
     });
 
-    // Enter-Taste für Login
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        document.getElementById("login-button").click();
+    document.getElementById("members-button").addEventListener("click", () => {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username && password) {
+        loginUserAndRedirect(username, password);
+      } else {
+        alert("B.name + PW erforderlich");
       }
     });
-
   </script>
 
 </body>
 </html>
-
