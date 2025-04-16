@@ -33,55 +33,82 @@
 
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-      authDomain: "auth-adfwc.firebaseapp.com",
-      projectId: "auth-adfwc",
-      storageBucket: "auth-adfwc.firebasestorage.app",
-      messagingSenderId: "221420792742",
-      appId: "1:221420792742:web:f75515331cb4c5b4603d67"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.firebasestorage.app",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    async function loginUserAndRedirect(username, password) {
-      const emailAsUsername = username + "@example.com";
-      try {
-        await setPersistence(auth, browserSessionPersistence); 
-        const userCredential = await signInWithEmailAndPassword(auth, emailAsUsername, password);
-
-        window.location.href = "t/mitgliederinfo.html"; 
-      } catch (error) {
-        alert("LOL - Frage doch den mächtigen Guru (V) - Fehler beim Login: " + error.message);
-      }
+  async function getGlobalRedirectUrl() {
+    const docRef = doc(db, "config", "global");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists() && docSnap.data().redirectUrl) {
+      return docSnap.data().redirectUrl;
+    } else {
+      throw new Error("LOL - Frage doch den mächtigen Guru (V) - Fehler: redirectUrl nicht gefunden");
     }
+  }
 
-    document.getElementById("login-button").addEventListener("click", () => {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      if (username && password) {
-        loginUserAndRedirect(username, password);
-      } else {
-        alert("B.name + PW erforderlich");
+  async function loginUserAndRedirect(username, password, redirectPath = null) {
+    const emailAsUsername = username + "@example.com";
+    try {
+      await setPersistence(auth, browserSessionPersistence);
+      const userCredential = await signInWithEmailAndPassword(auth, emailAsUsername, password);
+
+      let finalRedirect = redirectPath;
+      if (!finalRedirect) {
+        finalRedirect = await getGlobalRedirectUrl();
       }
-    });
 
-    document.getElementById("members-button").addEventListener("click", () => {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      if (username && password) {
-        loginUserAndRedirect(username, password);
-      } else {
-        alert("B.name + PW erforderlich");
-      }
-    });
-  </script>
+      window.location.href = finalRedirect;
 
+    } catch (error) {
+      alert("Fehler beim Login: " + error.message);
+    }
+  }
+
+  document.getElementById("login-button").addEventListener("click", () => {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    if (username && password) {
+      loginUserAndRedirect(username, password); // redirect aus Firestore
+    } else {
+      alert("B.name + PW erforderlich");
+    }
+  });
+
+  document.getElementById("login-button-2").addEventListener("click", () => {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    if (username && password) {
+      loginUserAndRedirect(username, password); // redirect aus Firestore
+    } else {
+      alert("B.name + PW erforderlich");
+    }
+  });
+
+  document.getElementById("members-button").addEventListener("click", () => {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    if (username && password) {
+      loginUserAndRedirect(username, password, "t/mitgliederseite.html"); // fester Pfad
+    } else {
+      alert("B.name + PW erforderlich");
+    }
+  });
+</script>
+
+  
 </body>
 </html>
