@@ -212,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-
 // Konfetti
 window.throwConfetti = function(e) {
   const rect = e.target.getBoundingClientRect();

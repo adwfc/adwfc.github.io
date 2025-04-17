@@ -941,6 +941,10 @@ header button {
     background-repeat: no-repeat;
 }
 
+.dark-mode .cookieTop {
+    color: black !important;
+}
+
 .dark-mode #username, .dark-mode #password {
     background-color: #070f1b !important;
 }
@@ -964,5 +968,9 @@ header button {
 }
 
 .dark-mode .click-svg {
-  content: url('../../bilder/click-dark.svg');
+    content: url('../../bilder/click-dark.svg');
+}
+
+.dark-mode .vertikale-linie {
+    background-color: white;
 }
