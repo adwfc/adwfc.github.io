@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Status Abreise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Lora', serif;
+      margin: 20px;
+      background: #121212; /* Dunkler Hintergrund */
+      color: #e0e0e0;       /* Helle Standard-Schrift */
+      font-size: 0.9rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      color: #ffffff;
+    }
+    #latest {
+      background: rgba(255, 255, 255, 0.1); /* leicht weiß-transparent */
+      padding: 15px;
+      margin: 20px auto;
+      border-radius: 10px;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      font-size: 1rem;
+    }
+    .time.on-time-true {
+      color: #4caf50; /* grün */
+    }
+    .time.on-time-false {
+      color: #f44336; /* rot */
+    }
+    table {
+      max-width: 600px;
+      margin: 0 auto;
+      border-spacing: 0 6px;
+    }
+    td {
+      color: #aaaaaa; /* grauer Text für alte Meldungen */
+      padding: 4px 8px;
+      vertical-align: top;
+      font-size: 0.85rem;
+    }
+    td.time {
+      font-weight: bold;
+      white-space: nowrap;
+      width: 80px;
+    }
+    td.status {
+      width: 500px;
+    }
+    #latest td {
+      font-size: 18px;
+    }
+    #latest td.status { 
+      color: #ffffff; /* neueste Meldung: weiße Schrift */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Status Abreise</h1>
+  <div id="latest">Lade aktuelle Meldungen...</div>
+
+  <table>
+    <tbody id="log-table"></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.appspot.com",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const colRef = collection(db, "p");
+    const q = query(colRef, orderBy("time", "desc"));
+
+    function formatTime(ts) {
+      if (ts && typeof ts.toDate === "function") {
+        const date = ts.toDate();
+        return date.toLocaleString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr";
+      }
+      return ts;
+    }
+
+    function updateLatest(latest) {
+      const latestDiv = document.getElementById("latest");
+      const isOnTime = !!latest["on-time"];
+
+      const latestTimeStr = formatTime(latest.time);
+
+      latestDiv.innerHTML = `
+        <table>
+          <tr>
+            <td class="time ${isOnTime ? 'on-time-true' : 'on-time-false'}" style="width:80px;">${latestTimeStr}</td>
+            <td class="status" style="width:500px;">${latest.status}</td>
+          </tr>
+        </table>
+      `;
+    }
+
+    function updateLog(messages) {
+      const tbody = document.getElementById("log-table");
+      tbody.innerHTML = "";
+      messages.forEach(msg => {
+        const timeStr = formatTime(msg.time);
+        const row = document.createElement("tr");
+
+        const timeCell = document.createElement("td");
+        timeCell.className = "time";
+        timeCell.textContent = timeStr;
+
+        const statusCell = document.createElement("td");
+        statusCell.className = "status";
+        statusCell.textContent = msg.status;
+
+        row.appendChild(timeCell);
+        row.appendChild(statusCell);
+        tbody.appendChild(row);
+      });
+    }
+
+    onSnapshot(q, snapshot => {
+      const messages = [];
+      snapshot.forEach(doc => messages.push(doc.data()));
+
+      if (messages.length === 0) {
+        document.getElementById("latest").textContent = "Keine Meldungen gefunden.";
+        return;
+      }
+
+      const latest = messages[0];
+      updateLatest(latest);
+      updateLog(messages.slice(1));
+
+      // Push-Benachrichtigung
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Neues Update zur Zugreise", {
+          body: `[${formatTime(latest.time)}] ${latest.status}`,
+          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/DB_logo.svg/1024px-DB_logo.svg.png"
+        });
+      }
+    });
+
+    if ("Notification" in window) {
+      Notification.requestPermission().then(permission => {
+        console.log("Notification-Berechtigung:", permission);
+      });
+    }
+  </script>
+
+</body>
+</html>
