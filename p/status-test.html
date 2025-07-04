@@ -101,7 +101,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
@@ -116,31 +116,43 @@
   const db = getFirestore(app);
 
   async function loadMessages() {
+    // 1. Moment-Dokument holen (mit moment.status)
+    const momentDocRef = doc(db, "p", "moment");
+    const momentDocSnap = await getDoc(momentDocRef);
+    let momentStatus = "1"; // Default, falls nix da
+
+    if (momentDocSnap.exists()) {
+      const momentData = momentDocSnap.data();
+      console.log("Moment-Dokument:", momentData);
+      momentStatus = String(momentData.status ?? "1");
+    } else {
+      console.log("Moment-Dokument existiert nicht!");
+    }
+
+    // 2. Meldungen laden, sortiert nach Zeit absteigend
     const colRef = collection(db, "p");
     const q = query(colRef, orderBy("time", "desc"));
     const snapshot = await getDocs(q);
 
-    if (snapshot.empty) {
+    // Filter das "moment"-Dokument raus aus den Meldungen, da es kein Status-Text-Dokument ist
+    const messages = [];
+    snapshot.forEach(docSnap => {
+      if (docSnap.id !== "moment") {
+        messages.push(docSnap.data());
+      }
+    });
+
+    if (messages.length === 0) {
       document.getElementById("latest").textContent = "Keine Meldungen gefunden.";
       return;
     }
 
-    const messages = [];
-    snapshot.forEach(doc => messages.push(doc.data()));
-
     const latest = messages[0];
-
-    // Debug-Ausgaben zur Kontrolle
-    console.log('latest document:', latest);
-    console.log('latest.moment:', latest.moment);
-    console.log('latest.moment?.status:', latest.moment?.status);
-
     const latestDiv = document.getElementById("latest");
     const momentDiv = document.getElementById("moment");
 
     const isOnTime = latest.status.toLowerCase().includes("verspätung") ? false : true;
 
-    // Zeit-Formatierung
     let latestTimeStr;
     if (latest.time && typeof latest.time.toDate === "function") {
       const date = latest.time.toDate();
@@ -152,10 +164,7 @@
       latestTimeStr = latest.time;
     }
 
-    // Moment-Status als String holen, Default "1"
-    const momentStatus = String(latest.moment?.status ?? "1");
-
-    // Moment-Anzeige aktualisieren
+    // Moment-Status-Anzeige
     momentDiv.innerHTML = `
       <div class="moment-status" data-status="${momentStatus}">
         <span class="s1">🟢 In Bewegung</span>
@@ -164,7 +173,7 @@
       </div>
     `;
 
-    // Neueste Statusmeldung anzeigen
+    // Neueste Meldung anzeigen
     latestDiv.innerHTML = `
       <table>
         <tr>
@@ -174,7 +183,7 @@
       </table>
     `;
 
-    // Alte Meldungen in Tabelle anzeigen
+    // Alle anderen Meldungen unten in Tabelle
     const tbody = document.getElementById("log-table");
     tbody.innerHTML = "";
     messages.slice(1).forEach(msg => {
