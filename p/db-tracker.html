@@ -1,36 +1,59 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICE 706 Live-Position</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        #map { height: 100vh; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICE 706 Live-Position mit Proxy</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+  <style>
+    #map {
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-    <div id="map"></div>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-        const map = L.map('map').setView([53.55, 10.0], 7); // Start auf Hamburg
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([53.55, 10], 7); // Hamburg-Zentrum
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-        async function fetchTrainData() {
-            try {
-                const response = await fetch('https://v5.db.transport.rest/journeys?from=Hamburg&to=Berlin&dateTime=2025-07-04T12:00');
-                const data = await response.json();
-                console.log(data);
-                // Hier kannst du die Daten weiterverarbeiten und auf der Karte anzeigen
-            } catch (error) {
-                console.error('Fehler beim Abrufen der Zugdaten:', error);
-            }
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const apiUrl =
+      'https://v5.db.transport.rest/journeys?train=ICE706&results=1';
+
+    fetch(proxyUrl + apiUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error('Netzwerkantwort nicht ok');
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Zugdaten:', data);
+        if (data.length > 0) {
+          const zug = data[0];
+          const letzteEtappe = zug.legs[zug.legs.length - 1];
+          const lat = letzteEtappe.from.location.latitude;
+          const lon = letzteEtappe.from.location.longitude;
+          L.marker([lat, lon])
+            .addTo(map)
+            .bindPopup(
+              `ICE706 bei ${letzteEtappe.from.station.name}`
+            )
+            .openPopup();
+          map.setView([lat, lon], 10);
+        } else {
+          alert('Keine Daten für ICE706 gefunden.');
         }
-
-        fetchTrainData();
-    </script>
+      })
+      .catch((error) => {
+        console.error('Fehler beim Abrufen der Zugdaten:', error);
+      });
+  </script>
 </body>
 </html>
