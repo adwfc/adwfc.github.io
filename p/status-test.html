@@ -9,8 +9,8 @@
     body {
       font-family: 'Lora', serif;
       margin: 20px;
-      background: #121212; /* Dunkler Hintergrund */
-      color: #e0e0e0;       /* Helle Standard-Schrift */
+      background: #121212;
+      color: #e0e0e0;
       font-size: 0.9rem;
     }
     h1 {
@@ -19,7 +19,7 @@
       color: #ffffff;
     }
     #latest {
-      background: rgba(255, 255, 255, 0.1); /* leicht weiß-transparent */
+      background: rgba(255, 255, 255, 0.1);
       padding: 15px;
       margin: 20px auto;
       border-radius: 10px;
@@ -28,10 +28,10 @@
       font-size: 1rem;
     }
     .time.on-time-true {
-      color: #4caf50; /* grün */
+      color: #4caf50;
     }
     .time.on-time-false {
-      color: #f44336; /* rot */
+      color: #f44336;
     }
     table {
       max-width: 600px;
@@ -39,7 +39,7 @@
       border-spacing: 0 6px;
     }
     td {
-      color: #aaaaaa; /* grauer Text für alte Meldungen */
+      color: #aaaaaa;
       padding: 4px 8px;
       vertical-align: top;
       font-size: 0.85rem;
@@ -56,7 +56,7 @@
       font-size: 18px;
     }
     #latest td.status { 
-      color: #ffffff; /* neueste Meldung: weiße Schrift */
+      color: #ffffff;
     }
   </style>
 </head>
@@ -88,6 +88,8 @@
     const colRef = collection(db, "p");
     const q = query(colRef, orderBy("time", "desc"));
 
+    let lastTimestamp = null;
+
     function formatTime(ts) {
       if (ts && typeof ts.toDate === "function") {
         const date = ts.toDate();
@@ -98,7 +100,7 @@
 
     function updateLatest(latest) {
       const latestDiv = document.getElementById("latest");
-      const isOnTime = !!latest["on-time"];
+      const isOnTime = latest["on-time"] === true;
 
       const latestTimeStr = formatTime(latest.time);
 
@@ -117,10 +119,12 @@
       tbody.innerHTML = "";
       messages.forEach(msg => {
         const timeStr = formatTime(msg.time);
+        const isOnTime = msg["on-time"] === true;
+
         const row = document.createElement("tr");
 
         const timeCell = document.createElement("td");
-        timeCell.className = "time";
+        timeCell.className = `time ${isOnTime ? 'on-time-true' : 'on-time-false'}`;
         timeCell.textContent = timeStr;
 
         const statusCell = document.createElement("td");
@@ -143,15 +147,21 @@
       }
 
       const latest = messages[0];
+
       updateLatest(latest);
       updateLog(messages.slice(1));
 
-      // Push-Benachrichtigung
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("Neues Update zur Zugreise", {
-          body: `[${formatTime(latest.time)}] ${latest.status}`,
-          icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/DB_logo.svg/1024px-DB_logo.svg.png"
-        });
+      // Prüfen, ob es eine neue Meldung gibt, um Push-Benachrichtigung auszulösen
+      const newTimestamp = latest.time?.seconds || latest.time;
+      if (newTimestamp !== lastTimestamp) {
+        lastTimestamp = newTimestamp;
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Neues Update zur Zugreise", {
+            body: `[${formatTime(latest.time)}] ${latest.status}`,
+            icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/DB_logo.svg/1024px-DB_logo.svg.png"
+          });
+        }
       }
     });
 
