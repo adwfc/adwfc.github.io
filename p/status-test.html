@@ -64,23 +64,22 @@
       max-width: 600px;
       margin: 0 auto 20px;
       text-align: center;
+      margin-top: 15px;
     }
 
     .moment-status {
       display: flex;
       justify-content: center;
       gap: 20px;
-      font-size: 1rem;
+      font-size: 15px;
       margin-bottom: 10px;
     }
 
-    /* Standard: alles leicht transparent */
     .moment-status span {
       opacity: 0.2;
       transition: opacity 0.3s;
     }
 
-    /* Aktiver Status: sichtbar */
     .moment-status[data-status="1"] .s1,
     .moment-status[data-status="2"] .s2,
     .moment-status[data-status="3"] .s3 {
@@ -92,7 +91,7 @@
 
   <h1>Status Abreise</h1>
 
-  <div id="moment"></div>       <!-- Neues Div für den Moment-Status -->
+  <div id="moment"></div>
   <div id="latest">Lade aktuelle Meldungen...</div>
 
   <table>
