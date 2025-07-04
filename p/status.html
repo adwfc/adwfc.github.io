@@ -18,7 +18,7 @@
       font-size: 1.6rem;
       color: #ffffff;
     }
-    #latest {
+    #latest, #ratespaß {
       background: rgba(255, 255, 255, 0.2);
       padding: 15px;
       margin: 20px auto;
@@ -75,15 +75,20 @@
       margin-bottom: 10px;
     }
 
+    /* Standard: alles leicht transparent */
     .moment-status span {
       opacity: 0.2;
       transition: opacity 0.3s;
     }
 
+    /* Aktiver Status: sichtbar */
     .moment-status[data-status="1"] .s1,
     .moment-status[data-status="2"] .s2,
     .moment-status[data-status="3"] .s3 {
       opacity: 1;
+    }
+    
+    #ratespaß {
     }
   </style>
 </head>
@@ -91,8 +96,9 @@
 
   <h1>Status Abreise</h1>
 
-  <div id="moment"></div>
+  <div id="moment"></div>       <!-- Neues Div für den Moment-Status -->
   <div id="latest">Lade aktuelle Meldungen...</div>
+  <div id="ratespaß">Plan. Ankunft in DD: <s>18:35</s> 20:30 Uhr</div>
 
   <table>
     <tbody id="log-table"></tbody>
@@ -229,6 +235,7 @@
 
   loadMessages().catch(console.error);
 </script>
-  
+
+
 </body>
 </html>
