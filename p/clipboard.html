@@ -79,16 +79,20 @@
       display: block;
     }
 
-    #loadBtn {
+    #loadBtn, #copyBtn {
       max-width: 50px;
       margin-left: 10px;
       cursor: pointer;
       border: none;
     }
 
-    #loadBtn img {
+    #loadBtn img, #copyBtn img {
       width: 90%;
     }    
+
+    #copyBtn {
+      margin-left: -5px;
+    }
 
     #pinInput {
       background-color: rgba(255, 255, 255, 0.1);
@@ -101,11 +105,6 @@
 
     #pinDisplay {
       color: blue;
-    }
-
-    #copyBtn {
-      margin-top: 1rem;
-      cursor: pointer;
     }
 
     .hidden {
@@ -124,11 +123,11 @@
   <label for="fileInput">Dateiupload<input type="file" id="fileInput" /></label>
 </div>
 
-<button id="copyBtn" class="hidden">📋 Kopieren</button>
 
 <div style="display: flex; align-items: center; margin-top: 50px;">
   <input type="number" id="pinInput" placeholder="Lade mit PIN" inputmode="numeric" />
   <button id="loadBtn" title="Lade Daten"><img src="../b/download.png" alt="Lade Daten" /></button>
+  <button id="copyBtn" class="hidden"><img src="../b/copy.png" alt="Kopiere Text" /></button>
 </div>
 
 <div id="pinDisplay"></div>
@@ -207,10 +206,14 @@
 
   saveBtn.addEventListener("click", async () => {
     const content = textInput.value.trim();
+
+    if (!pinInput.value.trim()) {
+      pinInput.value = Math.floor(Math.random() * 90 + 10).toString();
+    }
     const pin = pinInput.value.trim();
 
-    if (!content || !pin) {
-      alert("Bitte Text und PIN eingeben.");
+    if (!content) {
+      alert("Text/Datei fehlt");
       return;
     }
 
@@ -222,7 +225,6 @@
     try {
       await setDoc(doc(db, "p", "clipboard"), data);
       status.textContent = "✅ Gespeichert!";
-      pinDisplay.textContent = `PIN: ${pin}`;
       copyBtn.classList.remove("hidden");
     } catch (error) {
       status.textContent = "❌ Fehler beim Speichern.";
@@ -252,14 +254,10 @@
   });
 
   copyBtn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(textInput.value);
-      alert("📋 Text kopiert!");
-    } catch (err) {
-      alert("❌ Konnte nicht kopieren.");
-    }
+    await navigator.clipboard.writeText(textInput.value);
   });
 </script>
+
 
 </body>
 </html>
