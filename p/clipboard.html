@@ -176,34 +176,31 @@
     }
   });
 
-  fileInput.addEventListener("change", async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
 
-    status.textContent = "📤 Lade Datei hoch...";
-    const formData = new FormData();
-    formData.append("file", file);
+  status.textContent = "📤 Lade Datei hoch...";
+  const formData = new FormData();
+  formData.append("file", file);
 
-    try {
-      const res = await fetch("https://uploadthing.com/api/files", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer sk_live_b2b65a79f409620d8ce4793152d89aeef555aeafbbe9176efb09da6cb0d4842f"
-        },
-        body: formData
-      });
+  try {
+    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
+      method: "POST",
+      body: formData
+    });
 
-      if (!res.ok) throw new Error("Upload fehlgeschlagen");
+    if (!res.ok) throw new Error("Upload fehlgeschlagen");
 
-      const data = await res.json();
-      uploadedFileUrl = data.url || null;
-      status.textContent = "✅ Datei hochgeladen!";
-    } catch (err) {
-      status.textContent = "❌ Upload fehlgeschlagen.";
-      console.error(err);
-    }
-  });
-
+    const data = await res.json();
+    uploadedFileUrl = "https://tmpfiles.org" + data.data.url;
+    status.textContent = "✅ Datei hochgeladen!";
+  } catch (err) {
+    status.textContent = "❌ Upload fehlgeschlagen.";
+    console.error(err);
+  }
+});
+  
   saveBtn.addEventListener("click", async () => {
     const content = textInput.value.trim();
 
