@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zwischenablage mit PIN & Firebase</title>
+<title>Zwischenablage mit PIN, Text + Datei</title>
 <style>
   body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
   label { display: block; margin-top: 1rem; font-weight: bold; }
-  textarea, input[type="text"] {
+  textarea, input[type="text"], input[type="file"] {
     width: 100%; padding: 0.5rem; margin-top: 0.25rem;
     font-size: 1rem; box-sizing: border-box;
   }
@@ -15,16 +15,19 @@
     margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1rem;
   }
   #status {
-    margin-top: 1rem; font-weight: bold; color: green;
+    margin-top: 1rem; font-weight: bold;
   }
   #pinDisplay {
     margin-top: 0.5rem; font-weight: bold; color: blue;
+  }
+  #downloadLink {
+    margin-top: 1rem;
   }
 </style>
 </head>
 <body>
 
-<h1>Zwischenablage mit PIN</h1>
+<h1>Zwischenablage mit Text + Datei</h1>
 
 <label for="pinInput">PIN eingeben (zum Laden)</label>
 <input type="text" id="pinInput" maxlength="2" pattern="\d{2}" placeholder="z.B. 42" />
@@ -34,10 +37,14 @@
 <label for="textInput">Text</label>
 <textarea id="textInput" rows="6" placeholder="Hier Text eingeben..."></textarea>
 
+<label for="fileInput">Datei auswählen (optional)</label>
+<input type="file" id="fileInput" />
+
 <button id="saveBtn">Speichern (generiert neue PIN)</button>
 
 <div id="pinDisplay"></div>
 <div id="status"></div>
+<div id="downloadLink"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -57,22 +64,22 @@
 
   const pinInput = document.getElementById("pinInput");
   const textInput = document.getElementById("textInput");
+  const fileInput = document.getElementById("fileInput");
   const saveBtn = document.getElementById("saveBtn");
   const loadBtn = document.getElementById("loadBtn");
   const pinDisplay = document.getElementById("pinDisplay");
   const statusDiv = document.getElementById("status");
+  const downloadLink = document.getElementById("downloadLink");
 
   function setStatus(msg, isError = false) {
     statusDiv.textContent = msg;
     statusDiv.style.color = isError ? "red" : "green";
   }
 
-  // 2-stellige PIN zufällig generieren
   function generatePin() {
     return Math.floor(Math.random() * 100).toString().padStart(2, "0");
   }
 
-  // Laden: Text nur anzeigen wenn PIN passt
   async function loadData() {
     const enteredPin = pinInput.value.trim();
     if (!/^\d{2}$/.test(enteredPin)) {
@@ -86,34 +93,65 @@
         const data = docSnap.data();
         if (data.pin === enteredPin) {
           textInput.value = data.content || "";
-          setStatus("Text erfolgreich geladen.");
+          if (data.url) {
+            downloadLink.innerHTML = `<a href="${data.url}" target="_blank">📁 Datei herunterladen</a>`;
+          } else {
+            downloadLink.innerHTML = "";
+          }
+          setStatus("Daten erfolgreich geladen.");
           pinDisplay.textContent = "";
         } else {
           setStatus("Falsche PIN!", true);
           textInput.value = "";
-          pinDisplay.textContent = "";
+          downloadLink.innerHTML = "";
         }
       } else {
         setStatus("Keine Daten gefunden.", true);
-        textInput.value = "";
-        pinDisplay.textContent = "";
       }
     } catch (e) {
       setStatus("Fehler beim Laden: " + e.message, true);
     }
   }
 
-  // Speichern: Text speichern + neue PIN generieren und speichern + dem User anzeigen
+  async function uploadFile(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("https://uguu.se/api.php?d=upload-tool", {
+        method: "POST",
+        body: formData
+      });
+      const url = await response.text();
+      if (!url.startsWith("https://")) throw new Error("Ungültige Antwort von Uguu");
+      return url;
+    } catch (e) {
+      throw new Error("Upload fehlgeschlagen: " + e.message);
+    }
+  }
+
   async function saveData() {
     const newPin = generatePin();
     const content = textInput.value;
+    const file = fileInput.files[0];
+
+    setStatus("Speichere Daten...", false);
+    let url = null;
 
     try {
+      if (file) {
+        url = await uploadFile(file);
+      }
+
       const docRef = doc(db, "p", "clipboard");
-      await setDoc(docRef, { content, pin: newPin });
-      setStatus("Text erfolgreich gespeichert.");
+      await setDoc(docRef, { content, pin: newPin, url });
+
+      setStatus("Text und ggf. Datei erfolgreich gespeichert.");
       pinDisplay.textContent = "Deine neue PIN: " + newPin + " (bitte merken!)";
-      pinInput.value = newPin; // Optional: Eingabefeld aktualisieren
+      pinInput.value = newPin;
+      downloadLink.innerHTML = url
+        ? `<a href="${url}" target="_blank">📁 Datei herunterladen</a>`
+        : "";
     } catch (e) {
       setStatus("Fehler beim Speichern: " + e.message, true);
     }
