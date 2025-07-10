@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>📋 Zwischenablage</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+      background: #f8f8f8;
+      color: #222;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .output {
+      margin-top: 2rem;
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ccc;
+    }
+    .hidden {
+      display: none;
+    }
+    .link {
+      word-break: break-all;
+      background: #eef;
+      padding: 0.5rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Zwischenablage</h1>
+
+  <textarea id="textInput" placeholder="Text hier eingeben..."></textarea>
+  <input type="file" id="fileInput" />
+
+  <button id="uploadBtn">🔼 Hochladen</button>
+
+  <div class="output hidden" id="output">
+    <h3>✅ Gespeichert!</h3>
+    <div class="link" id="link"></div>
+    <button onclick="copyLink()">🔗 Link kopieren</button>
+  </div>
+
+  <div class="output hidden" id="loadedContent"></div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.appspot.com",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const apiKey = "sk_live_ce3a901f6899451242f8f3c6e98968d68383c45a63a044dcd44b5e6dadf91b05";
+
+    const textInput = document.getElementById("textInput");
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const output = document.getElementById("output");
+    const linkBox = document.getElementById("link");
+    const loadedContent = document.getElementById("loadedContent");
+
+    function randomCode(length = 6) {
+      return Math.random().toString(36).substring(2, 2 + length);
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(linkBox.innerText).then(() => alert("Link kopiert!"));
+    }
+
+    async function upload() {
+      const code = randomCode();
+
+      if (textInput.value.trim()) {
+        // Text speichern in Firestore
+        await setDoc(doc(db, "p", "clipboard"), { content: textInput.value });
+        const link = `${location.origin}${location.pathname}?code=${code}&type=text`;
+        linkBox.innerText = link;
+        output.classList.remove("hidden");
+      } else if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const form = new FormData();
+        form.append("file", file);
+
+        const res = await fetch("https://uploadthing.com/api/upload", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`
+          },
+          body: form
+        });
+
+        const json = await res.json();
+        const fileUrl = json.data[0].url;
+        const link = `${location.origin}${location.pathname}?code=${code}&type=file&url=${encodeURIComponent(fileUrl)}&name=${encodeURIComponent(file.name)}`;
+        linkBox.innerText = link;
+        output.classList.remove("hidden");
+      } else {
+        alert("Bitte Text eingeben oder Datei auswählen.");
+      }
+    }
+
+    uploadBtn.addEventListener("click", upload);
+
+    // Beim Aufruf mit Code: anzeigen
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get("code")) {
+      const type = urlParams.get("type");
+      if (type === "text") {
+        const docRef = doc(db, "p", "clipboard");
+        getDoc(docRef).then((docSnap) => {
+          if (docSnap.exists()) {
+            const content = docSnap.data().content;
+            loadedContent.innerHTML = `<h3>📝 Text:</h3><pre>${content}</pre><button onclick="navigator.clipboard.writeText(\`${content.replace(/`/g, "\\`")}\`)">📋 Kopieren</button>`;
+            loadedContent.classList.remove("hidden");
+          } else {
+            loadedContent.innerText = "❌ Kein Text gefunden.";
+            loadedContent.classList.remove("hidden");
+          }
+        });
+      } else if (type === "file") {
+        const fileUrl = urlParams.get("url");
+        const fileName = urlParams.get("name");
+        loadedContent.innerHTML = `<h3>📎 Datei:</h3><a href="${fileUrl}" download="${fileName}">⬇️ ${fileName}</a>`;
+        loadedContent.classList.remove("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
