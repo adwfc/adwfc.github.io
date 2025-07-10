@@ -1,50 +1,42 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zwischenablage mit PIN, Text + Datei</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
-  label { display: block; margin-top: 1rem; font-weight: bold; }
-  textarea, input[type="text"], input[type="file"] {
-    width: 100%; padding: 0.5rem; margin-top: 0.25rem;
-    font-size: 1rem; box-sizing: border-box;
-  }
-  button {
-    margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1rem;
-  }
-  #status {
-    margin-top: 1rem; font-weight: bold;
-  }
-  #pinDisplay {
-    margin-top: 0.5rem; font-weight: bold; color: blue;
-  }
-  #downloadLink {
-    margin-top: 1rem;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zwischenablage mit Upload</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
+    textarea, input[type="text"], input[type="file"], button {
+      width: 100%; padding: 0.5rem; margin-top: 1rem; font-size: 1rem;
+    }
+    #status { margin-top: 1rem; font-weight: bold; }
+    #pinDisplay { margin-top: 0.5rem; font-weight: bold; color: blue; }
+    #downloadLink { margin-top: 1rem; }
+  </style>
 </head>
 <body>
 
-<h1>Zwischenablage mit Text + Datei</h1>
+<h1>Geräteübergreifende Zwischenablage</h1>
 
-<label for="pinInput">PIN eingeben (zum Laden)</label>
-<input type="text" id="pinInput" maxlength="2" pattern="\d{2}" placeholder="z.B. 42" />
+<label for="pinInput">PIN (zum Abrufen):</label>
+<input type="text" id="pinInput" maxlength="2" placeholder="z.B. 42" />
 
 <button id="loadBtn">Laden</button>
 
-<label for="textInput">Text</label>
+<label for="textInput">Text:</label>
 <textarea id="textInput" rows="6" placeholder="Hier Text eingeben..."></textarea>
 
-<label for="fileInput">Datei auswählen (optional)</label>
+<label for="fileInput">Datei auswählen (optional):</label>
 <input type="file" id="fileInput" />
 
-<button id="saveBtn">Speichern (generiert neue PIN)</button>
+<button id="saveBtn">Speichern</button>
 
 <div id="pinDisplay"></div>
 <div id="status"></div>
 <div id="downloadLink"></div>
+
+<!-- UploadThing -->
+<script src="https://uploadthing.com/js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -71,89 +63,78 @@
   const statusDiv = document.getElementById("status");
   const downloadLink = document.getElementById("downloadLink");
 
-  function setStatus(msg, isError = false) {
+  const setStatus = (msg, error = false) => {
     statusDiv.textContent = msg;
-    statusDiv.style.color = isError ? "red" : "green";
-  }
+    statusDiv.style.color = error ? "red" : "green";
+  };
 
-  function generatePin() {
-    return Math.floor(Math.random() * 100).toString().padStart(2, "0");
-  }
+  const generatePin = () => Math.floor(Math.random() * 100).toString().padStart(2, "0");
 
   async function loadData() {
-    const enteredPin = pinInput.value.trim();
-    if (!/^\d{2}$/.test(enteredPin)) {
-      setStatus("Bitte eine gültige 2-stellige PIN eingeben.", true);
-      return;
-    }
+    const pin = pinInput.value.trim();
+    if (!/^\d{2}$/.test(pin)) return setStatus("Bitte 2-stellige PIN eingeben", true);
+
     try {
       const docRef = doc(db, "p", "clipboard");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.pin === enteredPin) {
-          textInput.value = data.content || "";
-          if (data.url) {
-            downloadLink.innerHTML = `<a href="${data.url}" target="_blank">📁 Datei herunterladen</a>`;
-          } else {
-            downloadLink.innerHTML = "";
-          }
-          setStatus("Daten erfolgreich geladen.");
-          pinDisplay.textContent = "";
-        } else {
-          setStatus("Falsche PIN!", true);
-          textInput.value = "";
-          downloadLink.innerHTML = "";
-        }
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) return setStatus("Keine Daten gefunden", true);
+      const data = snap.data();
+      if (data.pin !== pin) return setStatus("Falsche PIN", true);
+
+      textInput.value = data.content || "";
+      if (data.url) {
+        downloadLink.innerHTML = `<a href="${data.url}" target="_blank">📁 Datei herunterladen</a>`;
       } else {
-        setStatus("Keine Daten gefunden.", true);
+        downloadLink.innerHTML = "";
       }
-    } catch (e) {
-      setStatus("Fehler beim Laden: " + e.message, true);
+
+      setStatus("Daten geladen");
+    } catch (err) {
+      setStatus("Fehler: " + err.message, true);
     }
   }
 
-  async function uploadFile(file) {
+  async function uploadFileToUploadThing(file) {
     const formData = new FormData();
     formData.append("file", file);
 
-    try {
-      const response = await fetch("https://uguu.se/api.php?d=upload-tool", {
-        method: "POST",
-        body: formData
-      });
-      const url = await response.text();
-      if (!url.startsWith("https://")) throw new Error("Ungültige Antwort von Uguu");
-      return url;
-    } catch (e) {
-      throw new Error("Upload fehlgeschlagen: " + e.message);
-    }
+    const response = await fetch("https://uploadthing.com/api/upload", {
+      method: "POST",
+      headers: {
+        "X-Uploadthing-Api-Key": "sk_live_b2b65a79f409620d8ce4793152d89aeef555aeafbbe9176efb09da6cb0d4842f"
+      },
+      body: formData
+    });
+
+    const result = await response.json();
+    if (!result || !result.data || !result.data.url) throw new Error("Upload fehlgeschlagen");
+    return result.data.url;
   }
 
   async function saveData() {
-    const newPin = generatePin();
+    const pin = generatePin();
     const content = textInput.value;
     const file = fileInput.files[0];
-
-    setStatus("Speichere Daten...", false);
     let url = null;
+
+    setStatus("Speichern läuft...");
 
     try {
       if (file) {
-        url = await uploadFile(file);
+        url = await uploadFileToUploadThing(file);
       }
 
       const docRef = doc(db, "p", "clipboard");
-      await setDoc(docRef, { content, pin: newPin, url });
+      await setDoc(docRef, { content, pin, url });
 
-      setStatus("Text und ggf. Datei erfolgreich gespeichert.");
-      pinDisplay.textContent = "Deine neue PIN: " + newPin + " (bitte merken!)";
-      pinInput.value = newPin;
+      pinDisplay.textContent = "PIN: " + pin + " (merken!)";
+      setStatus("Erfolgreich gespeichert.");
       downloadLink.innerHTML = url
         ? `<a href="${url}" target="_blank">📁 Datei herunterladen</a>`
         : "";
-    } catch (e) {
-      setStatus("Fehler beim Speichern: " + e.message, true);
+      pinInput.value = pin;
+    } catch (err) {
+      setStatus("Fehler: " + err.message, true);
     }
   }
 
