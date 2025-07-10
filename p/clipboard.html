@@ -1,113 +1,264 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clipboard mit Text + Datei</title>
-<style>
-  body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
-  input, textarea, button { width: 100%; font-size: 1rem; margin-top: 1rem; padding: 0.5rem; box-sizing: border-box; }
-  #status { margin-top: 1rem; font-weight: bold; }
-  #pinDisplay { margin-top: 0.5rem; font-weight: bold; color: blue; }
-  #downloadLink { margin-top: 1rem; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clipboard</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 30px;
+      background-color: #070f1b;
+      color: white;
+    }
+
+    input, textarea, button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      box-sizing: border-box;
+      background-color: transparent;
+      color: white;
+      border: 1px solid white;
+    }
+
+    .textarea-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-right: 50px;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    label[for="fileInput"] {
+      display: inline-block;
+      border: 1px dashed white;
+      padding: 0.4em 1.2em;
+      color: grey;
+      border-radius: 6px;
+      bottom: 10px;
+      right: 60px;
+      position: absolute;
+      z-index: 2;
+      cursor: pointer;
+    }
+
+    label[for="fileInput"]:hover {
+      border: 1px solid orange;
+    }
+
+    img {
+      width: 25px;
+      height: auto;
+    }
+
+    #saveBtn {
+      position: absolute;
+      bottom: 10px;
+      right: 8px;
+      max-width: 36px;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    #saveBtn img {
+      width: 90%;
+      height: auto;
+      display: block;
+    }
+
+    #loadBtn {
+      max-width: 50px;
+      margin-left: 10px;
+      cursor: pointer;
+      border: none;
+    }
+
+    #loadBtn img {
+      width: 90%;
+    }    
+
+    #pinInput {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #status, #pinDisplay, #downloadLink {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    #pinDisplay {
+      color: blue;
+    }
+
+    #copyBtn {
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Clipboard mit Text & Datei</h1>
 
-<label>PIN (zum Laden):</label>
-<input type="text" id="pinInput" maxlength="2" placeholder="z.B. 42">
+<h1>Zwischenablage</h1>
 
-<button id="loadBtn">📥 Laden</button>
+<div class="textarea-container">
+  <textarea id="textInput" rows="6" placeholder="Text eingeben..."></textarea>
+  <button id="saveBtn" title="Speichern"><img src="../b/upload.png" alt="Speichern" /></button>
+  <label for="fileInput">Dateiupload<input type="file" id="fileInput" /></label>
+</div>
 
-<label>Text:</label>
-<textarea id="textInput" rows="6" placeholder="Text hier"></textarea>
+<button id="copyBtn" class="hidden">📋 Kopieren</button>
 
-<label>Datei auswählen (optional):</label>
-<input type="file" id="fileInput">
-
-<button id="saveBtn">💾 Speichern</button>
+<div style="display: flex; align-items: center; margin-top: 50px;">
+  <input type="number" id="pinInput" placeholder="Lade mit PIN" inputmode="numeric" />
+  <button id="loadBtn" title="Lade Daten"><img src="../b/download.png" alt="Lade Daten" /></button>
+</div>
 
 <div id="pinDisplay"></div>
 <div id="status"></div>
 <div id="downloadLink"></div>
 
+<p style="position: absolute; bottom: 20px; max-width: 80%;">Diese Seite speichert keine Daten 🍪🚫, <br>betreibt kein Tracking. Vergewissere dich im <a href="https://github.com/adwfc/adwfc.github.io/blob/main/p/clipboard.html" style="color: #709fff;">Code auf Github</a>.</p>
+ 
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-  authDomain: "auth-adfwc.firebaseapp.com",
-  projectId: "auth-adfwc",
-  storageBucket: "auth-adfwc.appspot.com",
-  messagingSenderId: "221420792742",
-  appId: "1:221420792742:web:f75515331cb4c5b4603d"
-};
-initializeApp(firebaseConfig);
-const db = getFirestore();
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.appspot.com",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d"
+  };
 
-const el = id => document.getElementById(id);
-const pinInput = el("pinInput"), textInput = el("textInput"), fileInput = el("fileInput");
-const statusDiv = el("status"), pinDisplay = el("pinDisplay"), downloadLink = el("downloadLink");
-const loadBtn = el("loadBtn"), saveBtn = el("saveBtn");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-const setStatus = (msg, err=false) => {
-  statusDiv.textContent = msg;
-  statusDiv.style.color = err ? "red" : "green";
-};
-const genPin = () => Math.floor(Math.random()*100).toString().padStart(2, "0");
+  const textInput = document.getElementById("textInput");
+  const pinInput = document.getElementById("pinInput");
+  const fileInput = document.getElementById("fileInput");
+  const status = document.getElementById("status");
+  const pinDisplay = document.getElementById("pinDisplay");
+  const downloadLink = document.getElementById("downloadLink");
+  const copyBtn = document.getElementById("copyBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const loadBtn = document.getElementById("loadBtn");
 
-async function uploadFile(file) {
-  const fd = new FormData();
-  fd.append("file", file);
-  const res = await fetch("https://tmpfiles.org/api/v1/upload", { method:"POST", body:fd });
-  if (!res.ok) throw new Error("Upload fehlgeschlagen");
-  const json = await res.json();
-  return "https://tmpfiles.org" + json.data.url;
-}
+  let uploadedFileUrl = null;
 
-async function saveData() {
-  const newPin = genPin(), content = textInput.value.trim();
-  let url = null;
-  setStatus("Speichere...");
-  if (fileInput.files.length) {
-    try { url = await uploadFile(fileInput.files[0]); }
-    catch(e){ return setStatus(e.message, true); }
-  }
-  try {
-    await setDoc(doc(db, "p", "clipboard"), { content, pin: newPin, url });
-    pinInput.value = newPin;
-    pinDisplay.textContent = "PIN: " + newPin;
-    if (url) downloadLink.innerHTML = `<a href="${url}" target="_blank">📁 Datei herunterladen</a>`;
-    else downloadLink.innerHTML = "";
-    setStatus("Gespeichert ✅");
-  } catch(e) {
-    setStatus("Fehler: " + e.message, true);
-  }
-}
+  pinInput.addEventListener("input", (e) => {
+    e.target.value = e.target.value.slice(0, 2);
+  });
 
-async function loadData() {
-  const pin = pinInput.value.trim();
-  if (!/^\d{2}$/.test(pin)) return setStatus("Ungültige PIN", true);
-  setStatus("Lade...");
-  try {
-    const snap = await getDoc(doc(db, "p", "clipboard"));
-    if (!snap.exists()) return setStatus("Keine Daten", true);
-    const data = snap.data();
-    if (data.pin !== pin) return setStatus("Falsche PIN", true);
-    textInput.value = data.content || "";
-    if (data.url) downloadLink.innerHTML = `<a href="${data.url}" target="_blank">📁 Datei herunterladen</a>`;
-    else downloadLink.innerHTML = "";
-    setStatus("Daten geladen ✅");
-  } catch(e) {
-    setStatus("Fehler: " + e.message, true);
-  }
-}
+  pinInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      saveBtn.click();
+    }
+  });
 
-saveBtn.addEventListener("click", saveData);
-loadBtn.addEventListener("click", loadData);
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    status.textContent = "📤 Lade Datei hoch...";
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("https://uploadthing.com/api/files", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer sk_live_b2b65a79f409620d8ce4793152d89aeef555aeafbbe9176efb09da6cb0d4842f"
+        },
+        body: formData
+      });
+
+      if (!res.ok) throw new Error("Upload fehlgeschlagen");
+
+      const data = await res.json();
+      uploadedFileUrl = data.url || null;
+      status.textContent = "✅ Datei hochgeladen!";
+    } catch (err) {
+      status.textContent = "❌ Upload fehlgeschlagen.";
+      console.error(err);
+    }
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    const content = textInput.value.trim();
+    const pin = pinInput.value.trim();
+
+    if (!content || !pin) {
+      alert("Bitte Text und PIN eingeben.");
+      return;
+    }
+
+    const data = { content, pin };
+    if (uploadedFileUrl) {
+      data.url = uploadedFileUrl;
+    }
+
+    try {
+      await setDoc(doc(db, "p", "clipboard"), data);
+      status.textContent = "✅ Gespeichert!";
+      pinDisplay.textContent = `PIN: ${pin}`;
+      copyBtn.classList.remove("hidden");
+    } catch (error) {
+      status.textContent = "❌ Fehler beim Speichern.";
+      console.error(error);
+    }
+  });
+
+  loadBtn.addEventListener("click", async () => {
+    const docRef = doc(db, "p", "clipboard");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.pin === pinInput.value.trim()) {
+        textInput.value = data.content || "";
+        uploadedFileUrl = data.url || null;
+        downloadLink.innerHTML = uploadedFileUrl
+          ? `<a href="${uploadedFileUrl}" target="_blank" rel="noopener noreferrer">📎 Datei öffnen</a>` : "";
+        copyBtn.classList.remove("hidden");
+        status.textContent = "";
+      } else {
+        alert("❌ PIN falsch.");
+      }
+    } else {
+      alert("❌ Keine Daten gefunden.");
+    }
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(textInput.value);
+      alert("📋 Text kopiert!");
+    } catch (err) {
+      alert("❌ Konnte nicht kopieren.");
+    }
+  });
 </script>
 
 </body>
