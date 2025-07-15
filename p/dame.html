@@ -1,266 +1,270 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dame Online</title>
-<style>
-  body {
-    margin: 0;
-    background: #333;
-    color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .board {
-    display: grid;
-    grid-template-columns: repeat(8, 80px);
-    grid-template-rows: repeat(8, 80px);
-    border: 5px solid black;
-    margin: 20px 0;
-  }
-  .cell {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-  }
-  .light { background: #ccc; }
-  .dark  { background: #555; }
-
-  .piece {
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    background-color: rgba(255,255,255,0.2);
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-  .piece img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  .crown {
-    position: absolute;
-    font-size: 20px;
-    top: 5px;
-    right: 5px;
-    pointer-events: none;
-  }
-  .status {
-    margin: 10px;
-    font-size: 18px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dame Online Komplett</title>
+  <style>
+    body {
+      margin: 0;
+      background: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .info {
+      color: white;
+      margin-bottom: 10px;
+      font-family: sans-serif;
+      font-size: 18px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 80px);
+      grid-template-rows: repeat(8, 80px);
+      border: 5px solid black;
+    }
+    .cell {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .light { background: #ccc; }
+    .dark  { background: #555; }
+    .stone {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border: 2px solid white;
+    }
+    .stone img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .selected {
+      outline: 4px solid yellow;
+    }
+  </style>
 </head>
 <body>
 
-<div class="status" id="status">Lade...</div>
+<div class="info" id="status">Lädt...</div>
 <div class="board" id="board"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-  authDomain: "auth-adfwc.firebaseapp.com",
-  projectId: "auth-adfwc",
-  storageBucket: "auth-adfwc.appspot.com",
-  messagingSenderId: "221420792742",
-  appId: "1:221420792742:web:f75515331cb4c5b4603d"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.appspot.com",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d"
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const docRef = doc(db, "p", "dame");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const docRef = doc(db, "p", "dame");
 
-const boardElement = document.getElementById("board");
-const statusEl = document.getElementById("status");
+  const boardElement = document.getElementById("board");
+  const statusElement = document.getElementById("status");
 
-const IMAGES = {
-  1: "../b/weiß.png",
-  2: "../b/schwarz.png",
-  11: "../b/weiß.png",
-  22: "../b/schwarz.png"
-};
+  const IMAGES = {
+    1: "../b/weiß.png",
+    2: "../b/schwarz.png",
+    11: "../b/weiß.png",  
+    22: "../b/schwarz.png" 
+  };
 
-const gameState = {
-  board: [],
-  currentPlayer: 1,
-  selected: null,
-  playerColor: parseInt(localStorage.getItem("playerColor")) || null
-};
+  const gameState = {
+    board: [],
+    currentPlayer: 1,
+    selected: null
+  };
 
-if (gameState.playerColor === null) {
-  const choice = confirm("Möchtest du als Weiß spielen? (Abbrechen = Schwarz)");
-  gameState.playerColor = choice ? 1 : 2;
-  localStorage.setItem("playerColor", gameState.playerColor);
-}
-
-function createInitialBoard() {
-  const board = [];
-  for (let r = 0; r < 8; r++) {
-    board[r] = [];
-    for (let c = 0; c < 8; c++) {
-      if ((r + c) % 2 === 1) {
-        if (r < 3) board[r][c] = 2;
-        else if (r > 4) board[r][c] = 1;
-        else board[r][c] = 0;
-      } else {
-        board[r][c] = 0;
-      }
-    }
+  let playerSide = localStorage.getItem("dame_player");
+  if (!playerSide) {
+    playerSide = prompt("Bist du Weiß (1) oder Schwarz (2)? Gib 1 oder 2 ein:");
+    if (playerSide !== "1" && playerSide !== "2") playerSide = "1";
+    localStorage.setItem("dame_player", playerSide);
   }
-  return board;
-}
+  playerSide = parseInt(playerSide);
 
-async function saveGame() {
-  await setDoc(docRef, {
-    board: JSON.stringify(gameState.board),
-    currentPlayer: gameState.currentPlayer
-  });
-}
-
-function renderBoard() {
-  boardElement.innerHTML = "";
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      const cell = document.createElement("div");
-      cell.className = "cell " + (((r + c) % 2 === 0) ? "light" : "dark");
-      const stone = gameState.board[r][c];
-      if (stone) {
-        const img = document.createElement("img");
-        img.src = IMAGES[stone];
-        img.className = "piece";
-        cell.appendChild(img);
-
-        if (stone === 11 || stone === 22) {
-          const crown = document.createElement("div");
-          crown.className = "crown";
-          crown.textContent = "👑";
-          cell.appendChild(crown);
+  function createInitialBoard() {
+    const board = [];
+    for (let r = 0; r < 8; r++) {
+      board[r] = [];
+      for (let c = 0; c < 8; c++) {
+        if ((r + c) % 2 === 1) {
+          if (r < 3) board[r][c] = 2;
+          else if (r > 4) board[r][c] = 1;
+          else board[r][c] = 0;
+        } else {
+          board[r][c] = 0;
         }
       }
-      cell.onclick = () => handleClick(r, c);
-      boardElement.appendChild(cell);
+    }
+    return board;
+  }
+
+  async function saveGame() {
+    await setDoc(docRef, {
+      board: JSON.stringify(gameState.board),
+      currentPlayer: gameState.currentPlayer
+    });
+  }
+
+  function renderBoard() {
+    boardElement.innerHTML = "";
+    statusElement.textContent = 
+      `Du spielst ${playerSide === 1 ? "Weiß ⚪" : "Schwarz ⚫"} — ` + 
+      `${gameState.currentPlayer === 1 ? "Weiß am Zug ⚪" : "Schwarz am Zug ⚫"}`;
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cell = document.createElement("div");
+        cell.className = "cell " + (((r + c) % 2 === 0) ? "light" : "dark");
+        const stone = gameState.board[r][c];
+        if (stone) {
+          const div = document.createElement("div");
+          div.className = "stone" + (gameState.selected?.r === r && gameState.selected?.c === c ? " selected" : "");
+          const img = document.createElement("img");
+          img.src = IMAGES[stone];
+          div.appendChild(img);
+          div.onclick = () => handleClick(r, c);
+          cell.appendChild(div);
+        } else {
+          cell.onclick = () => handleClick(r, c);
+        }
+        boardElement.appendChild(cell);
+      }
     }
   }
-  const player = gameState.currentPlayer === 1 ? "Weiß" : "Schwarz";
-  statusEl.textContent = `Du spielst als ${gameState.playerColor === 1 ? "Weiß" : "Schwarz"}. Am Zug: ${player}`;
-}
 
-function handleClick(r, c) {
-  if (gameState.currentPlayer !== gameState.playerColor) return;
+  function handleClick(r, c) {
+    if (gameState.currentPlayer !== playerSide) return;
 
-  const selected = gameState.selected;
-  const stone = gameState.board[r][c];
+    const sel = gameState.selected;
+    const stone = gameState.board[r][c];
 
-  if (selected) {
-    const [sr, sc] = selected;
-    if (gameState.board[sr][sc] && isValidMove(sr, sc, r, c)) {
-      gameState.board[r][c] = gameState.board[sr][sc];
-      gameState.board[sr][sc] = 0;
+    if (stone && (stone % 10) === playerSide) {
+      gameState.selected = { r, c };
+      renderBoard();
+      return;
+    }
 
-      // Dame-Status prüfen
-      if (gameState.board[r][c] === 1 && r === 0) gameState.board[r][c] = 11;
-      if (gameState.board[r][c] === 2 && r === 7) gameState.board[r][c] = 22;
+    if (sel) {
+      const sr = sel.r;
+      const sc = sel.c;
+      const piece = gameState.board[sr][sc];
+      const dr = r - sr;
+      const dc = c - sc;
 
-      gameState.currentPlayer = (gameState.currentPlayer === 1) ? 2 : 1;
-      gameState.selected = null;
-      saveGame();
+      if (gameState.board[r][c] === 0) {
+        if (piece >= 10) {  
+          if (Math.abs(dr) === Math.abs(dc)) {
+            if (!hasPiecesInPath(sr, sc, r, c)) {
+              gameState.board[r][c] = piece;
+              gameState.board[sr][sc] = 0;
+              endTurn();
+            }
+          }
+        } else {  
+          const forward = (playerSide === 1) ? -1 : 1;
+          if (Math.abs(dr) === 1 && Math.abs(dc) === 1 && dr === forward) {
+            gameState.board[r][c] = piece;
+            gameState.board[sr][sc] = 0;
+            if ((playerSide === 1 && r === 0) || (playerSide === 2 && r === 7)) {
+              gameState.board[r][c] = 10 + playerSide;
+            }
+            endTurn();
+          }
+          if (Math.abs(dr) === 2 && Math.abs(dc) === 2) {
+            const mr = sr + dr / 2;
+            const mc = sc + dc / 2;
+            const middlePiece = gameState.board[mr][mc];
+            if (middlePiece && (middlePiece % 10) !== playerSide) {
+              gameState.board[r][c] = piece;
+              gameState.board[sr][sc] = 0;
+              gameState.board[mr][mc] = 0;
+              if ((playerSide === 1 && r === 0) || (playerSide === 2 && r === 7)) {
+                gameState.board[r][c] = 10 + playerSide;
+              }
+              endTurn();
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function hasPiecesInPath(sr, sc, r, c) {
+    const stepR = (r - sr) > 0 ? 1 : -1;
+    const stepC = (c - sc) > 0 ? 1 : -1;
+    let tr = sr + stepR;
+    let tc = sc + stepC;
+    while (tr !== r && tc !== c) {
+      if (gameState.board[tr][tc] !== 0) return true;
+      tr += stepR;
+      tc += stepC;
+    }
+    return false;
+  }
+
+  function endTurn() {
+    gameState.selected = null;
+    gameState.currentPlayer = (gameState.currentPlayer === 1) ? 2 : 1;
+    renderBoard();
+    saveGame();
+  }
+
+  function startNewGame() {
+    gameState.board = createInitialBoard();
+    gameState.currentPlayer = 1;
+    saveGame();
+  }
+
+  async function loadGame() {
+    const snap = await getDoc(docRef);
+    if (snap.exists() && snap.data()?.board) {
+      try {
+        gameState.board = JSON.parse(snap.data().board);
+        if (!Array.isArray(gameState.board)) throw new Error("Kein gültiges Spielbrett.");
+        gameState.currentPlayer = snap.data().currentPlayer ?? 1;
+      } catch (e) {
+        startNewGame();
+      }
     } else {
-      gameState.selected = null;
+      startNewGame();
     }
-  } else {
-    if (stone && (stone % 10) === gameState.playerColor) {
-      gameState.selected = [r, c];
-    }
-  }
-  renderBoard();
-}
-
-function isValidMove(sr, sc, r, c) {
-  const piece = gameState.board[sr][sc];
-  if (!piece) return false;
-  const direction = piece === 1 ? -1 : (piece === 2 ? 1 : 0);
-
-  // Dame kann beliebig ziehen
-  if (piece >= 10) return isValidQueenMove(sr, sc, r, c);
-
-  // Normale Figuren: einen Schritt diagonal
-  if (Math.abs(sr - r) === 1 && Math.abs(sc - c) === 1 && (r - sr) === direction && gameState.board[r][c] === 0) {
-    return true;
+    renderBoard();
   }
 
-  // Schlagen
-  if (Math.abs(sr - r) === 2 && Math.abs(sc - c) === 2) {
-    const mr = (sr + r) / 2;
-    const mc = (sc + c) / 2;
-    const midStone = gameState.board[mr][mc];
-    if (midStone && (midStone % 10) !== (piece % 10) && gameState.board[r][c] === 0) {
-      gameState.board[mr][mc] = 0;
-      return true;
-    }
-  }
-  return false;
-}
+  loadGame();
 
-function isValidQueenMove(sr, sc, r, c) {
-  if (Math.abs(sr - r) !== Math.abs(sc - c)) return false;
-  const stepR = (r - sr) / Math.abs(r - sr);
-  const stepC = (c - sc) / Math.abs(c - sc);
-
-  let i = sr + stepR;
-  let j = sc + stepC;
-  let opponentHit = false;
-
-  while (i !== r && j !== c) {
-    const stone = gameState.board[i][j];
-    if (stone) {
-      if ((stone % 10) === (gameState.board[sr][sc] % 10)) return false;
-      if (opponentHit) return false;
-      opponentHit = true;
-    }
-    i += stepR;
-    j += stepC;
-  }
-
-  if (gameState.board[r][c] !== 0) return false;
-  if (opponentHit) {
-    const hitR = sr + stepR;
-    const hitC = sc + stepC;
-    gameState.board[hitR][hitC] = 0;
-  }
-
-  return true;
-}
-
-function initGame() {
   onSnapshot(docRef, (snapshot) => {
     const data = snapshot.data();
-    if (data) {
-      gameState.board = JSON.parse(data.board);
-      gameState.currentPlayer = data.currentPlayer;
-      gameState.selected = null;
-      renderBoard();
-    } else {
-      gameState.board = createInitialBoard();
-      gameState.currentPlayer = 1;
-      saveGame();
+    if (data && typeof data.board === "string") {
+      try {
+        gameState.board = JSON.parse(data.board);
+        gameState.currentPlayer = data.currentPlayer ?? 1;
+        renderBoard();
+      } catch (e) { }
     }
   });
-}
 
-initGame();
 </script>
 
 </body>
