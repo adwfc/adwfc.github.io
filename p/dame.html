@@ -55,206 +55,348 @@
 <div class="board" id="board"></div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot
-  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-    authDomain: "auth-adfwc.firebaseapp.com",
-    projectId: "auth-adfwc",
-    storageBucket: "auth-adfwc.appspot.com",
-    messagingSenderId: "221420792742",
-    appId: "1:221420792742:web:f75515331cb4c5b4603d"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+  authDomain: "auth-adfwc.firebaseapp.com",
+  projectId: "auth-adfwc",
+  storageBucket: "auth-adfwc.appspot.com",
+  messagingSenderId: "221420792742",
+  appId: "1:221420792742:web:f75515331cb4c5b4603d"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const docRef = doc(db, "p", "dame");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const docRef = doc(db, "p", "dame");
 
-  const boardElement = document.getElementById("board");
-  const statusElement = document.getElementById("status");
+const boardElement = document.getElementById("board");
 
-  const IMAGES = {
-    1: "../b/weiß.png",
-    2: "../b/schwarz.png",
-    11: "../b/weiß.png",
-    22: "../b/schwarz.png"
-  };
+const IMAGES = {
+  1: "../b/weiß.png",
+  2: "../b/schwarz.png",
+  11: "../b/weiß.png",
+  22: "../b/schwarz.png"
+};
 
-  // Spielstatus
-  let gameState = {
-    board: [],
-    currentPlayer: 1,
-    playerWhite: null,
-    playerBlack: null,
-    selected: null,
-    myColor: 0  // 0 = Zuschauer, 1 = Weiß, 2 = Schwarz
-  };
+const gameState = {
+  board: [],
+  currentPlayer: 1,
+  selected: null,
+  mustContinueJump: false, // ob Spieler nach Mehrfach-Schlag weitermuss
+  jumpFrom: null,          // Position von der aus der nächste Schlag erfolgen muss
+};
 
-  function createInitialBoard() {
-    const board = [];
-    for (let r = 0; r < 8; r++) {
-      board[r] = [];
-      for (let c = 0; c < 8; c++) {
-        if ((r + c) % 2 === 1) {
-          if (r < 3) board[r][c] = 2;
-          else if (r > 4) board[r][c] = 1;
-          else board[r][c] = 0;
-        } else {
-          board[r][c] = 0;
-        }
+function createInitialBoard() {
+  const board = [];
+  for (let r = 0; r < 8; r++) {
+    board[r] = [];
+    for (let c = 0; c < 8; c++) {
+      if ((r + c) % 2 === 1) {
+        if (r < 3) board[r][c] = 2;
+        else if (r > 4) board[r][c] = 1;
+        else board[r][c] = 0;
+      } else {
+        board[r][c] = 0;
       }
     }
-    return board;
   }
+  return board;
+}
 
-  function generateMyId() {
-    const localIdKey = "damePlayerId";
-    let myId = localStorage.getItem(localIdKey);
-    if (!myId) {
-      myId = Math.random().toString(36).substring(2, 10);
-      localStorage.setItem(localIdKey, myId);
-    }
-    return myId;
-  }
+async function saveGame() {
+  await setDoc(docRef, {
+    board: JSON.stringify(gameState.board),
+    currentPlayer: gameState.currentPlayer,
+    mustContinueJump: gameState.mustContinueJump,
+    jumpFrom: gameState.jumpFrom ? JSON.stringify(gameState.jumpFrom) : null
+  });
+}
 
-  async function joinGame() {
-    const myId = generateMyId();
-
-    const snap = await getDoc(docRef);
-    if (!snap.exists()) {
-      // Neues Spiel initialisieren
-      await setDoc(docRef, {
-        board: JSON.stringify(createInitialBoard()),
-        currentPlayer: 1,
-        playerWhite: null,
-        playerBlack: null
-      });
-      return joinGame();
-    }
-
+async function loadGame() {
+  const snap = await getDoc(docRef);
+  if (snap.exists() && snap.data().board) {
     const data = snap.data();
-
-    // Prüfen ob ich schon zugewiesen bin
-    if (data.playerWhite === myId) return 1;
-    if (data.playerBlack === myId) return 2;
-
-    // Versuchen Slots zu reservieren
-    if (!data.playerWhite) {
-      await updateDoc(docRef, { playerWhite: myId });
-      return 1;
-    }
-    if (!data.playerBlack) {
-      await updateDoc(docRef, { playerBlack: myId });
-      return 2;
-    }
-
-    // Spiel voll, Zuschauer
-    return 0;
+    gameState.board = JSON.parse(data.board);
+    gameState.currentPlayer = data.currentPlayer ?? 1;
+    gameState.mustContinueJump = data.mustContinueJump ?? false;
+    gameState.jumpFrom = data.jumpFrom ? JSON.parse(data.jumpFrom) : null;
+  } else {
+    gameState.board = createInitialBoard();
+    gameState.currentPlayer = 1;
+    gameState.mustContinueJump = false;
+    gameState.jumpFrom = null;
+    await saveGame();
   }
+  gameState.selected = null;
+  renderBoard();
+}
 
-  function renderBoard() {
-    boardElement.innerHTML = "";
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        const cell = document.createElement("div");
-        cell.className = "cell " + (((r + c) % 2 === 0) ? "light" : "dark");
-
-        const stone = gameState.board[r][c];
-        if (stone) {
-          const img = document.createElement("img");
-          img.src = IMAGES[stone];
-          img.className = "stone";
-          cell.appendChild(img);
-        }
-
-        cell.onclick = () => handleClick(r, c);
-        boardElement.appendChild(cell);
+function renderBoard() {
+  boardElement.innerHTML = "";
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell " + (((r + c) % 2 === 0) ? "light" : "dark");
+      const stone = gameState.board[r][c];
+      if (stone) {
+        const img = document.createElement("img");
+        img.src = IMAGES[stone];
+        img.className = "stone";
+        cell.appendChild(img);
       }
+      cell.onclick = () => handleClick(r, c);
+      if (gameState.selected && gameState.selected[0] === r && gameState.selected[1] === c) {
+        cell.classList.add("selected");
+      }
+      boardElement.appendChild(cell);
     }
   }
+}
 
-  // Beispiel-Zug-Validierung: Zug erlaubt, wenn Zug vom Spieler und Feld leer
-  function isValidMove(fromR, fromC, toR, toC) {
-    if (gameState.myColor !== gameState.currentPlayer) return false; // Nicht am Zug
-    if (gameState.board[fromR][fromC] !== gameState.myColor) return false; // Steintyp stimmt nicht
-    if (gameState.board[toR][toC] !== 0) return false; // Zielfeld nicht frei
-    // Hier bitte echte Dame-Regeln einsetzen (wegen Umfang jetzt nur Dummy)
-    const dr = toR - fromR;
-    const dc = toC - fromC;
-    if (Math.abs(dr) === 1 && Math.abs(dc) === 1) return true;
+function isOpponent(player, stone) {
+  if (!stone) return false;
+  if (player === 1) return stone === 2 || stone === 22;
+  if (player === 2) return stone === 1 || stone === 11;
+  return false;
+}
+
+function isOwnPiece(player, stone) {
+  if (!stone) return false;
+  if (player === 1) return stone === 1 || stone === 11;
+  if (player === 2) return stone === 2 || stone === 22;
+  return false;
+}
+
+function isKing(stone) {
+  return stone === 11 || stone === 22;
+}
+
+function canMoveOrJump(fromR, fromC, toR, toC) {
+  const stone = gameState.board[fromR][fromC];
+  if (!stone) return false;
+  const player = gameState.currentPlayer;
+  if (!isOwnPiece(player, stone)) return false;
+
+  const dr = toR - fromR;
+  const dc = toC - fromC;
+
+  // Ziel leer?
+  if (gameState.board[toR][toC] !== 0) return false;
+
+  // Bewegungslogik:
+
+  // Normale Figuren dürfen nur vorwärts diagonal 1 Schritt oder Schlag überspringen
+  // Könige dürfen diagonal vor/zurück springen beliebig weit
+
+  // Prüfe Schlagsprung (2 Felder diagonal) und ob Gegner übersprungen wird
+  if (Math.abs(dr) === 2 && Math.abs(dc) === 2) {
+    const midR = fromR + dr/2;
+    const midC = fromC + dc/2;
+    const middle = gameState.board[midR][midC];
+    if (isOpponent(player, middle)) {
+      // Schlag erlaubt
+      if (!isKing(stone)) {
+        // normale Figur darf nur vorwärts schlagen (je nach Spieler)
+        if (player === 1 && dr !== -2) return false;
+        if (player === 2 && dr !== 2) return false;
+      }
+      return true;
+    }
     return false;
   }
 
-  // Variablen für Zughandling
-  let moveFrom = null;
+  // Normale Bewegung (1 Schritt diagonal)
+  if (Math.abs(dr) === 1 && Math.abs(dc) === 1) {
+    if (gameState.mustContinueJump) return false; // muss weiter schlagen, keine normalen Züge
+    if (!isKing(stone)) {
+      if (player === 1 && dr !== -1) return false; // Weiß vorwärts
+      if (player === 2 && dr !== 1) return false;  // Schwarz vorwärts
+    } else {
+      // König darf 1 Schritt in jede Richtung (für Einfachheit hier)
+      // Wir erweitern später evtl. auf beliebig weit
+    }
+    return true;
+  }
 
-  async function handleClick(r, c) {
-    if (gameState.myColor === 0) {
-      alert("Du bist nur Zuschauer.");
+  // Für Könige Schläge über beliebig viele Felder (wenn freier Weg)
+  if (isKing(stone)) {
+    // Bei Schlägen größer 2 Felder (z.B. 3,4...) diagonal checken
+    if (Math.abs(dr) === Math.abs(dc) && Math.abs(dr) > 1) {
+      // Prüfe dass genau ein Gegnerstein übersprungen wird, und Landefeld leer
+      const stepR = dr / Math.abs(dr);
+      const stepC = dc / Math.abs(dc);
+
+      let countOpponent = 0;
+      for (let i = 1; i < Math.abs(dr); i++) {
+        const rCheck = fromR + i*stepR;
+        const cCheck = fromC + i*stepC;
+        const piece = gameState.board[rCheck][cCheck];
+        if (piece === 0) continue;
+        if (isOpponent(player, piece)) countOpponent++;
+        else return false; // eigener Stein blockiert
+      }
+      if (countOpponent === 1) return true;
+      return false;
+    }
+  }
+
+  return false;
+}
+
+// Prüft alle möglichen Sprünge für aktuellen Spieler - wird in Regel nicht zum Zwingen genutzt, aber nützlich
+function playerHasAnyJump(player) {
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      if (isOwnPiece(player, gameState.board[r][c])) {
+        if (canJumpFrom(r, c)) return true;
+      }
+    }
+  }
+  return false;
+}
+
+// Prüft, ob von dieser Position ein Schlag möglich ist
+function canJumpFrom(r, c) {
+  const stone = gameState.board[r][c];
+  if (!stone) return false;
+  const player = gameState.currentPlayer;
+
+  if (isKing(stone)) {
+    // König kann in alle Richtungen mehrere Felder springen
+    // Suche alle diagonalen Richtungen
+    const directions = [[1,1],[1,-1],[-1,1],[-1,-1]];
+    for (const [dr, dc] of directions) {
+      let i = 1;
+      let opponentFound = false;
+      while (true) {
+        const nr = r + i*dr;
+        const nc = c + i*dc;
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
+        const cell = gameState.board[nr][nc];
+        if (cell === 0) {
+          if (opponentFound) return true; // Landefeld hinter Gegner gefunden
+          i++;
+          continue;
+        }
+        if (isOpponent(player, cell)) {
+          if (opponentFound) break; // mehr als 1 Gegner blockiert
+          opponentFound = true;
+          i++;
+          continue;
+        }
+        break; // eigener Stein oder andere blockiert
+      }
+    }
+    return false;
+  } else {
+    // Normale Figur kann nur 2 Felder diagonal schlagen (vorwärts)
+    const directions = (player === 1) ? [[-2, -2], [-2, 2]] : [[2, -2], [2, 2]];
+    for (const [dr, dc] of directions) {
+      const nr = r + dr;
+      const nc = c + dc;
+      if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) continue;
+      if (canMoveOrJump(r, c, nr, nc)) return true;
+    }
+    return false;
+  }
+}
+
+// Führe den Zug aus: (inkl. evtl. Schlag)
+function doMove(fromR, fromC, toR, toC) {
+  const stone = gameState.board[fromR][fromC];
+  const player = gameState.currentPlayer;
+  const dr = toR - fromR;
+  const dc = toC - fromC;
+
+  // Prüfe ob es ein Schlagzug ist (Länge 2 oder König überspringt)
+  if (Math.abs(dr) > 1) {
+    // Gegnerstein entfernen
+    const stepR = dr / Math.abs(dr);
+    const stepC = dc / Math.abs(dc);
+    // Alle übersprungenen Felder durchgehen (für Könige auch mehrere)
+    for (let i = 1; i < Math.abs(dr); i++) {
+      const rCheck = fromR + i*stepR;
+      const cCheck = fromC + i*stepC;
+      if (isOpponent(player, gameState.board[rCheck][cCheck])) {
+        gameState.board[rCheck][cCheck] = 0; // Stein schlagen
+        break; // Nur ein Stein darf geschlagen werden pro Sprung
+      }
+    }
+    // Figur bewegen
+    gameState.board[toR][toC] = stone;
+    gameState.board[fromR][fromC] = 0;
+
+    // Prüfen, ob noch weitere Sprünge möglich sind
+    if (canJumpFrom(toR, toC)) {
+      gameState.mustContinueJump = true;
+      gameState.jumpFrom = [toR, toC];
+      gameState.selected = [toR, toC];
+    } else {
+      // Kein weiterer Sprung: Zug beenden
+      gameState.mustContinueJump = false;
+      gameState.jumpFrom = null;
+      gameState.selected = null;
+      // Spieler wechseln
+      gameState.currentPlayer = player === 1 ? 2 : 1;
+    }
+  } else {
+    // Normaler Zug
+    gameState.board[toR][toC] = stone;
+    gameState.board[fromR][fromC] = 0;
+    gameState.mustContinueJump = false;
+    gameState.jumpFrom = null;
+    gameState.selected = null;
+    gameState.currentPlayer = player === 1 ? 2 : 1;
+  }
+
+  // Dame-Krönung prüfen
+  if (!isKing(stone)) {
+    if (player === 1 && toR === 0) gameState.board[toR][toC] = 11;
+    if (player === 2 && toR === 7) gameState.board[toR][toC] = 22;
+  }
+}
+
+function handleClick(r, c) {
+  const stone = gameState.board[r][c];
+  const player = gameState.currentPlayer;
+
+  // Spieler darf nur eigene Steine auswählen
+  if (gameState.mustContinueJump) {
+    // Muss weiter schlagen von jumpFrom
+    if (!(gameState.jumpFrom && gameState.jumpFrom[0] === r && gameState.jumpFrom[1] === c)) {
+      alert("Du musst den Sprung fortsetzen!");
       return;
     }
-    if (moveFrom === null) {
-      // Erster Klick: Stein auswählen
-      if (gameState.board[r][c] === gameState.myColor) {
-        moveFrom = { r, c };
-        renderBoard();
-        highlightCell(r, c, true);
-      }
+  }
+
+  if (gameState.selected) {
+    // Versuch Zug oder Schlag ausführen
+    const [selR, selC] = gameState.selected;
+
+    // Nur erlaubte Züge
+    if (canMoveOrJump(selR, selC, r, c)) {
+      doMove(selR, selC, r, c);
+      renderBoard();
+      saveGame();
     } else {
-      // Zweiter Klick: Zug versuchen
-      if (isValidMove(moveFrom.r, moveFrom.c, r, c)) {
-        // Zug ausführen
-        gameState.board[r][c] = gameState.board[moveFrom.r][moveFrom.c];
-        gameState.board[moveFrom.r][moveFrom.c] = 0;
-        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-        moveFrom = null;
-        await saveGame();
-      } else {
-        // Ungültig, Auswahl zurücksetzen
-        moveFrom = null;
+      // Wenn Klick auf andere eigene Figur: neu auswählen
+      if (isOwnPiece(player, stone)) {
+        gameState.selected = [r, c];
+        renderBoard();
       }
+    }
+  } else {
+    // Nichts ausgewählt: nur eigene Figur auswählen erlaubt
+    if (isOwnPiece(player, stone)) {
+      gameState.selected = [r, c];
       renderBoard();
     }
   }
+}
 
-  function highlightCell(r, c, selected) {
-    const index = r * 8 + c;
-    const cell = boardElement.children[index];
-    if (cell) {
-      if (selected) cell.classList.add("selected");
-      else cell.classList.remove("selected");
-    }
-  }
-
-  async function saveGame() {
-    await updateDoc(docRef, {
-      board: JSON.stringify(gameState.board),
-      currentPlayer: gameState.currentPlayer
-    });
-  }
-
-  async function setup() {
-    gameState.myColor = await joinGame();
-    statusElement.textContent =
-      gameState.myColor === 1 ? "Du bist Spieler Weiß" :
-      gameState.myColor === 2 ? "Du bist Spieler Schwarz" :
-      "Spiel voll, du bist Zuschauer";
-
-    onSnapshot(docRef, (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      gameState.board = JSON.parse(data.board);
-      gameState.currentPlayer = data.currentPlayer;
-      gameState.playerWhite = data.playerWhite;
-      gameState.playerBlack = data.playerBlack;
-      renderBoard();
-    });
-  }
-
-  setup();
+loadGame();
 </script>
 </body>
 </html>
