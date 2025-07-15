@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dame Online (kein Schmeißen-Zwang)</title>
+<title>Dame Online</title>
 <style>
   body {
     margin: 0;
@@ -104,9 +104,21 @@ let gameState = {
   board: [],
   currentPlayer: 1,
   selected: null,
-  multiJumpInProgress: false,
-  multiJumpPos: null
 };
+
+// ** Lokale Bindung: Wer ist Weiß / Schwarz im Browser **
+// Falls noch nicht gesetzt: frage den User per prompt einmalig
+// Danach in localStorage speichern
+let playerColor = localStorage.getItem("dame_player_color");
+if (!playerColor) {
+  let choice;
+  do {
+    choice = prompt("Bist du Weiß oder Schwarz? (w/s)").toLowerCase();
+  } while (choice !== "w" && choice !== "s");
+  playerColor = (choice === "w") ? "1" : "2";
+  localStorage.setItem("dame_player_color", playerColor);
+}
+playerColor = parseInt(playerColor); // 1 oder 2
 
 function createInitialBoard() {
   const board = [];
@@ -134,71 +146,8 @@ function isOpponent(piece, player) {
   else return piece === 1 || piece === 11;
 }
 
-function cloneBoard(board) {
-  return board.map(row => row.slice());
-}
-
 function posInBounds(r, c) {
   return r >= 0 && r < 8 && c >= 0 && c < 8;
-}
-
-function getJumpsFrom(r, c, board, player) {
-  const piece = board[r][c];
-  if (!piece || ![player, player+10].includes(piece)) return [];
-  const directions = isDame(piece)
-    ? [[1,1],[1,-1],[-1,1],[-1,-1]]
-    : player === 1
-      ? [[-1,-1],[-1,1]]
-      : [[1,-1],[1,1]];
-
-  let jumps = [];
-
-  if (isDame(piece)) {
-    for (let [dr, dc] of directions) {
-      let stepR = r + dr;
-      let stepC = c + dc;
-      while (posInBounds(stepR, stepC) && board[stepR][stepC] === 0) {
-        stepR += dr;
-        stepC += dc;
-      }
-      if (posInBounds(stepR, stepC) && isOpponent(board[stepR][stepC], player)) {
-        let landR = stepR + dr;
-        let landC = stepC + dc;
-        if (posInBounds(landR, landC) && board[landR][landC] === 0) {
-          jumps.push({from: [r,c], over: [stepR,stepC], to: [landR,landC]});
-        }
-      }
-    }
-  } else {
-    for (let [dr, dc] of directions) {
-      const midR = r + dr;
-      const midC = c + dc;
-      const landR = r + 2*dr;
-      const landC = c + 2*dc;
-      if (posInBounds(landR, landC) &&
-          isOpponent(board[midR][midC], player) &&
-          board[landR][landC] === 0) {
-        jumps.push({from: [r,c], over: [midR,midC], to: [landR,landC]});
-      }
-    }
-  }
-  return jumps;
-}
-
-function canMoveWithoutJump(r, c, board, player) {
-  const piece = board[r][c];
-  if (!piece || ![player, player+10].includes(piece)) return false;
-  const directions = isDame(piece)
-    ? [[1,1],[1,-1],[-1,1],[-1,-1]]
-    : player === 1
-      ? [[-1,-1],[-1,1]]
-      : [[1,-1],[1,1]];
-  for (let [dr, dc] of directions) {
-    const nr = r + dr;
-    const nc = c + dc;
-    if (posInBounds(nr, nc) && board[nr][nc] === 0) return true;
-  }
-  return false;
 }
 
 function promoteIfNeeded(r, piece) {
@@ -214,9 +163,7 @@ function boardToString(board) {
 async function saveGame() {
   await setDoc(docRef, {
     board: boardToString(gameState.board),
-    currentPlayer: gameState.currentPlayer,
-    multiJumpInProgress: gameState.multiJumpInProgress,
-    multiJumpPos: gameState.multiJumpPos
+    currentPlayer: gameState.currentPlayer
   });
 }
 
@@ -240,73 +187,88 @@ function renderBoard() {
       boardElement.appendChild(cell);
     }
   }
+  // Anzeige, wer am Zug ist
   const playerText = gameState.currentPlayer === 1 ? "⚪ Weiß" : "⚫ Schwarz";
-  statusElement.textContent = `Am Zug: ${playerText}`;
+  // Anzeige, ob man selbst dran ist oder nicht
+  const isMyTurn = playerColor === gameState.currentPlayer;
+  statusElement.textContent = `Am Zug: ${playerText} ${isMyTurn ? "(Du)" : "(Gegner)"}`;
 }
 
 function arraysEqual(a,b) {
   return a.length === b.length && a.every((v,i) => v === b[i]);
 }
 
-function handleClick(r, c) {
+// KEIN Schmeißen-Zwang: Jeder Zug (Springen oder Ziehen) ist erlaubt
+
+function getValidMoves(r, c) {
   const piece = gameState.board[r][c];
+  if (!piece || ![gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) return [];
 
-  if (gameState.selected) {
-    const fromR = gameState.selected[0];
-    const fromC = gameState.selected[1];
+  const directions = isDame(piece)
+    ? [[1,1],[1,-1],[-1,1],[-1,-1]]
+    : gameState.currentPlayer === 1
+      ? [[-1,-1],[-1,1]]
+      : [[1,-1],[1,1]];
 
-    if (r === fromR && c === fromC) {
-      gameState.selected = null;
-      renderBoard();
-      return;
+  const moves = [];
+
+  // Normale Züge
+  for (const [dr, dc] of directions) {
+    const nr = r + dr;
+    const nc = c + dc;
+    if (posInBounds(nr, nc) && gameState.board[nr][nc] === 0) {
+      moves.push({from: [r,c], to: [nr,nc], capture: null});
     }
+  }
 
-    // Prüfe ob Zug gültig ist (normaler Zug oder Sprung)
-    const jumps = getJumpsFrom(fromR, fromC, gameState.board, gameState.currentPlayer);
-    const jump = jumps.find(j => arraysEqual(j.to, [r,c]));
+  // Sprünge
+  for (const [dr, dc] of directions) {
+    const midR = r + dr;
+    const midC = c + dc;
+    const landR = r + 2*dr;
+    const landC = c + 2*dc;
+    if (posInBounds(landR, landC) &&
+        isOpponent(gameState.board[midR][midC], gameState.currentPlayer) &&
+        gameState.board[landR][landC] === 0) {
+      moves.push({from: [r,c], to: [landR,landC], capture: [midR,midC]});
+    }
+  }
 
-    if (jump) {
-      // Sprung ausführen
-      gameState.board[jump.over[0]][jump.over[1]] = 0;
-      gameState.board[jump.to[0]][jump.to[1]] = promoteIfNeeded(jump.to[0], gameState.board[fromR][fromC]);
-      gameState.board[fromR][fromC] = 0;
+  return moves;
+}
+
+function handleClick(r, c) {
+  if (playerColor !== gameState.currentPlayer) return; // Nur eigener Zug!
+
+  const piece = gameState.board[r][c];
+  if (gameState.selected) {
+    // Prüfen, ob Klick auf möglichen Zug
+    const validMoves = getValidMoves(gameState.selected[0], gameState.selected[1]);
+    const chosenMove = validMoves.find(m => arraysEqual(m.to, [r,c]));
+    if (chosenMove) {
+      // Zug durchführen
+      gameState.board[chosenMove.to[0]][chosenMove.to[1]] = promoteIfNeeded(chosenMove.to[0], gameState.board[gameState.selected[0]][gameState.selected[1]]);
+      gameState.board[gameState.selected[0]][gameState.selected[1]] = 0;
+      if (chosenMove.capture) {
+        gameState.board[chosenMove.capture[0]][chosenMove.capture[1]] = 0;
+      }
       gameState.selected = null;
       gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
       saveGame();
       renderBoard();
       return;
     }
-
-    // Kein Sprung: Normaler Zug?
-    const directions = isDame(piece)
-      ? [[1,1],[1,-1],[-1,1],[-1,-1]]
-      : gameState.currentPlayer === 1
-        ? [[-1,-1],[-1,1]]
-        : [[1,-1],[1,1]];
-
-    if ([gameState.currentPlayer, gameState.currentPlayer+10].includes(gameState.board[fromR][fromC])) {
-      for (let [dr, dc] of directions) {
-        if (r === fromR + dr && c === fromC + dc && gameState.board[r][c] === 0) {
-          gameState.board[r][c] = promoteIfNeeded(r, gameState.board[fromR][fromC]);
-          gameState.board[fromR][fromC] = 0;
-          gameState.selected = null;
-          gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-          saveGame();
-          renderBoard();
-          return;
-        }
-      }
-    }
-
-    // Sonst neue Auswahl
-    if ([gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
-      gameState.selected = [r, c];
+    // Sonst neue Auswahl (falls eigene Figur)
+    if ([playerColor, playerColor + 10].includes(piece)) {
+      gameState.selected = [r,c];
+      renderBoard();
+    } else {
+      gameState.selected = null;
       renderBoard();
     }
   } else {
-    // Auswahl setzen nur bei eigenen Steinen
-    if ([gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
-      gameState.selected = [r, c];
+    if ([playerColor, playerColor + 10].includes(piece)) {
+      gameState.selected = [r,c];
       renderBoard();
     }
   }
@@ -317,8 +279,6 @@ function loadGame(data) {
     gameState.board = createInitialBoard();
     gameState.currentPlayer = 1;
     gameState.selected = null;
-    gameState.multiJumpInProgress = false;
-    gameState.multiJumpPos = null;
   } else {
     try {
       gameState.board = JSON.parse(data.board);
@@ -326,8 +286,6 @@ function loadGame(data) {
       gameState.board = createInitialBoard();
     }
     gameState.currentPlayer = data.currentPlayer || 1;
-    gameState.multiJumpInProgress = false;  // Wir ignorieren Sprungzwang komplett
-    gameState.multiJumpPos = null;
     gameState.selected = null;
   }
   renderBoard();
