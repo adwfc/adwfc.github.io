@@ -1,276 +1,389 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dame Online</title>
-  <style>
-    body {
-      margin: 0;
-      background: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-    }
-    .info {
-      color: white;
-      margin-bottom: 10px;
-      font-family: sans-serif;
-      font-size: 16px;
-      text-align: center;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      aspect-ratio: 1 / 1;
-      width: 90vmin;
-      max-width: 600px;
-      border: 4px solid black;
-    }
-    .cell {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .light { background: #f0d9b5; }
-    .dark  { background: #b58863; }
-    .stone {
-      width: 80%;
-      height: 80%;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2em;
-      background: none;
-    }
-    .selected {
-      outline: 3px solid yellow;
-      border-radius: 50%;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dame Online</title>
+<style>
+  body {
+    margin: 0;
+    background: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: white;
+  }
+  #status {
+    margin: 1rem;
+    font-size: 1.2rem;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    aspect-ratio: 1 / 1;
+    width: 90vmin;
+    max-width: 600px;
+    border: 4px solid #5a3e1b;
+    background: #b58863; /* dunkler Braunton */
+    box-sizing: border-box;
+  }
+  .cell {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+  }
+  .light {
+    background: #f0d9b5; /* hellbraun */
+  }
+  .dark {
+    background: #b58863; /* dunkelbraun */
+  }
+  .cell > div {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    right: 5%;
+    bottom: 5%;
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .stone {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+  }
+  .selected {
+    outline: 3px solid yellow;
+    box-shadow: 0 0 8px 3px yellow;
+  }
+</style>
 </head>
 <body>
 
-<div class="info" id="status">Lädt...</div>
-<div class="board" id="board"></div>
+<div id="status">Lädt...</div>
+<div id="board"></div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot,
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-    authDomain: "auth-adfwc.firebaseapp.com",
-    projectId: "auth-adfwc",
-    storageBucket: "auth-adfwc.appspot.com",
-    messagingSenderId: "221420792742",
-    appId: "1:221420792742:web:f75515331cb4c5b4603d"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+  authDomain: "auth-adfwc.firebaseapp.com",
+  projectId: "auth-adfwc",
+  storageBucket: "auth-adfwc.appspot.com",
+  messagingSenderId: "221420792742",
+  appId: "1:221420792742:web:f75515331cb4c5b4603d",
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const docRef = doc(db, "p", "dame");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const docRef = doc(db, "p", "dame");
 
-  const boardElement = document.getElementById("board");
-  const statusElement = document.getElementById("status");
+const boardElement = document.getElementById("board");
+const statusElement = document.getElementById("status");
 
-  const SYMBOLS = {
-    1: "⚪",
-    2: "⚫",
-    11: "👑⚪",
-    22: "👑⚫"
-  };
+const IMAGES = {
+  1: "../b/weiß.png",
+  2: "../b/schwarz.png",
+  11: "../b/weiß.png",  // Dame weiß (gleiche Bild)
+  22: "../b/schwarz.png" // Dame schwarz (gleiche Bild)
+};
 
-  const gameState = {
-    board: [],
-    currentPlayer: 1,
-    selected: null
-  };
+const DIRECTIONS = {
+  1: [[-1, -1], [-1, 1]],       // Weiß normal läuft nach oben
+  2: [[1, -1], [1, 1]],         // Schwarz normal läuft nach unten
+  11: [[-1, -1], [-1, 1], [1, -1], [1, 1]], // Dame läuft in alle Richtungen
+  22: [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+};
 
-  let playerSide = localStorage.getItem("dame_player");
-  if (!playerSide) {
-    playerSide = prompt("Bist du Weiß (1) oder Schwarz (2)? Gib 1 oder 2 ein:");
-    if (playerSide !== "1" && playerSide !== "2") playerSide = "1";
-    localStorage.setItem("dame_player", playerSide);
-  }
-  playerSide = parseInt(playerSide);
+const gameState = {
+  board: [],
+  currentPlayer: 1,
+  selected: null,
+  mustJumpPositions: [] // Pflicht-Schlagzüge Positionen (Mehrfachsprünge)
+};
 
-  function createInitialBoard() {
-    const board = [];
-    for (let r = 0; r < 8; r++) {
-      board[r] = [];
-      for (let c = 0; c < 8; c++) {
-        if ((r + c) % 2 === 1) {
-          if (r < 3) board[r][c] = 2;
-          else if (r > 4) board[r][c] = 1;
-          else board[r][c] = 0;
-        } else {
-          board[r][c] = 0;
-        }
-      }
-    }
-    return board;
-  }
+let playerSide = localStorage.getItem("dame_player");
+if (!playerSide) {
+  playerSide = prompt("Bist du Weiß (1) oder Schwarz (2)?\nGib 1 oder 2 ein:");
+  if (playerSide !== "1" && playerSide !== "2") playerSide = "1";
+  localStorage.setItem("dame_player", playerSide);
+}
+playerSide = parseInt(playerSide);
 
-  async function saveGame() {
-    await setDoc(docRef, {
-      board: JSON.stringify(gameState.board),
-      currentPlayer: gameState.currentPlayer
-    });
-  }
-
-  function renderBoard() {
-    boardElement.innerHTML = "";
-    statusElement.textContent = 
-      `Du spielst ${playerSide === 1 ? "⚪ Weiß" : "⚫ Schwarz"} — ` + 
-      `${gameState.currentPlayer === 1 ? "⚪ Weiß am Zug" : "⚫ Schwarz am Zug"}`;
-
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        const cell = document.createElement("div");
-        cell.className = "cell " + (((r + c) % 2 === 0) ? "light" : "dark");
-        const stone = gameState.board[r][c];
-        if (stone) {
-          const div = document.createElement("div");
-          div.className = "stone" + (gameState.selected?.r === r && gameState.selected?.c === c ? " selected" : "");
-          div.textContent = SYMBOLS[stone];
-          div.onclick = () => handleClick(r, c);
-          cell.appendChild(div);
-        } else {
-          cell.onclick = () => handleClick(r, c);
-        }
-        boardElement.appendChild(cell);
+function createInitialBoard() {
+  const board = [];
+  for (let r = 0; r < 8; r++) {
+    board[r] = [];
+    for (let c = 0; c < 8; c++) {
+      if ((r + c) % 2 === 1) {
+        if (r < 3) board[r][c] = 2;
+        else if (r > 4) board[r][c] = 1;
+        else board[r][c] = 0;
+      } else {
+        board[r][c] = 0;
       }
     }
   }
+  return board;
+}
 
-  function handleClick(r, c) {
-    if (gameState.currentPlayer !== playerSide) return;
+async function saveGame() {
+  await setDoc(docRef, {
+    board: JSON.stringify(gameState.board),
+    currentPlayer: gameState.currentPlayer,
+  });
+}
 
-    const sel = gameState.selected;
-    const stone = gameState.board[r][c];
+function renderBoard() {
+  boardElement.innerHTML = "";
+  statusElement.textContent =
+    `Du spielst ${playerSide === 1 ? "Weiß ⚪" : "Schwarz ⚫"} – ` +
+    `${gameState.currentPlayer === 1 ? "Weiß am Zug ⚪" : "Schwarz am Zug ⚫"}`;
 
-    if (stone && (stone % 10) === playerSide) {
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const cell = document.createElement("div");
+      cell.className = (r + c) % 2 === 0 ? "cell light" : "cell dark";
+
+      const stone = gameState.board[r][c];
+      if (stone) {
+        const pieceDiv = document.createElement("div");
+        pieceDiv.onclick = () => handleClick(r, c);
+        if (
+          gameState.selected &&
+          gameState.selected.r === r &&
+          gameState.selected.c === c
+        ) {
+          pieceDiv.classList.add("selected");
+        }
+        const img = document.createElement("img");
+        img.src = IMAGES[stone];
+        img.className = "stone";
+        pieceDiv.appendChild(img);
+        cell.appendChild(pieceDiv);
+      } else {
+        cell.onclick = () => handleClick(r, c);
+      }
+      boardElement.appendChild(cell);
+    }
+  }
+}
+
+function opponent(player) {
+  return player === 1 ? 2 : 1;
+}
+
+// Check ob ein Spieler einen Schlag machen kann (Pflichtschlag ermitteln)
+function getAllJumpPositions(player, board) {
+  const jumps = [];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      if ((board[r][c] % 10) === player) {
+        if (canJump(r, c, board[r][c], board)) {
+          jumps.push({ r, c });
+        }
+      }
+    }
+  }
+  return jumps;
+}
+
+function canJump(r, c, stone, board) {
+  const dirs = DIRECTIONS[stone];
+  for (const [dr, dc] of dirs) {
+    const midR = r + dr;
+    const midC = c + dc;
+    const toR = r + dr * 2;
+    const toC = c + dc * 2;
+    if (
+      toR >= 0 &&
+      toR < 8 &&
+      toC >= 0 &&
+      toC < 8 &&
+      midR >= 0 &&
+      midR < 8 &&
+      midC >= 0 &&
+      midC < 8
+    ) {
+      if (
+        board[toR][toC] === 0 &&
+        board[midR][midC] !== 0 &&
+        (board[midR][midC] % 10) !== (stone % 10)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isValidMove(fromR, fromC, toR, toC, stone, board) {
+  if (board[toR][toC] !== 0) return false;
+  const dr = toR - fromR;
+  const dc = toC - fromC;
+  if (Math.abs(dr) !== Math.abs(dc)) return false;
+
+  const absDr = Math.abs(dr);
+  if (absDr > 2 || absDr < 1) return false;
+
+  const dirs = DIRECTIONS[stone];
+  if (!dirs.some(([dR, dC]) => dR === Math.sign(dr) && dC === Math.sign(dc)))
+    return false;
+
+  if (absDr === 1) {
+    // Normaler Zug (ohne springen)
+    // Nur erlaubt, wenn keine Sprungzüge existieren (Pflichtsprung)
+    if (getAllJumpPositions(stone % 10, board).length > 0) return false;
+    return true;
+  } else if (absDr === 2) {
+    // Sprung
+    const midR = fromR + dr / 2;
+    const midC = fromC + dc / 2;
+    const midStone = board[midR][midC];
+    if (
+      midStone !== 0 &&
+      (midStone % 10) !== (stone % 10) &&
+      board[toR][toC] === 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Führt den Zug aus, inklusive Schlag und Dame-Krönung
+function doMove(fromR, fromC, toR, toC) {
+  const stone = gameState.board[fromR][fromC];
+  gameState.board[toR][toC] = stone;
+  gameState.board[fromR][fromC] = 0;
+
+  // Schlag entfernen
+  if (Math.abs(toR - fromR) === 2) {
+    const midR = (toR + fromR) / 2;
+    const midC = (toC + fromC) / 2;
+    gameState.board[midR][midC] = 0;
+  }
+
+  // Dame-Krönung
+  if (stone === 1 && toR === 0) gameState.board[toR][toC] = 11;
+  if (stone === 2 && toR === 7) gameState.board[toR][toC] = 22;
+}
+
+// Prüft, ob nach einem Schlag weitere Sprünge von der neuen Position möglich sind
+function canContinueJump(r, c) {
+  const stone = gameState.board[r][c];
+  return canJump(r, c, stone, gameState.board);
+}
+
+function handleClick(r, c) {
+  if (gameState.currentPlayer !== playerSide) return; // Nicht dein Zug
+
+  const stone = gameState.board[r][c];
+  const sel = gameState.selected;
+
+  if (sel === null) {
+    // Auswahl des eigenen Steins
+    if (stone !== 0 && (stone % 10) === playerSide) {
+      // Falls es Pflichtsprünge gibt, darf man nur die Steine auswählen, die springen können
+      const mustJump = getAllJumpPositions(playerSide, gameState.board);
+      if (mustJump.length > 0) {
+        if (!mustJump.some(pos => pos.r === r && pos.c === c)) return;
+      }
       gameState.selected = { r, c };
       renderBoard();
-      return;
     }
+  } else {
+    // Versuchen zu ziehen
+    if (isValidMove(sel.r, sel.c, r, c, gameState.board[sel.r][sel.c], gameState.board)) {
+      doMove(sel.r, sel.c, r, c);
 
-    if (sel) {
-      const sr = sel.r;
-      const sc = sel.c;
-      const piece = gameState.board[sr][sc];
-      const dr = r - sr;
-      const dc = c - sc;
-
-      if (gameState.board[r][c] === 0) {
-        if (piece >= 10) {  
-          if (Math.abs(dr) === Math.abs(dc)) {
-            const result = checkDameCapture(sr, sc, r, c);
-            if (result.canMove) {
-              if (result.captured) gameState.board[result.captured.r][result.captured.c] = 0;
-              gameState.board[r][c] = piece;
-              gameState.board[sr][sc] = 0;
-              endTurn();
-            }
-          }
-        } else {  
-          const forward = (playerSide === 1) ? -1 : 1;
-          if (Math.abs(dr) === 1 && Math.abs(dc) === 1 && dr === forward) {
-            gameState.board[r][c] = piece;
-            gameState.board[sr][sc] = 0;
-            if ((playerSide === 1 && r === 0) || (playerSide === 2 && r === 7)) {
-              gameState.board[r][c] = 10 + playerSide;
-            }
-            endTurn();
-          }
-          if (Math.abs(dr) === 2 && Math.abs(dc) === 2) {
-            const mr = sr + dr / 2;
-            const mc = sc + dc / 2;
-            const middlePiece = gameState.board[mr][mc];
-            if (middlePiece && (middlePiece % 10) !== playerSide) {
-              gameState.board[r][c] = piece;
-              gameState.board[sr][sc] = 0;
-              gameState.board[mr][mc] = 0;
-              if ((playerSide === 1 && r === 0) || (playerSide === 2 && r === 7)) {
-                gameState.board[r][c] = 10 + playerSide;
-              }
-              endTurn();
-            }
-          }
-        }
+      if (Math.abs(r - sel.r) === 2 && canContinueJump(r, c)) {
+        // Mehrfachsprung möglich: gleiche Auswahl behalten
+        gameState.selected = { r, c };
+      } else {
+        // Zug beendet
+        gameState.selected = null;
+        gameState.currentPlayer = opponent(gameState.currentPlayer);
       }
-    }
-  }
 
-  function checkDameCapture(sr, sc, r, c) {
-    const stepR = (r > sr) ? 1 : -1;
-    const stepC = (c > sc) ? 1 : -1;
-    let tr = sr + stepR;
-    let tc = sc + stepC;
-    let captured = null;
-    while (tr !== r && tc !== c) {
-      const field = gameState.board[tr][tc];
-      if (field !== 0) {
-        if (!captured && (field % 10) !== playerSide) {
-          captured = { r: tr, c: tc };
-        } else {
-          return { canMove: false };
-        }
-      }
-      tr += stepR;
-      tc += stepC;
-    }
-    return { canMove: true, captured };
-  }
-
-  function endTurn() {
-    gameState.selected = null;
-    gameState.currentPlayer = (gameState.currentPlayer === 1) ? 2 : 1;
-    renderBoard();
-    saveGame();
-  }
-
-  function startNewGame() {
-    gameState.board = createInitialBoard();
-    gameState.currentPlayer = 1;
-    saveGame();
-  }
-
-  async function loadGame() {
-    const snap = await getDoc(docRef);
-    if (snap.exists() && snap.data()?.board) {
-      try {
-        gameState.board = JSON.parse(snap.data().board);
-        if (!Array.isArray(gameState.board)) throw new Error("Kein gültiges Spielbrett.");
-        gameState.currentPlayer = snap.data().currentPlayer ?? 1;
-      } catch (e) {
-        startNewGame();
-      }
+      saveGame();
+      renderBoard();
     } else {
-      startNewGame();
+      // Falls Spieler auf eigenen Stein klickt, Auswahl ändern
+      if (stone !== 0 && (stone % 10) === playerSide) {
+        const mustJump = getAllJumpPositions(playerSide, gameState.board);
+        if (mustJump.length > 0) {
+          if (!mustJump.some(pos => pos.r === r && pos.c === c)) return;
+        }
+        gameState.selected = { r, c };
+        renderBoard();
+      }
     }
-    renderBoard();
   }
+}
 
-  loadGame();
+async function startNewGame() {
+  gameState.board = createInitialBoard();
+  gameState.currentPlayer = 1;
+  gameState.selected = null;
+  await saveGame();
+  renderBoard();
+}
 
-  onSnapshot(docRef, (snapshot) => {
-    const data = snapshot.data();
-    if (data && typeof data.board === "string") {
-      try {
+async function loadGame() {
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    try {
+      const data = snap.data();
+      if (data.board) {
         gameState.board = JSON.parse(data.board);
         gameState.currentPlayer = data.currentPlayer ?? 1;
-        renderBoard();
-      } catch (e) { }
+      } else {
+        gameState.board = createInitialBoard();
+        gameState.currentPlayer = 1;
+      }
+    } catch {
+      gameState.board = createInitialBoard();
+      gameState.currentPlayer = 1;
     }
-  });
+  } else {
+    gameState.board = createInitialBoard();
+    gameState.currentPlayer = 1;
+  }
+  renderBoard();
+}
 
+loadGame();
+
+onSnapshot(docRef, (snapshot) => {
+  const data = snapshot.data();
+  if (data && typeof data.board === "string") {
+    try {
+      gameState.board = JSON.parse(data.board);
+      gameState.currentPlayer = data.currentPlayer ?? 1;
+      gameState.selected = null;
+      renderBoard();
+    } catch {}
+  }
+});
 </script>
 
 </body>
