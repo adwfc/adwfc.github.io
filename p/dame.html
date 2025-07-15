@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dame mit Firebase</title>
+<style>
+  body {
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; margin: 0; background: #333; font-family: Arial, sans-serif;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    border: 4px solid #000;
+  }
+  .cell {
+    width: 60px; height: 60px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer;
+  }
+  .light {
+    background-color: #eee;
+  }
+  .dark {
+    background-color: #444;
+  }
+  .piece {
+    width: 50px; height: 50px;
+    border-radius: 50%; overflow: hidden;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none;
+  }
+  .piece img {
+    width: 100%; height: 100%; object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+  .player1 {
+    background-color: white;
+  }
+  .player2 {
+    background-color: #222;
+  }
+  .selected {
+    outline: 3px solid yellow;
+  }
+</style>
+</head>
+<body>
+  <div class="board" id="board"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.appspot.com",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const docRef = doc(db, "p", "dame");
+
+  const boardElem = document.getElementById("board");
+
+  // Initiales Board-Setup: 0 = leer, 1 = weiß, 2 = schwarz
+  // Vereinfachtes Anfangs-Setup mit nur Steinen, keine Damen-Logik hier
+  const initialBoard = [
+    [0,2,0,2,0,2,0,2],
+    [2,0,2,0,2,0,2,0],
+    [0,2,0,2,0,2,0,2],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [1,0,1,0,1,0,1,0],
+    [0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1,0]
+  ];
+
+  let gameState = {
+    board: initialBoard,
+    currentPlayer: 1,
+    selected: null // [row,col] der gewählten Figur
+  };
+
+  // Bild-URLs (als Beispiel; du musst die Bilder auf deinem Server/GitHub haben)
+  const images = {
+    1: "https://i.postimg.cc/xT8DddV6/white.png",
+    2: "https://i.postimg.cc/9Q8Z9VwC/black.png"
+  };
+
+  function renderBoard(state) {
+    boardElem.innerHTML = "";
+    for(let r=0; r<8; r++) {
+      for(let c=0; c<8; c++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.classList.add((r+c)%2===0 ? "light" : "dark");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+
+        const pieceVal = state.board[r][c];
+        if(pieceVal > 0) {
+          const piece = document.createElement("div");
+          piece.classList.add("piece");
+          piece.classList.add(pieceVal === 1 ? "player1" : "player2");
+          const img = document.createElement("img");
+          img.src = images[pieceVal];
+          // Bild leicht zufällig drehen (nur 0°, 90°, 180°, 270°)
+          const rotations = [0, 90, 180, 270];
+          const rot = rotations[Math.floor(Math.random()*rotations.length)];
+          img.style.transform = `rotate(${rot}deg)`;
+          piece.appendChild(img);
+
+          // Markiere ausgewählte Figur
+          if(state.selected && state.selected[0] === r && state.selected[1] === c) {
+            piece.classList.add("selected");
+          }
+
+          cell.appendChild(piece);
+        }
+        boardElem.appendChild(cell);
+      }
+    }
+  }
+
+  // Primitiver Zug: Wenn ausgewählt, bewege Figur, falls Zielfeld leer und diagonal 1 Schritt
+  function canMove(state, from, to) {
+    const [fr, fc] = from;
+    const [tr, tc] = to;
+    if(state.board[tr][tc] !== 0) return false; // Zielfeld frei?
+    const piece = state.board[fr][fc];
+    if(piece !== state.currentPlayer) return false; // Spielerzug?
+    const dr = tr - fr;
+    const dc = Math.abs(tc - fc);
+    if(dc !== 1) return false; // diagonal 1 Feld?
+    if(piece === 1 && dr !== -1) return false; // weiß zieht nach oben
+    if(piece === 2 && dr !== 1) return false; // schwarz zieht nach unten
+    return true;
+  }
+
+  async function makeMove(from, to) {
+    if(!canMove(gameState, from, to)) return false;
+    // Update Board
+    const [fr, fc] = from;
+    const [tr, tc] = to;
+    gameState.board[tr][tc] = gameState.board[fr][fc];
+    gameState.board[fr][fc] = 0;
+    gameState.selected = null;
+    // Spieler wechseln
+    gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+    renderBoard(gameState);
+    // Spielstand speichern
+    await setDoc(docRef, {
+      board: gameState.board,
+      currentPlayer: gameState.currentPlayer
+    });
+    return true;
+  }
+
+  boardElem.addEventListener("click", async e => {
+    if(!e.target.classList.contains("cell") && !e.target.parentElement.classList.contains("cell")) return;
+    const cell = e.target.classList.contains("cell") ? e.target : e.target.parentElement;
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    const piece = gameState.board[r][c];
+
+    if(gameState.selected) {
+      // Versuche Zug
+      const moved = await makeMove(gameState.selected, [r,c]);
+      if(!moved && piece === gameState.currentPlayer) {
+        // Neue Auswahl
+        gameState.selected = [r,c];
+        renderBoard(gameState);
+      }
+    } else {
+      if(piece === gameState.currentPlayer) {
+        gameState.selected = [r,c];
+        renderBoard(gameState);
+      }
+    }
+  });
+
+  // Lade Spielstand von Firestore
+  async function loadGame() {
+    const docSnap = await getDoc(docRef);
+    if(docSnap.exists()) {
+      const data = docSnap.data();
+      gameState.board = data.board || initialBoard;
+      gameState.currentPlayer = data.currentPlayer || 1;
+    } else {
+      gameState.board = initialBoard;
+      gameState.currentPlayer = 1;
+      // Speichere initial
+      await setDoc(docRef, {
+        board: initialBoard,
+        currentPlayer: 1
+      });
+    }
+    renderBoard(gameState);
+  }
+
+  // Echtzeit-Listener
+  onSnapshot(docRef, (docSnap) => {
+    if(docSnap.exists()) {
+      const data = docSnap.data();
+      gameState.board = data.board;
+      gameState.currentPlayer = data.currentPlayer;
+      gameState.selected = null;
+      renderBoard(gameState);
+    }
+  });
+
+  loadGame();
+
+</script>
+</body>
+</html>
