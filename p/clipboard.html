@@ -176,30 +176,31 @@
     }
   });
 
-fileInput.addEventListener("change", async () => {
-  const file = fileInput.files[0];
-  if (!file) return;
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
 
-  status.textContent = "📤 Lade Datei hoch...";
-  const formData = new FormData();
-  formData.append("file", file);
+    status.textContent = "📤 Lade Datei hoch...";
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
-      method: "POST",
-      body: formData
-    });
+    try {
+      const res = await fetch("https://tmpfiles.org/api/v1/upload", {
+        method: "POST",
+        body: formData
+      });
 
-    if (!res.ok) throw new Error("Upload fehlgeschlagen");
+      if (!res.ok) throw new Error("Upload fehlgeschlagen");
 
-    const data = await res.json();
-    uploadedFileUrl = "https://tmpfiles.org" + data.data.url;
-    status.textContent = "✅ Datei hochgeladen!";
-  } catch (err) {
-    status.textContent = "❌ Upload fehlgeschlagen.";
-    console.error(err);
-  }
-});
+      const data = await res.json();
+      // Entferne fehlerhaftes "http//" am Anfang, damit Browser https:// ergänzt
+      uploadedFileUrl = data.data.url.replace(/^http\/\/?/, "");
+      status.textContent = "✅ Datei hochgeladen!";
+    } catch (err) {
+      status.textContent = "❌ Upload fehlgeschlagen.";
+      console.error(err);
+    }
+  });
   
   saveBtn.addEventListener("click", async () => {
     const content = textInput.value.trim();
@@ -254,7 +255,7 @@ fileInput.addEventListener("change", async () => {
     await navigator.clipboard.writeText(textInput.value);
   });
 </script>
-
+  
 
 </body>
 </html>
