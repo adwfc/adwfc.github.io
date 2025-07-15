@@ -1,54 +1,59 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dame mit Firebase</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dame Online</title>
 <style>
   body {
-    display: flex; justify-content: center; align-items: center;
-    height: 100vh; margin: 0; background: #333; font-family: Arial, sans-serif;
+    margin: 0;
+    background: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
   }
   .board {
     display: grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
-    border: 4px solid #000;
+    grid-template-columns: repeat(8, 80px);
+    grid-template-rows: repeat(8, 80px);
+    border: 5px solid black;
   }
   .cell {
-    width: 60px; height: 60px;
-    display: flex; justify-content: center; align-items: center;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .light { background: #ccc; }
+  .dark  { background: #555; }
+
+  .piece {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.2);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
   }
-  .light {
-    background-color: #eee;
-  }
-  .dark {
-    background-color: #444;
-  }
-  .piece {
-    width: 50px; height: 50px;
-    border-radius: 50%; overflow: hidden;
-    display: flex; justify-content: center; align-items: center;
-    user-select: none;
-  }
   .piece img {
-    width: 100%; height: 100%; object-fit: contain;
-    transition: transform 0.3s ease;
-  }
-  .player1 {
-    background-color: white;
-  }
-  .player2 {
-    background-color: #222;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: rotate(0deg);
   }
   .selected {
-    outline: 3px solid yellow;
+    outline: 4px solid yellow;
   }
 </style>
 </head>
 <body>
-  <div class="board" id="board"></div>
+
+<div class="board" id="board"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -69,155 +74,199 @@
 
   const boardElem = document.getElementById("board");
 
-  // Initiales Board-Setup: 0 = leer, 1 = weiß, 2 = schwarz
-  // Vereinfachtes Anfangs-Setup mit nur Steinen, keine Damen-Logik hier
-  const initialBoard = [
-    [0,2,0,2,0,2,0,2],
-    [2,0,2,0,2,0,2,0],
-    [0,2,0,2,0,2,0,2],
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0],
-    [1,0,1,0,1,0,1,0],
-    [0,1,0,1,0,1,0,1],
-    [1,0,1,0,1,0,1,0]
-  ];
+  const IMAGES = {
+    1: "../b/weiß.png",
+    2: "../b/schwarz.png",
+    11: "../b/weiß.png",   // Dame benutzt dasselbe Bild, unterscheidet sich aber in den Regeln
+    22: "../b/schwarz.png"
+  };
 
   let gameState = {
-    board: initialBoard,
+    board: [],
     currentPlayer: 1,
-    selected: null // [row,col] der gewählten Figur
+    selected: null
   };
 
-  // Bild-URLs (als Beispiel; du musst die Bilder auf deinem Server/GitHub haben)
-  const images = {
-    1: "https://i.postimg.cc/xT8DddV6/white.png",
-    2: "https://i.postimg.cc/9Q8Z9VwC/black.png"
-  };
+  function createInitialBoard() {
+    const b = [];
+    for(let r=0; r<8; r++) {
+      b[r] = [];
+      for(let c=0; c<8; c++) {
+        if(r<3 && (r+c)%2 === 1) b[r][c] = 2;
+        else if(r>4 && (r+c)%2 === 1) b[r][c] = 1;
+        else b[r][c] = 0;
+      }
+    }
+    return b;
+  }
 
-  function renderBoard(state) {
+  function renderBoard() {
     boardElem.innerHTML = "";
     for(let r=0; r<8; r++) {
       for(let c=0; c<8; c++) {
         const cell = document.createElement("div");
         cell.classList.add("cell");
-        cell.classList.add((r+c)%2===0 ? "light" : "dark");
+        cell.classList.add((r+c)%2 === 0 ? "light" : "dark");
         cell.dataset.row = r;
         cell.dataset.col = c;
 
-        const pieceVal = state.board[r][c];
-        if(pieceVal > 0) {
+        const val = gameState.board[r][c];
+        if(val !== 0) {
           const piece = document.createElement("div");
           piece.classList.add("piece");
-          piece.classList.add(pieceVal === 1 ? "player1" : "player2");
           const img = document.createElement("img");
-          img.src = images[pieceVal];
-          // Bild leicht zufällig drehen (nur 0°, 90°, 180°, 270°)
-          const rotations = [0, 90, 180, 270];
-          const rot = rotations[Math.floor(Math.random()*rotations.length)];
-          img.style.transform = `rotate(${rot}deg)`;
+          img.src = IMAGES[val];
+          img.style.transform = `rotate(${Math.floor(Math.random()*4)*90}deg)`;
           piece.appendChild(img);
 
-          // Markiere ausgewählte Figur
-          if(state.selected && state.selected[0] === r && state.selected[1] === c) {
+          if(gameState.selected && gameState.selected[0] === r && gameState.selected[1] === c) {
             piece.classList.add("selected");
           }
 
           cell.appendChild(piece);
         }
+
         boardElem.appendChild(cell);
       }
     }
   }
 
-  // Primitiver Zug: Wenn ausgewählt, bewege Figur, falls Zielfeld leer und diagonal 1 Schritt
-  function canMove(state, from, to) {
-    const [fr, fc] = from;
-    const [tr, tc] = to;
-    if(state.board[tr][tc] !== 0) return false; // Zielfeld frei?
-    const piece = state.board[fr][fc];
-    if(piece !== state.currentPlayer) return false; // Spielerzug?
-    const dr = tr - fr;
-    const dc = Math.abs(tc - fc);
-    if(dc !== 1) return false; // diagonal 1 Feld?
-    if(piece === 1 && dr !== -1) return false; // weiß zieht nach oben
-    if(piece === 2 && dr !== 1) return false; // schwarz zieht nach unten
-    return true;
+  function getMoves(from) {
+    const [r,c] = from;
+    const val = gameState.board[r][c];
+    if(val === 0) return [];
+
+    const isDame = val > 10;
+    const player = val % 10;
+
+    const dirs = isDame ? [[1,1],[1,-1],[-1,1],[-1,-1]] :
+                (player === 1 ? [[-1,1],[-1,-1]] : [[1,1],[1,-1]]);
+
+    const moves = [];
+
+    for(const [dr, dc] of dirs) {
+      let nr = r+dr;
+      let nc = c+dc;
+
+      if(isDame) {
+        while(nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          if(gameState.board[nr][nc] === 0) {
+            moves.push([nr, nc]);
+          } else {
+            if(gameState.board[nr][nc]%10 !== player) {
+              let afterR = nr+dr;
+              let afterC = nc+dc;
+              while(afterR >= 0 && afterR < 8 && afterC >= 0 && afterC < 8 && gameState.board[afterR][afterC] === 0) {
+                moves.push([afterR, afterC, nr, nc]);  // optionaler Schlag
+                afterR += dr;
+                afterC += dc;
+              }
+            }
+            break;
+          }
+          nr += dr;
+          nc += dc;
+        }
+      } else {
+        if(nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          if(gameState.board[nr][nc] === 0) {
+            moves.push([nr, nc]);
+          } else if(gameState.board[nr][nc]%10 !== player) {
+            const afterR = nr+dr;
+            const afterC = nc+dc;
+            if(afterR >= 0 && afterR < 8 && afterC >= 0 && afterC < 8 && gameState.board[afterR][afterC] === 0) {
+              moves.push([afterR, afterC, nr, nc]);  // optionaler Schlag
+            }
+          }
+        }
+      }
+    }
+
+    return moves;
   }
 
-  async function makeMove(from, to) {
-    if(!canMove(gameState, from, to)) return false;
-    // Update Board
-    const [fr, fc] = from;
-    const [tr, tc] = to;
-    gameState.board[tr][tc] = gameState.board[fr][fc];
-    gameState.board[fr][fc] = 0;
+  async function tryMove(toR, toC) {
+    const [r,c] = gameState.selected;
+    const val = gameState.board[r][c];
+    const moves = getMoves([r,c]);
+
+    for(const move of moves) {
+      const [mr, mc] = move;
+      if(mr === toR && mc === toC) {
+        if(move.length === 4) {
+          const [_,__,sr,sc] = move;
+          gameState.board[sr][sc] = 0;  // Schlagen
+        }
+
+        gameState.board[toR][toC] = val;
+        gameState.board[r][c] = 0;
+
+        // Dame werden
+        if(val === 1 && toR === 0) gameState.board[toR][toC] = 11;
+        if(val === 2 && toR === 7) gameState.board[toR][toC] = 22;
+
+        gameState.currentPlayer = (gameState.currentPlayer === 1) ? 2 : 1;
+        gameState.selected = null;
+
+        renderBoard();
+        await saveGame();
+        return;
+      }
+    }
     gameState.selected = null;
-    // Spieler wechseln
-    gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-    renderBoard(gameState);
-    // Spielstand speichern
+    renderBoard();
+  }
+
+  boardElem.addEventListener("click", async (e) => {
+    const cell = e.target.closest(".cell");
+    if(!cell) return;
+
+    const r = parseInt(cell.dataset.row);
+    const c = parseInt(cell.dataset.col);
+    const val = gameState.board[r][c];
+
+    if(gameState.selected) {
+      await tryMove(r,c);
+    } else if(val !== 0 && val%10 === gameState.currentPlayer) {
+      gameState.selected = [r,c];
+      renderBoard();
+    }
+  });
+
+  async function saveGame() {
     await setDoc(docRef, {
       board: gameState.board,
       currentPlayer: gameState.currentPlayer
     });
-    return true;
   }
 
-  boardElem.addEventListener("click", async e => {
-    if(!e.target.classList.contains("cell") && !e.target.parentElement.classList.contains("cell")) return;
-    const cell = e.target.classList.contains("cell") ? e.target : e.target.parentElement;
-    const r = parseInt(cell.dataset.row);
-    const c = parseInt(cell.dataset.col);
-    const piece = gameState.board[r][c];
-
-    if(gameState.selected) {
-      // Versuche Zug
-      const moved = await makeMove(gameState.selected, [r,c]);
-      if(!moved && piece === gameState.currentPlayer) {
-        // Neue Auswahl
-        gameState.selected = [r,c];
-        renderBoard(gameState);
-      }
-    } else {
-      if(piece === gameState.currentPlayer) {
-        gameState.selected = [r,c];
-        renderBoard(gameState);
-      }
-    }
-  });
-
-  // Lade Spielstand von Firestore
   async function loadGame() {
-    const docSnap = await getDoc(docRef);
-    if(docSnap.exists()) {
-      const data = docSnap.data();
-      gameState.board = data.board || initialBoard;
-      gameState.currentPlayer = data.currentPlayer || 1;
+    const snap = await getDoc(docRef);
+    if(snap.exists()) {
+      const data = snap.data();
+      gameState.board = data.board;
+      gameState.currentPlayer = data.currentPlayer;
     } else {
-      gameState.board = initialBoard;
+      gameState.board = createInitialBoard();
       gameState.currentPlayer = 1;
-      // Speichere initial
-      await setDoc(docRef, {
-        board: initialBoard,
-        currentPlayer: 1
-      });
+      await saveGame();
     }
-    renderBoard(gameState);
+    gameState.selected = null;
+    renderBoard();
   }
 
-  // Echtzeit-Listener
-  onSnapshot(docRef, (docSnap) => {
-    if(docSnap.exists()) {
-      const data = docSnap.data();
+  onSnapshot(docRef, (snap) => {
+    if(snap.exists()) {
+      const data = snap.data();
       gameState.board = data.board;
       gameState.currentPlayer = data.currentPlayer;
       gameState.selected = null;
-      renderBoard(gameState);
+      renderBoard();
     }
   });
 
   loadGame();
-
 </script>
+
 </body>
 </html>
