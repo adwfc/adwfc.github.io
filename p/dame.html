@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dame Online mit Mehrfach-Schlag</title>
+<title>Dame Online (kein Schmeißen-Zwang)</title>
 <style>
   body {
     margin: 0;
-    background: #7f5835; /* ursprünglicher Braunton */
+    background: #7f5835;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -29,7 +29,7 @@
     grid-template-rows: repeat(8, 11vw);
     max-width: 90vmin;
     max-height: 90vmin;
-    border: 4px solid #4b3115; /* dunkler Braunrahmen */
+    border: 4px solid #4b3115;
     box-sizing: border-box;
   }
   .cell {
@@ -43,8 +43,8 @@
     box-sizing: border-box;
     cursor: pointer;
   }
-  .light { background: #c4a47e; }  /* helleres Braun, wie du es hattest */
-  .dark  { background: #6b4c27; }  /* dunkler Braun, original */
+  .light { background: #c4a47e; }
+  .dark  { background: #6b4c27; }
 
   .piece {
     width: 85%;
@@ -154,9 +154,7 @@ function getJumpsFrom(r, c, board, player) {
   let jumps = [];
 
   if (isDame(piece)) {
-    const forwardDirs = player === 1 ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]];
-
-    for (let [dr, dc] of forwardDirs) {
+    for (let [dr, dc] of directions) {
       let stepR = r + dr;
       let stepC = c + dc;
       while (posInBounds(stepR, stepC) && board[stepR][stepC] === 0) {
@@ -185,17 +183,6 @@ function getJumpsFrom(r, c, board, player) {
     }
   }
   return jumps;
-}
-
-function playerHasJumps(board, player) {
-  for (let r=0; r<8; r++) {
-    for (let c=0; c<8; c++) {
-      if ([player, player+10].includes(board[r][c])) {
-        if (getJumpsFrom(r,c,board,player).length > 0) return true;
-      }
-    }
-  }
-  return false;
 }
 
 function canMoveWithoutJump(r, c, board, player) {
@@ -262,13 +249,6 @@ function arraysEqual(a,b) {
 }
 
 function handleClick(r, c) {
-  if (gameState.multiJumpInProgress) {
-    if (!gameState.selected || !arraysEqual(gameState.selected, gameState.multiJumpPos)) {
-      alert("Du musst mit demselben Stein weiter schlagen!");
-      return;
-    }
-  }
-
   const piece = gameState.board[r][c];
 
   if (gameState.selected) {
@@ -281,44 +261,23 @@ function handleClick(r, c) {
       return;
     }
 
-    // Prüfe, ob ein Sprung möglich ist
+    // Prüfe ob Zug gültig ist (normaler Zug oder Sprung)
     const jumps = getJumpsFrom(fromR, fromC, gameState.board, gameState.currentPlayer);
     const jump = jumps.find(j => arraysEqual(j.to, [r,c]));
+
     if (jump) {
-      // Ausführen Sprung
+      // Sprung ausführen
       gameState.board[jump.over[0]][jump.over[1]] = 0;
       gameState.board[jump.to[0]][jump.to[1]] = promoteIfNeeded(jump.to[0], gameState.board[fromR][fromC]);
       gameState.board[fromR][fromC] = 0;
-
-      // Prüfen, ob weiterer Sprung möglich ist
-      const furtherJumps = getJumpsFrom(jump.to[0], jump.to[1], gameState.board, gameState.currentPlayer);
-      if (furtherJumps.length > 0) {
-        gameState.multiJumpInProgress = true;
-        gameState.multiJumpPos = jump.to;
-        gameState.selected = jump.to;
-      } else {
-        gameState.multiJumpInProgress = false;
-        gameState.multiJumpPos = null;
-        gameState.selected = null;
-        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-      }
+      gameState.selected = null;
+      gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
       saveGame();
       renderBoard();
       return;
     }
 
-    if (gameState.multiJumpInProgress) {
-      alert("Du musst weiter schlagen!");
-      return;
-    }
-
-    // Wenn kein Sprung: prüfen, ob normaler Zug möglich (nur, wenn kein Sprung verfügbar)
-    if (playerHasJumps(gameState.board, gameState.currentPlayer)) {
-      alert("Du musst schlagen, wenn möglich!");
-      return;
-    }
-
-    // Normale Züge prüfen
+    // Kein Sprung: Normaler Zug?
     const directions = isDame(piece)
       ? [[1,1],[1,-1],[-1,1],[-1,-1]]
       : gameState.currentPlayer === 1
@@ -339,13 +298,13 @@ function handleClick(r, c) {
       }
     }
 
-    // Sonst Auswahl neu setzen
+    // Sonst neue Auswahl
     if ([gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
       gameState.selected = [r, c];
       renderBoard();
     }
   } else {
-    // Keine Auswahl: nur eigene Steine auswählbar
+    // Auswahl setzen nur bei eigenen Steinen
     if ([gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
       gameState.selected = [r, c];
       renderBoard();
@@ -367,8 +326,8 @@ function loadGame(data) {
       gameState.board = createInitialBoard();
     }
     gameState.currentPlayer = data.currentPlayer || 1;
-    gameState.multiJumpInProgress = data.multiJumpInProgress || false;
-    gameState.multiJumpPos = data.multiJumpPos || null;
+    gameState.multiJumpInProgress = false;  // Wir ignorieren Sprungzwang komplett
+    gameState.multiJumpPos = null;
     gameState.selected = null;
   }
   renderBoard();
