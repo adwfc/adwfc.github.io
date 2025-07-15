@@ -7,7 +7,7 @@
 <style>
   body {
     margin: 0;
-    background: #5a3e1b; /* brauner Hintergrund */
+    background: #7f5835; /* ursprünglicher Braunton */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -29,7 +29,7 @@
     grid-template-rows: repeat(8, 11vw);
     max-width: 90vmin;
     max-height: 90vmin;
-    border: 4px solid #3a260d;
+    border: 4px solid #4b3115; /* dunkler Braunrahmen */
     box-sizing: border-box;
   }
   .cell {
@@ -43,8 +43,8 @@
     box-sizing: border-box;
     cursor: pointer;
   }
-  .light { background: #deb887; }  /* heller Braunton */
-  .dark  { background: #6b4f2a; }  /* dunkler Braunton */
+  .light { background: #c4a47e; }  /* helleres Braun, wie du es hattest */
+  .dark  { background: #6b4c27; }  /* dunkler Braun, original */
 
   .piece {
     width: 85%;
@@ -142,7 +142,6 @@ function posInBounds(r, c) {
   return r >= 0 && r < 8 && c >= 0 && c < 8;
 }
 
-// Prüft alle möglichen Schläge von einem Feld aus (r,c) für aktuellen Spieler
 function getJumpsFrom(r, c, board, player) {
   const piece = board[r][c];
   if (!piece || ![player, player+10].includes(piece)) return [];
@@ -155,10 +154,6 @@ function getJumpsFrom(r, c, board, player) {
   let jumps = [];
 
   if (isDame(piece)) {
-    // Dame kann über beliebig viele Felder diagonal springen, aber nur geradeaus schlagen
-    // Hier laut Regeln: Dame darf in alle Richtungen schlagen, aber geradeaus schlagen
-    // Du hattest gesagt Schlagen nur geradeaus (also vorwärts Richtung?)
-    // Um einfache Regel zu befolgen: Dame schlägt nur geradeaus (Richtung Spieler)
     const forwardDirs = player === 1 ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]];
 
     for (let [dr, dc] of forwardDirs) {
@@ -192,7 +187,6 @@ function getJumpsFrom(r, c, board, player) {
   return jumps;
 }
 
-// Prüft, ob für einen Spieler irgendwo Schläge möglich sind
 function playerHasJumps(board, player) {
   for (let r=0; r<8; r++) {
     for (let c=0; c<8; c++) {
@@ -268,7 +262,6 @@ function arraysEqual(a,b) {
 }
 
 function handleClick(r, c) {
-  // Falls Mehrfach-Schlag aktiv, nur weiterer Sprung mit demselben Stein erlaubt
   if (gameState.multiJumpInProgress) {
     if (!gameState.selected || !arraysEqual(gameState.selected, gameState.multiJumpPos)) {
       alert("Du musst mit demselben Stein weiter schlagen!");
@@ -279,92 +272,66 @@ function handleClick(r, c) {
   const piece = gameState.board[r][c];
 
   if (gameState.selected) {
-    // Versuche Zug oder Sprung mit gewähltem Stein
     const fromR = gameState.selected[0];
     const fromC = gameState.selected[1];
 
     if (r === fromR && c === fromC) {
-      // Abwahl
       gameState.selected = null;
       renderBoard();
       return;
     }
 
-    // Prüfe ob Zug ein erlaubter Schlag ist
+    // Prüfe, ob ein Sprung möglich ist
     const jumps = getJumpsFrom(fromR, fromC, gameState.board, gameState.currentPlayer);
-    const isJump = jumps.some(j => arraysEqual(j.to, [r,c]));
+    const jump = jumps.find(j => arraysEqual(j.to, [r,c]));
+    if (jump) {
+      // Ausführen Sprung
+      gameState.board[jump.over[0]][jump.over[1]] = 0;
+      gameState.board[jump.to[0]][jump.to[1]] = promoteIfNeeded(jump.to[0], gameState.board[fromR][fromC]);
+      gameState.board[fromR][fromC] = 0;
 
-    if (gameState.multiJumpInProgress) {
-      // Nur Sprung erlaubt, kein normaler Zug
-      if (!isJump) {
-        alert("Du musst weiterschlagen!");
-        return;
-      }
-    }
-
-    if (isJump) {
-      // Führe Schlag aus
-      const jump = jumps.find(j => arraysEqual(j.to, [r,c]));
-      if (!jump) return;
-      let newBoard = cloneBoard(gameState.board);
-      newBoard[jump.to[0]][jump.to[1]] = newBoard[fromR][fromC];
-      newBoard[fromR][fromC] = 0;
-      newBoard[jump.over[0]][jump.over[1]] = 0;
-
-      // Dame falls nötig
-      newBoard[jump.to[0]][jump.to[1]] = promoteIfNeeded(jump.to[0], newBoard[jump.to[0]][jump.to[1]]);
-
-      gameState.board = newBoard;
-      gameState.selected = jump.to;
-
-      // Prüfe ob weiterer Schlag möglich ist mit diesem Stein
-      const moreJumps = getJumpsFrom(jump.to[0], jump.to[1], gameState.board, gameState.currentPlayer);
-      if (moreJumps.length > 0) {
+      // Prüfen, ob weiterer Sprung möglich ist
+      const furtherJumps = getJumpsFrom(jump.to[0], jump.to[1], gameState.board, gameState.currentPlayer);
+      if (furtherJumps.length > 0) {
         gameState.multiJumpInProgress = true;
         gameState.multiJumpPos = jump.to;
+        gameState.selected = jump.to;
       } else {
         gameState.multiJumpInProgress = false;
         gameState.multiJumpPos = null;
         gameState.selected = null;
         gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
       }
-
       saveGame();
       renderBoard();
       return;
     }
 
-    // Kein Sprung: Prüfe normalen Zug (nur wenn Mehrfach-Schlag nicht aktiv)
-    if (!gameState.multiJumpInProgress) {
-      // Normale Züge (einen Schritt diagonal)
-      const piece = gameState.board[fromR][fromC];
-      const isDamePiece = isDame(piece);
+    if (gameState.multiJumpInProgress) {
+      alert("Du musst weiter schlagen!");
+      return;
+    }
 
-      const dr = r - fromR;
-      const dc = c - fromC;
+    // Wenn kein Sprung: prüfen, ob normaler Zug möglich (nur, wenn kein Sprung verfügbar)
+    if (playerHasJumps(gameState.board, gameState.currentPlayer)) {
+      alert("Du musst schlagen, wenn möglich!");
+      return;
+    }
 
-      // Zug darf nur 1 Feld diagonal sein
-      if (Math.abs(dr) === 1 && Math.abs(dc) === 1) {
-        // Nicht erlauben wenn irgendwo ein Sprung möglich ist (Regel: Schlag optional, also nicht zwingend)
-        // Da du nicht möchtest dass man springen muss, erlauben wir normalen Zug jederzeit
-        // Nur gültiger Zug für Spieler
-        if (gameState.board[r][c] === 0 && [gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
-          // Für nicht-Dame darf Zug nur vorwärts sein
-          if (!isDamePiece) {
-            if ((gameState.currentPlayer === 1 && dr !== -1) ||
-                (gameState.currentPlayer === 2 && dr !== 1)) {
-              alert("Normale Steine dürfen nur vorwärts ziehen.");
-              return;
-            }
-          }
-          // Zug ausführen
-          let newBoard = cloneBoard(gameState.board);
-          newBoard[r][c] = newBoard[fromR][fromC];
-          newBoard[fromR][fromC] = 0;
-          newBoard[r][c] = promoteIfNeeded(r, newBoard[r][c]);
-          gameState.board = newBoard;
-          gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+    // Normale Züge prüfen
+    const directions = isDame(piece)
+      ? [[1,1],[1,-1],[-1,1],[-1,-1]]
+      : gameState.currentPlayer === 1
+        ? [[-1,-1],[-1,1]]
+        : [[1,-1],[1,1]];
+
+    if ([gameState.currentPlayer, gameState.currentPlayer+10].includes(gameState.board[fromR][fromC])) {
+      for (let [dr, dc] of directions) {
+        if (r === fromR + dr && c === fromC + dc && gameState.board[r][c] === 0) {
+          gameState.board[r][c] = promoteIfNeeded(r, gameState.board[fromR][fromC]);
+          gameState.board[fromR][fromC] = 0;
           gameState.selected = null;
+          gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
           saveGame();
           renderBoard();
           return;
@@ -372,13 +339,13 @@ function handleClick(r, c) {
       }
     }
 
-    // Wenn nichts passt: neue Auswahl, falls Feld mit eigenem Stein
+    // Sonst Auswahl neu setzen
     if ([gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
       gameState.selected = [r, c];
       renderBoard();
     }
   } else {
-    // Keine Auswahl: Auswahl nur eigener Steine erlauben
+    // Keine Auswahl: nur eigene Steine auswählbar
     if ([gameState.currentPlayer, gameState.currentPlayer + 10].includes(piece)) {
       gameState.selected = [r, c];
       renderBoard();
@@ -407,13 +374,10 @@ function loadGame(data) {
   renderBoard();
 }
 
-// Firebase Echtzeit-Listener
 onSnapshot(docRef, (docSnap) => {
   if (docSnap.exists()) {
     loadGame(docSnap.data());
-    statusElement.textContent = `Am Zug: ${gameState.currentPlayer === 1 ? "⚪ Weiß" : "⚫ Schwarz"}`;
   } else {
-    // Initial laden wenn nix da
     saveGame();
   }
 }, (err) => {
@@ -421,7 +385,6 @@ onSnapshot(docRef, (docSnap) => {
   console.error(err);
 });
 
-// Initial starten
 statusElement.textContent = "Verbinde...";
 </script>
 
