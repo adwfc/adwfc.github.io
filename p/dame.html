@@ -3,35 +3,377 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dame Online mit Spielerbindung</title>
+<title>Dame mit Firebase Sync</title>
 <style>
-  body {
-    margin: 0;
-    background: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    color: white;
-    font-family: sans-serif;
-  }
-  #status {
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-  }
-  .board {
+  body { font-family: Arial, sans-serif; text-align:center; }
+  #board {
     display: grid;
-    grid-template-columns: repeat(8, 80px);
-    grid-template-rows: repeat(8, 80px);
-    border: 5px solid black;
+    grid-template-columns: repeat(8, 50px);
+    grid-template-rows: repeat(8, 50px);
+    margin: 20px auto;
+    width: 400px;
+    border: 2px solid #333;
   }
   .cell {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 50px;
+    height: 50px;
   }
-  .light {
-    
+  .dark { background-color: #769656; }
+  .light { background-color: #eeeed2; }
+  .selected { outline: 3px solid red; }
+  img.stone {
+    width: 44px;
+    height: 44px;
+    user-select: none;
+    pointer-events: none;
+  }
+  #status {
+    margin-top: 15px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Dame Spiel (mit Firebase Sync)</h1>
+<div id="status">Verbinde zu Firebase...</div>
+<div id="board"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+  authDomain: "auth-adfwc.firebaseapp.com",
+  projectId: "auth-adfwc",
+  storageBucket: "auth-adfwc.appspot.com",
+  messagingSenderId: "221420792742",
+  appId: "1:221420792742:web:f75515331cb4c5b4603d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const docRef = doc(db, "p", "dame");
+
+const boardElement = document.getElementById("board");
+const statusEl = document.getElementById("status");
+
+const IMAGES = {
+  1: "https://upload.wikimedia.org/wikipedia/commons/3/3b/Checker_white.png",
+  2: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Checker_black.png",
+  11: "https://upload.wikimedia.org/wikipedia/commons/5/50/Checker_white_king.png",
+  22: "https://upload.wikimedia.org/wikipedia/commons/0/09/Checker_black_king.png"
+};
+
+const gameState = {
+  board: [],
+  currentPlayer: 1,
+  selected: null,
+  mustContinueJump: false,
+  jumpFrom: null,
+  playerColor: null // 1 oder 2, wird durch Prompt gesetzt
+};
+
+function createInitialBoard() {
+  const board = [];
+  for (let r = 0; r < 8; r++) {
+    board[r] = [];
+    for (let c = 0; c < 8; c++) {
+      if ((r + c) % 2 === 1) {
+        if (r < 3) board[r][c] = 2;
+        else if (r > 4) board[r][c] = 1;
+        else board[r][c] = 0;
+      } else {
+        board[r][c] = 0;
+      }
+    }
+  }
+  return board;
+}
+
+function renderBoard() {
+  boardElement.innerHTML = "";
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell " + (((r + c) % 2 === 0) ? "light" : "dark");
+      const stone = gameState.board[r][c];
+      if (stone) {
+        const img = document.createElement("img");
+        img.src = IMAGES[stone];
+        img.className = "stone";
+        cell.appendChild(img);
+      }
+      if (gameState.selected && gameState.selected[0] === r && gameState.selected[1] === c) {
+        cell.classList.add("selected");
+      }
+      cell.onclick = () => handleClick(r, c);
+      boardElement.appendChild(cell);
+    }
+  }
+  updateStatus();
+}
+
+function updateStatus() {
+  if (gameState.mustContinueJump) {
+    statusEl.textContent = `Spieler ${gameState.currentPlayer} muss weiteren Sprung machen. Du spielst als ${gameState.playerColor === 1 ? "Weiß" : "Schwarz"}.`;
+  } else {
+    statusEl.textContent = `Spieler ${gameState.currentPlayer} ist am Zug. Du spielst als ${gameState.playerColor === 1 ? "Weiß" : "Schwarz"}.`;
+  }
+  if (gameState.currentPlayer !== gameState.playerColor) {
+    statusEl.textContent += " (Bitte warten, bis Gegner gezogen hat)";
+  }
+}
+
+function isOpponent(player, stone) {
+  if (!stone) return false;
+  if (player === 1) return stone === 2 || stone === 22;
+  if (player === 2) return stone === 1 || stone === 11;
+  return false;
+}
+
+function isOwnPiece(player, stone) {
+  if (!stone) return false;
+  if (player === 1) return stone === 1 || stone === 11;
+  if (player === 2) return stone === 2 || stone === 22;
+  return false;
+}
+
+function isKing(stone) {
+  return stone === 11 || stone === 22;
+}
+
+function canMoveOrJump(fromR, fromC, toR, toC) {
+  const stone = gameState.board[fromR][fromC];
+  if (!stone) return false;
+  const player = gameState.currentPlayer;
+  if (!isOwnPiece(player, stone)) return false;
+
+  const dr = toR - fromR;
+  const dc = toC - fromC;
+
+  if (gameState.board[toR][toC] !== 0) return false;
+
+  if (Math.abs(dr) === 2 && Math.abs(dc) === 2) {
+    const midR = fromR + dr/2;
+    const midC = fromC + dc/2;
+    const middle = gameState.board[midR][midC];
+    if (isOpponent(player, middle)) {
+      if (!isKing(stone)) {
+        if (player === 1 && dr !== -2) return false;
+        if (player === 2 && dr !== 2) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  if (Math.abs(dr) === 1 && Math.abs(dc) === 1) {
+    if (gameState.mustContinueJump) return false;
+    if (!isKing(stone)) {
+      if (player === 1 && dr !== -1) return false;
+      if (player === 2 && dr !== 1) return false;
+    }
+    return true;
+  }
+
+  if (isKing(stone)) {
+    if (Math.abs(dr) === Math.abs(dc) && Math.abs(dr) > 1) {
+      const stepR = dr / Math.abs(dr);
+      const stepC = dc / Math.abs(dc);
+      let countOpponent = 0;
+      for (let i = 1; i < Math.abs(dr); i++) {
+        const rCheck = fromR + i*stepR;
+        const cCheck = fromC + i*stepC;
+        const piece = gameState.board[rCheck][cCheck];
+        if (piece === 0) continue;
+        if (isOpponent(player, piece)) countOpponent++;
+        else return false;
+      }
+      if (countOpponent === 1) return true;
+      return false;
+    }
+  }
+
+  return false;
+}
+
+function canJumpFrom(r, c) {
+  const stone = gameState.board[r][c];
+  if (!stone) return false;
+  const player = gameState.currentPlayer;
+
+  if (isKing(stone)) {
+    const directions = [[1,1],[1,-1],[-1,1],[-1,-1]];
+    for (const [dr, dc] of directions) {
+      let i = 1;
+      let opponentFound = false;
+      while (true) {
+        const nr = r + i*dr;
+        const nc = c + i*dc;
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
+        const cell = gameState.board[nr][nc];
+        if (cell === 0) {
+          if (opponentFound) return true;
+          i++;
+          continue;
+        }
+        if (isOpponent(player, cell)) {
+          if (opponentFound) break;
+          opponentFound = true;
+          i++;
+          continue;
+        }
+        break;
+      }
+    }
+    return false;
+  } else {
+    const directions = (player === 1) ? [[-2, -2], [-2, 2]] : [[2, -2], [2, 2]];
+    for (const [dr, dc] of directions) {
+      const nr = r + dr;
+      const nc = c + dc;
+      if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) continue;
+      if (canMoveOrJump(r, c, nr, nc)) return true;
+    }
+    return false;
+  }
+}
+
+function doMove(fromR, fromC, toR, toC) {
+  const stone = gameState.board[fromR][fromC];
+  const player = gameState.currentPlayer;
+  const dr = toR - fromR;
+  const dc = toC - fromC;
+
+  if (Math.abs(dr) > 1) {
+    const stepR = dr / Math.abs(dr);
+    const stepC = dc / Math.abs(dc);
+    for (let i = 1; i < Math.abs(dr); i++) {
+      const rCheck = fromR + i*stepR;
+      const cCheck = fromC + i*stepC;
+      if (isOpponent(player, gameState.board[rCheck][cCheck])) {
+        gameState.board[rCheck][cCheck] = 0;
+        break;
+      }
+    }
+    gameState.board[toR][toC] = stone;
+    gameState.board[fromR][fromC] = 0;
+
+    if (canJumpFrom(toR, toC)) {
+      gameState.mustContinueJump = true;
+      gameState.jumpFrom = [toR, toC];
+      gameState.selected = [toR, toC];
+    } else {
+      gameState.mustContinueJump = false;
+      gameState.jumpFrom = null;
+      gameState.selected = null;
+      gameState.currentPlayer = player === 1 ? 2 : 1;
+    }
+  } else {
+    gameState.board[toR][toC] = stone;
+    gameState.board[fromR][fromC] = 0;
+    gameState.mustContinueJump = false;
+    gameState.jumpFrom = null;
+    gameState.selected = null;
+    gameState.currentPlayer = player === 1 ? 2 : 1;
+  }
+
+  if (!isKing(stone)) {
+    if (player === 1 && toR === 0) gameState.board[toR][toC] = 11;
+    if (player === 2 && toR === 7) gameState.board[toR][toC] = 22;
+  }
+}
+
+function handleClick(r, c) {
+  if (gameState.currentPlayer !== gameState.playerColor) {
+    alert("Du bist nicht am Zug!");
+    return;
+  }
+
+  const stone = gameState.board[r][c];
+  const player = gameState.currentPlayer;
+
+  if (gameState.mustContinueJump) {
+    if (!(gameState.jumpFrom && gameState.jumpFrom[0] === r && gameState.jumpFrom[1] === c)) {
+      alert("Du musst den Sprung fortsetzen!");
+      return;
+    }
+  }
+
+  if (gameState.selected) {
+    const [selR, selC] = gameState.selected;
+    if (canMoveOrJump(selR, selC, r, c)) {
+      doMove(selR, selC, r, c);
+      saveGame();
+      renderBoard();
+    } else {
+      if (isOwnPiece(player, stone)) {
+        gameState.selected = [r, c];
+        renderBoard();
+      }
+    }
+  } else {
+    if (isOwnPiece(player, stone)) {
+      gameState.selected = [r, c];
+      renderBoard();
+    }
+  }
+}
+
+async function saveGame() {
+  try {
+    await setDoc(docRef, {
+      board: JSON.stringify(gameState.board),
+      currentPlayer: gameState.currentPlayer,
+      mustContinueJump: gameState.mustContinueJump,
+      jumpFrom: gameState.jumpFrom ? JSON.stringify(gameState.jumpFrom) : null
+    });
+  } catch(e) {
+    console.error("Fehler beim Speichern:", e);
+  }
+}
+
+async function initGame() {
+  // Spielerfarbe festlegen
+  let color = prompt("Spielerfarbe wählen: 1 für Weiß, 2 für Schwarz");
+  if (color !== "1" && color !== "2") {
+    alert("Ungültige Farbe, nehme Weiß (1) an.");
+    color = "1";
+  }
+  gameState.playerColor = Number(color);
+
+  // Listener auf Firestore-Dokument einrichten für Live-Updates
+  onSnapshot(docRef, (docSnap) => {
+    if (!docSnap.exists()) {
+      // Neues Spiel initialisieren
+      gameState.board = createInitialBoard();
+      gameState.currentPlayer = 1;
+      gameState.mustContinueJump = false;
+      gameState.jumpFrom = null;
+      saveGame();
+      statusEl.textContent = "Neues Spiel gestartet.";
+    } else {
+      const data = docSnap.data();
+      if (data.board) gameState.board = JSON.parse(data.board);
+      if (data.currentPlayer) gameState.currentPlayer = data.currentPlayer;
+      if (data.mustContinueJump !== undefined) gameState.mustContinueJump = data.mustContinueJump;
+      if (data.jumpFrom) gameState.jumpFrom = JSON.parse(data.jumpFrom);
+      else gameState.jumpFrom = null;
+      gameState.selected = null;
+      renderBoard();
+      statusEl.textContent = `Verbunden. Du spielst als ${gameState.playerColor === 1 ? "Weiß" : "Schwarz"}. Spieler ${gameState.currentPlayer} ist am Zug.`;
+    }
+  }, (error) => {
+    statusEl.textContent = "Fehler bei Firebase-Verbindung: " + error;
+  });
+}
+
+initGame();
+
+</script>
+
+</body>
+</html>
