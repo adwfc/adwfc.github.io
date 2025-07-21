@@ -2,39 +2,34 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Push-Benachrichtigungs-Test</title>
+  <title>Push Test mit Service Worker</title>
 </head>
 <body>
-  <h1>Push-Benachrichtigungstest</h1>
-  <p>Alle 30 Sekunden wird eine Benachrichtigung ausgelöst.</p>
-  <button onclick="startNotifications()">Benachrichtigungen starten</button>
+  <h1>Push-Test mit Service Worker</h1>
+  <button onclick="startPush()">Benachrichtigungen aktivieren</button>
 
   <script>
-    let intervalId;
-
-    function startNotifications() {
-      if (!("Notification" in window)) {
-        alert("Dieser Browser unterstützt keine Benachrichtigungen.");
+    async function startPush() {
+      if (!('serviceWorker' in navigator)) {
+        alert('Service Worker nicht unterstützt.');
         return;
       }
 
-      Notification.requestPermission().then(function(permission) {
-        if (permission !== "granted") {
-          alert("Benachrichtigungen wurden nicht erlaubt.");
-          return;
-        }
+      const reg = await navigator.serviceWorker.register('sw.js');
+      console.log('Service Worker registriert:', reg);
 
-        if (intervalId) clearInterval(intervalId);
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('Benachrichtigungen blockiert.');
+        return;
+      }
 
-        intervalId = setInterval(() => {
-          new Notification("Test-Benachrichtigung", {
-            body: "Das ist eine Testnachricht (" + new Date().toLocaleTimeString() + ")",
-            icon: "https://upload.wikimedia.org/wikipedia/commons/3/3a/OOjs_UI_icon_notice.svg"
-          });
-        }, 30000);
+      // Alle 30 Sekunden eine Notification vom Service Worker
+      setInterval(() => {
+        reg.active.postMessage('show-notification');
+      }, 30000);
 
-        alert("Benachrichtigungen werden nun alle 30 Sekunden gesendet.");
-      });
+      alert('Benachrichtigungen werden nun im Hintergrund angezeigt.');
     }
   </script>
 </body>
