@@ -4,7 +4,7 @@
 
   let sheepStar = {
     angle: 0,
-    y: h / 2,
+    y: 0,
     radius: 8,
     alpha: 1.0,
     color: 'red',
