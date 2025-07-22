@@ -117,4 +117,4 @@ export function stopSheep(container) {
   clearInterval(schafInterval);
   cancelAnimationFrame(animationFrameId);
   if (container) container.innerHTML = '';
-}sheep
+}
