@@ -15,18 +15,7 @@
       width: 100vw;
       height: 100vh;
     }
-    #sheepThumbnail {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 80px;
-      height: 80px;
-      cursor: pointer;
-      z-index: 10;
-      border-radius: 12px;
-      border: 2px solid white;
-      background: white;
-    }
+
     #lightboxOverlay {
       display: none;
       position: fixed;
@@ -40,7 +29,7 @@
       position: relative;
       width: 80vw;
       height: 60vh;
-      background: rgba(0,0,0,0.8);
+      background: #222;
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 0 20px rgba(255,255,255,0.5);
@@ -61,7 +50,6 @@
       z-index: 101;
     }
 
-    /* Sheep / Hill Styles */
     .huegel {
       position: absolute;
       bottom: 0;
@@ -70,14 +58,11 @@
       width: 130vw;
       height: 80vh;
       background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-      border-top-left-radius: 60vw;
-      border-top-right-radius: 60vw;
-      border-bottom-left-radius: 60vw;
-      border-bottom-right-radius: 60vw;
+      border-radius: 60vw;
       box-shadow: 0 5px 15px rgba(0,0,0,0.5);
       user-select: none;
       pointer-events: none;
-      margin-bottom: -60vh;
+      margin-bottom: -35vh;
       overflow: visible;
       z-index: 5;
     }
@@ -116,8 +101,8 @@
     .schaf-nummer {
       position: absolute;
       width: 5cm;
-      top: calc(50% - 100px);
-      left: calc(50% - 130px);
+      top: calc(50% - 20px);
+      left: 50%;
       transform: translate(-50%, -50%);
       font-size: 1.2rem;
       font-weight: bold;
@@ -132,8 +117,6 @@
 <body>
 
 <canvas id="starCanvas"></canvas>
-
-<img id="sheepThumbnail" src="schaf.png" alt="Schaf" title="Schaf ansehen" />
 
 <div id="lightboxOverlay">
   <div id="lightboxContent">
@@ -162,22 +145,16 @@
     sheepContainer.innerHTML = '';
   }
 
-  closeLightbox.addEventListener('click', closeLightboxFunc);
+  // Exportieren für Zugriff in stars.js
+  window.openLightbox = openLightbox;
 
+  closeLightbox.addEventListener('click', closeLightboxFunc);
   lightboxOverlay.addEventListener('click', e => {
     if (e.target === lightboxOverlay) {
       closeLightboxFunc();
     }
   });
-
-  // Für den Sternenhimmel-Schaf-Klick:
-  import { registerSheepClickCallback } from './stars.js';
-
-  registerSheepClickCallback(() => {
-    openLightbox();
-  });
 </script>
-
 
 </body>
 </html>
