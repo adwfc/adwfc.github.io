@@ -12,16 +12,18 @@
   resize();
   window.addEventListener('resize', resize);
 
+  const sheepImage = new Image();
+  sheepImage.src = 'schaf.png';
+
   const starCount = 100;
   const bgStarCount = 50;
-
   const maxStars = 600;
   const maxBgStars = 300;
 
   const stars = [];
   const bgStars = [];
 
-  for(let i = 0; i < starCount; i++) {
+  for (let i = 0; i < starCount; i++) {
     stars.push({
       angle: Math.random() * Math.PI * 2,
       y: Math.random() * h,
@@ -31,7 +33,7 @@
     });
   }
 
-  for(let i = 0; i < bgStarCount; i++) {
+  for (let i = 0; i < bgStarCount; i++) {
     bgStars.push({
       angle: Math.random() * Math.PI * 2,
       y: Math.random() * h,
@@ -54,7 +56,8 @@
   let lastDragY = 0;
   let lastDistance = null;
 
-  const anchorAngle = 0;
+  const sheepAngle = Math.PI * 1.25;  // z.B. 225 Grad
+  const sheepY = h / 2;
 
   function angleToScreenX(angleDiff, fov) {
     return (angleDiff + fov / 2) / fov * w;
@@ -68,7 +71,6 @@
 
       if (diff > -fov/2 && diff < fov/2) {
         const screenX = angleToScreenX(diff, fov);
-
         const centerY = h / 2;
         const offsetY = (star.y - centerY) * zoomFactor + verticalOffset;
         const screenY = centerY + offsetY;
@@ -83,12 +85,12 @@
   }
 
   function updateStarsForZoom() {
-    const zoomRange = 3; 
+    const zoomRange = 3;
     const zoomProgress = (zoomFactor - 1) / zoomRange;
     const speedFactor = 1.5;
 
     const targetStarsCount = Math.floor(starCount + (maxStars - starCount) * Math.min(zoomProgress * speedFactor, 1));
-    while(stars.length < targetStarsCount) {
+    while (stars.length < targetStarsCount) {
       stars.push({
         angle: Math.random() * Math.PI * 2,
         y: Math.random() * h,
@@ -97,18 +99,12 @@
         targetAlpha: 0.7
       });
     }
-
-    for(let i = stars.length -1; i >= targetStarsCount; i--) {
-      if(stars[i].alpha > 0) {
-        stars[i].alpha -= 0.05;
-        if(stars[i].alpha < 0) stars[i].alpha = 0;
-      } else {
-        stars.splice(i, 1);
-      }
+    while (stars.length > targetStarsCount) {
+      stars.pop();
     }
 
     const targetBgStarsCount = Math.floor(bgStarCount + (maxBgStars - bgStarCount) * Math.min(zoomProgress * speedFactor, 1));
-    while(bgStars.length < targetBgStarsCount) {
+    while (bgStars.length < targetBgStarsCount) {
       bgStars.push({
         angle: Math.random() * Math.PI * 2,
         y: Math.random() * h,
@@ -117,27 +113,49 @@
         targetAlpha: 0.25 + Math.random() * 0.15
       });
     }
-    for(let i = bgStars.length -1; i >= targetBgStarsCount; i--) {
-      if(bgStars[i].alpha > 0) {
-        bgStars[i].alpha -= 0.05;
-        if(bgStars[i].alpha < 0) bgStars[i].alpha = 0;
-      } else {
-        bgStars.splice(i, 1);
+    while (bgStars.length > targetBgStarsCount) {
+      bgStars.pop();
+    }
+  }
+
+  function drawDegreeMarkers(fov) {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+
+    const totalMarkers = 360 / 100;
+    for (let i = 0; i <= totalMarkers; i++) {
+      const deg = i * 100;
+      let markerAngle = deg * Math.PI / 180;
+      let diff = markerAngle - cameraAngle;
+      if (diff > Math.PI) diff -= 2 * Math.PI;
+      if (diff < -Math.PI) diff += 2 * Math.PI;
+
+      if (diff > -fov/2 && diff < fov/2) {
+        const screenX = angleToScreenX(diff, fov);
+        ctx.fillText(deg + '°', screenX, 20);
       }
     }
+  }
 
-    stars.forEach(star => {
-      if(star.alpha < star.targetAlpha) {
-        star.alpha += 0.01;
-        if(star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
-      }
-    });
-    bgStars.forEach(star => {
-      if(star.alpha < star.targetAlpha) {
-        star.alpha += 0.01;
-        if(star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
-      }
-    });
+  function drawSheep(fov) {
+    let diff = sheepAngle - cameraAngle;
+    if (diff > Math.PI) diff -= 2 * Math.PI;
+    if (diff < -Math.PI) diff += 2 * Math.PI;
+
+    if (diff > -fov/2 && diff < fov/2) {
+      const screenX = angleToScreenX(diff, fov);
+      const centerY = h / 2 + verticalOffset;
+      const size = 60;
+
+      ctx.drawImage(sheepImage, screenX - size/2, centerY - size/2, size, size);
+
+      ctx.beginPath();
+      ctx.arc(screenX, centerY, size/2, 0, Math.PI * 2);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+    }
   }
 
   function draw() {
@@ -151,18 +169,9 @@
     drawStars(bgStars, fov);
     drawStars(stars, fov);
 
-    let diffAnchor = anchorAngle - cameraAngle;
-    if (diffAnchor > Math.PI) diffAnchor -= 2 * Math.PI;
-    if (diffAnchor < -Math.PI) diffAnchor += 2 * Math.PI;
+    drawDegreeMarkers(fov);
 
-    if (diffAnchor > -fov/2 && diffAnchor < fov/2) {
-      const anchorX = angleToScreenX(diffAnchor, fov);
-      const anchorY = h / 2 + verticalOffset;
-      ctx.fillStyle = 'red';
-      ctx.beginPath();
-      ctx.arc(anchorX, anchorY, 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    drawSheep(fov);
   }
 
   function animate() {
@@ -192,11 +201,9 @@
 
     if (verticalOffset > bounceLimit) {
       verticalOffset -= returnSpeed;
-      if (verticalOffset < bounceLimit) verticalOffset = bounceLimit;
       verticalVelocity = 0;
     } else if (verticalOffset < -bounceLimit) {
       verticalOffset += returnSpeed;
-      if (verticalOffset > -bounceLimit) verticalOffset = -bounceLimit;
       verticalVelocity = 0;
     }
 
@@ -259,7 +266,6 @@
   function pointerUp(e) {
     isDragging = false;
     lastDistance = null;
-
     velocity *= 0.9;
     zoomVelocity *= 0.9;
   }
