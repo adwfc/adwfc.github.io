@@ -108,14 +108,16 @@ function verteileGras(huegel) {
   }
 }
 
-function verteileBlumen(huegel) {
-  const anzahl = 5;
+function verteileBlumen() {
   const w = huegel.clientWidth;
   const h = huegel.clientHeight;
-  const sichtbarerBereich = h - (35 / 100 * window.innerHeight);
+  const anzahlBlumen = 5;
 
-  for (let i = 0; i < anzahl; i++) {
-    let x, y, versuche = 0;
+  const sichtbarerBereich = h * 0.65;  // Beschränkt auf obere 65% des Hügels
+
+  for (let i = 0; i < anzahlBlumen; i++) {
+    let x, y;
+    let versuche = 0;
     do {
       x = Math.random() * w;
       y = Math.random() * sichtbarerBereich;
@@ -123,12 +125,7 @@ function verteileBlumen(huegel) {
       if (versuche > 200) break;
     } while (!istImHalbkreis(x, y, w, h));
 
-    const blume = document.createElement('img');
-    blume.src = 'blume.png';
-    blume.alt = 'Blume';
-    blume.className = 'blume';
-    blume.style.left = `${x}px`;
-    blume.style.top = `${y}px`;
+    const blume = erstelleBlume(x, y);
     huegel.appendChild(blume);
   }
 }
