@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sternenhimmel mit Schaf-Lightbox</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+    font-family: sans-serif;
+  }
+  #starCanvas {
+    display: block;
+    touch-action: none;
+    width: 100vw;
+    height: 100vh;
+  }
+  #sheepThumbnail {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 12px;
+    border: 2px solid white;
+    background: white;
+  }
+  /* Lightbox */
+  #lightboxOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+  }
+  #lightboxContent {
+    position: relative;
+    width: 80vw;
+    height: 60vh;
+    background: #222;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+  }
+  #sheepContainer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  #closeLightbox {
+    position: absolute;
+    top: 10px; right: 15px;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    z-index: 101;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+
+<!-- Schaf Thumbnail -->
+<img id="sheepThumbnail" src="schaf.png" alt="Schaf" title="Schaf ansehen" />
+
+<!-- Lightbox -->
+<div id="lightboxOverlay">
+  <div id="lightboxContent">
+    <div id="closeLightbox">&times;</div>
+    <div id="sheepContainer"></div>
+  </div>
+</div>
+
+<script src="stars.js"></script>
+<script type="module">
+  import { initSheep, stopSheep } from './sheep.js';
+
+  const sheepThumbnail = document.getElementById('sheepThumbnail');
+  const lightboxOverlay = document.getElementById('lightboxOverlay');
+  const closeLightbox = document.getElementById('closeLightbox');
+  const sheepContainer = document.getElementById('sheepContainer');
+
+  let sheepRunning = false;
+
+  function openLightbox() {
+    lightboxOverlay.style.display = 'flex';
+    if (!sheepRunning) {
+      // Kleines Delay damit Container-Layout sicher fertig ist
+      setTimeout(() => {
+        initSheep(sheepContainer);
+        sheepRunning = true;
+      }, 50);
+    }
+  }
+
+  function closeLightboxFunc() {
+    lightboxOverlay.style.display = 'none';
+    stopSheep(sheepContainer);
+    sheepRunning = false;
+  }
+
+  sheepThumbnail.addEventListener('click', openLightbox);
+  closeLightbox.addEventListener('click', closeLightboxFunc);
+
+  lightboxOverlay.addEventListener('click', e => {
+    if (e.target === lightboxOverlay) {
+      closeLightboxFunc();
+    }
+  });
+</script>
+
+</body>
+</html>
