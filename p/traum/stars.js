@@ -2,6 +2,16 @@
   const canvas = document.getElementById('starCanvas');
   const ctx = canvas.getContext('2d');
 
+  let sheepStar = {
+    angle: 0,
+    y: h / 2,
+    radius: 8,
+    alpha: 1.0,
+    color: 'red',
+    screenX: null,
+    screenY: null
+  };
+
   let w, h;
   function resize() {
     w = window.innerWidth;
@@ -41,16 +51,6 @@
       targetAlpha: 0.25 + Math.random() * 0.15
     });
   }
-
-  let sheepStar = {
-    angle: 0,
-    y: h / 2,
-    radius: 8,
-    alpha: 1.0,
-    color: 'red',
-    screenX: null,
-    screenY: null
-  };
 
   let cameraAngle = 0;
   let velocity = 0;
