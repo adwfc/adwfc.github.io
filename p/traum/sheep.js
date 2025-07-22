@@ -108,12 +108,12 @@ function verteileGras(huegel) {
   }
 }
 
-function verteileBlumen() {
+function verteileBlumen(huegel) {
   const w = huegel.clientWidth;
   const h = huegel.clientHeight;
   const anzahlBlumen = 5;
 
-  const sichtbarerBereich = h * 0.65;  // Beschränkt auf obere 65% des Hügels
+  const sichtbarerBereich = h * 0.65;  // Nur oberer sichtbarer Bereich des Hügels
 
   for (let i = 0; i < anzahlBlumen; i++) {
     let x, y;
@@ -128,6 +128,20 @@ function verteileBlumen() {
     const blume = erstelleBlume(x, y);
     huegel.appendChild(blume);
   }
+}
+
+function erstelleBlume(x, y) {
+  const img = document.createElement('img');
+  img.src = 'blume.png';
+  img.alt = 'Blume';
+  img.style.position = 'absolute';
+  img.style.width = '30px';
+  img.style.left = `${x}px`;
+  img.style.top = `${y}px`;
+  img.style.pointerEvents = 'none';
+  img.style.userSelect = 'none';
+  img.style.zIndex = 6;
+  return img;
 }
 
 function istImHalbkreis(x, y, w, h) {
