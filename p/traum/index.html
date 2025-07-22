@@ -60,6 +60,73 @@
       user-select: none;
       z-index: 101;
     }
+
+    /* Sheep / Hill Styles */
+    .huegel {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130vw;
+      height: 80vh;
+      background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+      border-top-left-radius: 60vw;
+      border-top-right-radius: 60vw;
+      border-bottom-left-radius: 60vw;
+      border-bottom-right-radius: 60vw;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      user-select: none;
+      pointer-events: none;
+      margin-bottom: -35vh;
+      overflow: visible;
+      z-index: 5;
+    }
+
+    .gras-stueck {
+      position: absolute;
+      width: 1.5px;
+      background-color: #1a3d11;
+      border-radius: 1px;
+      pointer-events: none;
+      transform-origin: bottom center;
+    }
+
+    .blume {
+      position: absolute;
+      width: 30px;
+      pointer-events: none;
+      user-select: none;
+      z-index: 6;
+    }
+
+    .schaf-container {
+      position: absolute;
+      width: 5cm;
+      height: auto;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .schaf {
+      width: 5cm;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .schaf-nummer {
+      position: absolute;
+      width: 5cm;
+      top: calc(50% - 20px);
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #43406d;
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
+      z-index: 11;
+    }
   </style>
 </head>
 <body>
