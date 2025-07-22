@@ -1,15 +1,17 @@
-(() => { 
+(() => {
   const canvas = document.getElementById('starCanvas');
   const ctx = canvas.getContext('2d');
 
-  let w, h; // Muss vor sheepStar deklariert werden
+  const sheepImg = new Image();
+  sheepImg.src = 'schaf-trigger.png'; // <-- Bildpfad anpassen
+
+  let w, h;
 
   let sheepStar = {
     angle: 0,
-    y: 0, // wird später gesetzt in resize()
-    radius: 8,
+    y: 0,
+    radius: 16,
     alpha: 1.0,
-    color: 'red',
     screenX: null,
     screenY: null
   };
@@ -98,7 +100,6 @@
     drawStars(bgStars, fov);
     drawStars(stars, fov);
 
-    // sheepStar zeichnen
     let diff = sheepStar.angle - cameraAngle;
     if (diff > Math.PI) diff -= 2 * Math.PI;
     if (diff < -Math.PI) diff += 2 * Math.PI;
@@ -106,14 +107,11 @@
     if (diff > -fov / 2 && diff < fov / 2) {
       const screenX = angleToScreenX(diff, fov);
       const screenY = h / 2 + verticalOffset;
-
       sheepStar.screenX = screenX;
       sheepStar.screenY = screenY;
 
-      ctx.fillStyle = sheepStar.color;
-      ctx.beginPath();
-      ctx.arc(screenX, screenY, sheepStar.radius, 0, Math.PI * 2);
-      ctx.fill();
+      const size = sheepStar.radius * 2;
+      ctx.drawImage(sheepImg, screenX - size / 2, screenY - size / 2, size, size);
     } else {
       sheepStar.screenX = null;
       sheepStar.screenY = null;
@@ -171,6 +169,7 @@
         if (star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
       }
     });
+
     bgStars.forEach(star => {
       if (star.alpha < star.targetAlpha) {
         star.alpha += 0.01;
@@ -268,26 +267,21 @@
   canvas.addEventListener('touchmove', pointerMove, { passive: false });
   canvas.addEventListener('touchend', pointerUp);
   canvas.addEventListener('touchcancel', pointerUp);
-
   canvas.addEventListener('mousedown', pointerDown);
   canvas.addEventListener('mousemove', pointerMove);
   canvas.addEventListener('mouseup', pointerUp);
 
   canvas.addEventListener('click', e => {
     if (sheepStar.screenX == null || sheepStar.screenY == null) return;
-
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
     const dx = x - sheepStar.screenX;
     const dy = y - sheepStar.screenY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-
     if (distance <= sheepStar.radius + 5) {
       if (window.openLightbox) window.openLightbox();
     }
   });
-
 })();
-  
+      
