@@ -10,7 +10,7 @@
   let sheepStar = {
     angle: 0,
     y: 0,
-    radius: 16,
+    radius: 64,
     alpha: 1.0,
     screenX: null,
     screenY: null
