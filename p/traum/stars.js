@@ -1,10 +1,12 @@
-(() => {
+(() => { 
   const canvas = document.getElementById('starCanvas');
   const ctx = canvas.getContext('2d');
 
+  let w, h; // Muss vor sheepStar deklariert werden
+
   let sheepStar = {
     angle: 0,
-    y: 0,
+    y: 0, // wird später gesetzt in resize()
     radius: 8,
     alpha: 1.0,
     color: 'red',
@@ -12,7 +14,6 @@
     screenY: null
   };
 
-  let w, h;
   function resize() {
     w = window.innerWidth;
     h = window.innerHeight;
@@ -20,19 +21,18 @@
     canvas.height = h;
     sheepStar.y = h / 2;
   }
+
   resize();
   window.addEventListener('resize', resize);
 
   const starCount = 100;
   const bgStarCount = 50;
-
   const maxStars = 600;
   const maxBgStars = 300;
-
   const stars = [];
   const bgStars = [];
 
-  for(let i = 0; i < starCount; i++) {
+  for (let i = 0; i < starCount; i++) {
     stars.push({
       angle: Math.random() * Math.PI * 2,
       y: Math.random() * h,
@@ -42,7 +42,7 @@
     });
   }
 
-  for(let i = 0; i < bgStarCount; i++) {
+  for (let i = 0; i < bgStarCount; i++) {
     bgStars.push({
       angle: Math.random() * Math.PI * 2,
       y: Math.random() * h,
@@ -56,10 +56,8 @@
   let velocity = 0;
   let zoomFactor = 1.0;
   let zoomVelocity = 0;
-
   let verticalOffset = 0;
   let verticalVelocity = 0;
-
   let isDragging = false;
   let lastDragX = 0;
   let lastDragY = 0;
@@ -75,7 +73,7 @@
       if (diff > Math.PI) diff -= 2 * Math.PI;
       if (diff < -Math.PI) diff += 2 * Math.PI;
 
-      if (diff > -fov/2 && diff < fov/2) {
+      if (diff > -fov / 2 && diff < fov / 2) {
         const screenX = angleToScreenX(diff, fov);
         const centerY = h / 2;
         const offsetY = (star.y - centerY) * zoomFactor + verticalOffset;
@@ -100,12 +98,12 @@
     drawStars(bgStars, fov);
     drawStars(stars, fov);
 
-    // Schaf-Stern zeichnen
+    // sheepStar zeichnen
     let diff = sheepStar.angle - cameraAngle;
     if (diff > Math.PI) diff -= 2 * Math.PI;
     if (diff < -Math.PI) diff += 2 * Math.PI;
 
-    if (diff > -fov/2 && diff < fov/2) {
+    if (diff > -fov / 2 && diff < fov / 2) {
       const screenX = angleToScreenX(diff, fov);
       const screenY = h / 2 + verticalOffset;
 
@@ -128,7 +126,7 @@
     const speedFactor = 1.5;
 
     const targetStarsCount = Math.floor(starCount + (maxStars - starCount) * Math.min(zoomProgress * speedFactor, 1));
-    while(stars.length < targetStarsCount) {
+    while (stars.length < targetStarsCount) {
       stars.push({
         angle: Math.random() * Math.PI * 2,
         y: Math.random() * h,
@@ -138,17 +136,17 @@
       });
     }
 
-    for(let i = stars.length -1; i >= targetStarsCount; i--) {
-      if(stars[i].alpha > 0) {
+    for (let i = stars.length - 1; i >= targetStarsCount; i--) {
+      if (stars[i].alpha > 0) {
         stars[i].alpha -= 0.05;
-        if(stars[i].alpha < 0) stars[i].alpha = 0;
+        if (stars[i].alpha < 0) stars[i].alpha = 0;
       } else {
         stars.splice(i, 1);
       }
     }
 
     const targetBgStarsCount = Math.floor(bgStarCount + (maxBgStars - bgStarCount) * Math.min(zoomProgress * speedFactor, 1));
-    while(bgStars.length < targetBgStarsCount) {
+    while (bgStars.length < targetBgStarsCount) {
       bgStars.push({
         angle: Math.random() * Math.PI * 2,
         y: Math.random() * h,
@@ -158,25 +156,25 @@
       });
     }
 
-    for(let i = bgStars.length -1; i >= targetBgStarsCount; i--) {
-      if(bgStars[i].alpha > 0) {
+    for (let i = bgStars.length - 1; i >= targetBgStarsCount; i--) {
+      if (bgStars[i].alpha > 0) {
         bgStars[i].alpha -= 0.05;
-        if(bgStars[i].alpha < 0) bgStars[i].alpha = 0;
+        if (bgStars[i].alpha < 0) bgStars[i].alpha = 0;
       } else {
         bgStars.splice(i, 1);
       }
     }
 
     stars.forEach(star => {
-      if(star.alpha < star.targetAlpha) {
+      if (star.alpha < star.targetAlpha) {
         star.alpha += 0.01;
-        if(star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
+        if (star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
       }
     });
     bgStars.forEach(star => {
-      if(star.alpha < star.targetAlpha) {
+      if (star.alpha < star.targetAlpha) {
         star.alpha += 0.01;
-        if(star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
+        if (star.alpha > star.targetAlpha) star.alpha = star.targetAlpha;
       }
     });
   }
@@ -207,13 +205,14 @@
     draw();
     requestAnimationFrame(animate);
   }
+
   animate();
 
   function getTouchDistance(e) {
     if (e.touches.length < 2) return null;
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
-    return Math.sqrt(dx*dx + dy*dy);
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   function pointerDown(e) {
@@ -249,7 +248,6 @@
       const sensitivityX = 0.0015;
       cameraAngle -= deltaX * sensitivityX;
       cameraAngle = (cameraAngle + 2 * Math.PI) % (2 * Math.PI);
-
       velocity = deltaX * sensitivityX;
 
       if (zoomFactor <= 1.1 && Math.abs(deltaY) > 0) {
@@ -262,13 +260,12 @@
   function pointerUp() {
     isDragging = false;
     lastDistance = null;
-
     velocity *= 0.9;
     zoomVelocity *= 0.9;
   }
 
-  canvas.addEventListener('touchstart', pointerDown, {passive:false});
-  canvas.addEventListener('touchmove', pointerMove, {passive:false});
+  canvas.addEventListener('touchstart', pointerDown, { passive: false });
+  canvas.addEventListener('touchmove', pointerMove, { passive: false });
   canvas.addEventListener('touchend', pointerUp);
   canvas.addEventListener('touchcancel', pointerUp);
 
@@ -291,4 +288,6 @@
       if (window.openLightbox) window.openLightbox();
     }
   });
+
 })();
+  
