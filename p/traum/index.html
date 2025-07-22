@@ -147,7 +147,6 @@
 <script type="module">
   import { initSheep, stopSheep } from './sheep.js';
 
-  const sheepThumbnail = document.getElementById('sheepThumbnail');
   const lightboxOverlay = document.getElementById('lightboxOverlay');
   const closeLightbox = document.getElementById('closeLightbox');
   const sheepContainer = document.getElementById('sheepContainer');
@@ -163,7 +162,6 @@
     sheepContainer.innerHTML = '';
   }
 
-  sheepThumbnail.addEventListener('click', openLightbox);
   closeLightbox.addEventListener('click', closeLightboxFunc);
 
   lightboxOverlay.addEventListener('click', e => {
@@ -171,7 +169,15 @@
       closeLightboxFunc();
     }
   });
+
+  // Für den Sternenhimmel-Schaf-Klick:
+  import { registerSheepClickCallback } from './stars.js';
+
+  registerSheepClickCallback(() => {
+    openLightbox();
+  });
 </script>
+
 
 </body>
 </html>
