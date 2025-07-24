@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>🚀 Weltraum-Galerie mit fliegender Rakete und Bildwechsel</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      user-select: none;
+    }
+
+    #galerie {
+      position: relative;
+      width: 100vw;
+      height: 260px;
+      overflow: visible;
+      background: black;
+      border-radius: 12px;
+    }
+
+    .bild {
+      position: absolute;
+      top: 50%;
+      width: 200px;
+      height: auto;
+      transform: translateY(-50%);
+      transition: left 1s ease;
+      user-select: none;
+    }
+
+    #rakete {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      width: 50px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 10;
+      transition: transform 1s ease;
+      transform: translateX(0);
+    }
+
+    #login-form {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    input, button {
+      padding: 1rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="login-form">
+    <h1>🚀 Zugang zur Galerie</h1>
+    <input type="password" id="password" placeholder="Passwort eingeben" required />
+    <button type="submit">Start</button>
+  </form>
+
+  <div id="galerie" style="display:none;"></div>
+
+  <img id="rakete" src="rakete.png" alt="Rakete" style="display:none;" />
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://ziikbioeavgapnjumpju.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppaWtiaW9lYXZnYXBuanVtcGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMTc4MzIsImV4cCI6MjA2ODc5MzgzMn0.IK147XNWr8E8INYsgYZP45vME0CAASM2LBQWKuaJgyw'
+    );
+
+    const email = "test@example.com";
+    let index = 0;
+    let urls = [];
+    let raketeState = 'links';
+
+    const form = document.getElementById('login-form');
+    const galerie = document.getElementById('galerie');
+    const rakete = document.getElementById('rakete');
+
+    let currentBild = null;
+
+    function zeigeBild(i) {
+      console.log('zeigeBild:', i);
+
+      const neuesBild = document.createElement('img');
+      neuesBild.src = urls[i];
+      neuesBild.className = 'bild';
+      galerie.appendChild(neuesBild);
+
+      neuesBild.style.left = '120vw'; // Start rechts außen
+
+      // Altes Bild verschwindet nach links
+      if (currentBild) {
+        currentBild.style.left = '-120vw';
+        const bildZumEntfernen = currentBild;
+        setTimeout(() => {
+          if (bildZumEntfernen && bildZumEntfernen.parentElement) {
+            bildZumEntfernen.remove();
+          }
+        }, 1000);
+      }
+
+      // Neues Bild nach 100ms in die Mitte
+      setTimeout(() => {
+        neuesBild.style.left = 'calc(50vw - 100px)';
+      }, 100);
+
+      currentBild = neuesBild;
+    }
+
+    rakete.addEventListener('click', () => {
+      if (urls.length === 0) return;
+
+      index = (index + 1) % urls.length;
+      zeigeBild(index);
+
+      if (raketeState === 'links') {
+        rakete.style.transition = 'transform 1s ease';
+        rakete.style.transform = 'translateX(70vw)';
+        raketeState = 'mitte';
+      } else if (raketeState === 'mitte') {
+        rakete.style.transition = 'transform 1s ease';
+        rakete.style.transform = 'translateX(120vw)';
+        raketeState = 'rechts';
+
+        setTimeout(() => {
+          rakete.style.transition = 'none';
+          rakete.style.transform = 'translateX(-100px)';
+          void rakete.offsetWidth; // Trigger Reflow
+          rakete.style.transition = 'transform 1s ease';
+          rakete.style.transform = 'translateX(0)';
+          raketeState = 'links';
+        }, 1000);
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return alert("Login fehlgeschlagen: " + error.message);
+
+      const { data: files, error: listErr } = await supabase
+        .storage
+        .from('bilder')
+        .list('', { limit: 100 });
+
+      if (listErr || !files || files.length === 0) {
+        alert("Keine Bilder gefunden");
+        return;
+      }
+
+      files.sort((a, b) => a.name.localeCompare(b.name));
+      urls = [];
+
+      for (const file of files) {
+        const { data: signed, error: urlErr } = await supabase
+          .storage
+          .from('bilder')
+          .createSignedUrl(file.name, 300);
+        if (!urlErr) {
+          urls.push(signed.signedUrl);
+        }
+      }
+
+      if (urls.length === 0) return alert("Keine gültigen Bilder");
+
+      zeigeBild(index);    
+      form.style.display = 'none';
+
+
+   galerie.style.display = 'block';
+      rakete.style.display = 'block';
+      raketeState = 'links';
+      rakete.style.transform = 'translateX(0)';
+    });
+  </script>
+</body>
+</html>
