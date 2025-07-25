@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenhimmel mit Schaf-Lightbox</title>
+  <title>Sternenhimmel mit Galerie-Stern</title>
   <style>
     html, body {
-      margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+      height: 100%;
       font-family: sans-serif;
     }
+
     #starCanvas {
       display: block;
       touch-action: none;
@@ -19,98 +24,33 @@
     #lightboxOverlay {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.8);
+      top: 0;
+      left:  0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.9);
       z-index: 100;
       justify-content: center;
       align-items: center;
     }
+
     #lightboxContent {
       position: relative;
-      width: 80vw;
-      height: 60vh;
-      background: #222;
-      border-radius: 16px;
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
-      box-shadow: 0 0 20px rgba(255,255,255,0.5);
     }
-    #sheepContainer {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
+
     #closeLightbox {
       position: absolute;
-      top: 10px; right: 15px;
+      top: 10px;
+      right: 20px;
       color: white;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: bold;
+      z-index: 999;
       cursor: pointer;
       user-select: none;
-      z-index: 101;
-    }
-
-    .huegel {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 130vw;
-      height: 80vh;
-      background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-      border-radius: 60vw;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-      user-select: none;
-      pointer-events: none;
-      margin-bottom: -60vh;
-      overflow: visible;
-      z-index: 5;
-    }
-
-    .gras-stueck {
-      position: absolute;
-      width: 1.5px;
-      background-color: #1a3d11;
-      border-radius: 1px;
-      pointer-events: none;
-      transform-origin: bottom center;
-    }
-
-    .blume {
-      position: absolute;
-      width: 30px;
-      pointer-events: none;
-      user-select: none;
-      z-index: 6;
-    }
-
-    .schaf-container {
-      position: absolute;
-      width: 5cm;
-      height: auto;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .schaf {
-      width: 5cm;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    .schaf-nummer {
-      position: absolute;
-      width: 5cm;
-      top: calc(50% - 100px);
-      left: calc(50% - 120px);
-      transform: translate(-50%, -50%);
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #43406d;
-      text-align: center;
-      pointer-events: none;
-      user-select: none;
-      z-index: 11;
     }
   </style>
 </head>
@@ -118,40 +58,49 @@
 
 <canvas id="starCanvas"></canvas>
 
+<!-- Galerie-Lightbox -->
 <div id="lightboxOverlay">
   <div id="lightboxContent">
     <div id="closeLightbox">&times;</div>
-    <div id="sheepContainer"></div>
+    <div id="galerieContainer"></div>
   </div>
 </div>
 
-<script src="stars.js"></script>
+<script src="stars.js" type="module"></script>
 
 <script type="module">
-  import { initSheep, stopSheep } from './sheep.js';
+  const overlay = document.getElementById('lightboxOverlay');
+  const galerieContainer = document.getElementById('galerieContainer');
+  const closeBtn = document.getElementById('closeLightbox');
 
-  const lightboxOverlay = document.getElementById('lightboxOverlay');
-  const closeLightbox = document.getElementById('closeLightbox');
-  const sheepContainer = document.getElementById('sheepContainer');
+  let galerieModule = null;
 
-  function openLightbox() {
-    lightboxOverlay.style.display = 'flex';
-    initSheep(sheepContainer);
-  }
+  window.openLightbox = async () => {
+    overlay.style.display = 'flex';
 
-  function closeLightboxFunc() {
-    lightboxOverlay.style.display = 'none';
-    stopSheep();
-    sheepContainer.innerHTML = '';
-  }
+    if (!galerieModule) {
+      try {
+        galerieModule = await import('./galerie.js');
+      } catch (err) {
+        console.error('Fehler beim Laden der Galerie:', err);
+        return;
+      }
+    }
 
-  // Exportieren für Zugriff in stars.js
-  window.openLightbox = openLightbox;
+    galerieModule.initGalerie(galerieContainer);
+  };
 
-  closeLightbox.addEventListener('click', closeLightboxFunc);
-  lightboxOverlay.addEventListener('click', e => {
-    if (e.target === lightboxOverlay) {
-      closeLightboxFunc();
+  closeBtn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    galerieContainer.innerHTML = '';
+    if (galerieModule?.cleanupGalerie) {
+      galerieModule.cleanupGalerie();
+    }
+  });
+
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      closeBtn.click();
     }
   });
 </script>
