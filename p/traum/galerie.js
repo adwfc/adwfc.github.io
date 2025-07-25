@@ -27,37 +27,70 @@ export function initGalerie(container) {
   const form = container.querySelector('#galerie-login');
   const galerie = container.querySelector('#galerie-view');
 
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    const pw = container.querySelector('#galerie-pass').value;
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('password').value;
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
-    if (error) return alert("Login fehlgeschlagen");
+  try {
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    const { data: files } = await supabase.storage.from('bilder').list('', { limit: 100 });
-    if (!files || files.length === 0) return alert("Keine Bilder gefunden");
-
-    urls = [];
-    files.sort((a, b) => a.name.localeCompare(b.name));
-    for (const f of files) {
-      const { data: signed } = await supabase.storage.from('bilder').createSignedUrl(f.name, 300);
-      if (signed?.signedUrl) urls.push(signed.signedUrl);
+    if (loginError) {
+      console.error('❌ Login-Fehler:', loginError.message);
+      alert("Login fehlgeschlagen: " + loginError.message);
+      return;
     }
 
+    const { data: files, error: listErr } = await supabase
+      .storage
+      .from('bilder')
+      .list('', { limit: 100 });
+
+    if (listErr) {
+      console.error('❌ Fehler beim Abrufen der Bilder:', listErr.message);
+      alert("Fehler beim Abrufen der Galerie: " + listErr.message);
+      return;
+    }
+
+    if (!files || files.length === 0) {
+      alert("⚠️ Keine Bilder gefunden.");
+      return;
+    }
+
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    urls = [];
+
+    for (const file of files) {
+      const { data: signed, error: urlErr } = await supabase
+        .storage
+        .from('bilder')
+        .createSignedUrl(file.name, 300);
+      if (urlErr) {
+        console.warn(`⚠️ Fehler beim URL-Generieren für ${file.name}:`, urlErr.message);
+        continue;
+      }
+      urls.push(signed.signedUrl);
+    }
+
+    if (urls.length === 0) {
+      alert("⚠️ Keine gültigen URLs konnten erzeugt werden.");
+      return;
+    }
+
+    zeigeBild(index);
     form.style.display = 'none';
     galerie.style.display = 'block';
     rakete.style.display = 'block';
-    index = 0;
     raketeState = 'links';
     rakete.style.transform = 'translateX(0)';
-    zeigeBild(index, galerie);
 
-    rakete.onclick = () => {
-      index = (index + 1) % urls.length;
-      zeigeBild(index, galerie);
-      animateRakete();
-    };
-  });
+  } catch (err) {
+    console.error('❌ Unerwarteter Fehler:', err);
+    alert("Ein unerwarteter Fehler ist aufgetreten.");
+  }
+});
 }
 
 export function cleanupGalerie() {
