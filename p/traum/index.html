@@ -2,53 +2,52 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>2 Sterne – Sheep & Galerie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sternenhimmel mit Schaf- & Galerie-Stern</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
+      margin: 0; padding: 0; overflow: hidden;
       background: black;
       height: 100%;
       font-family: sans-serif;
     }
-
     #starCanvas {
+      display: block;
       width: 100vw;
       height: 100vh;
-      display: block;
       touch-action: none;
     }
-
     .lightbox {
       display: none;
       position: fixed;
       top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
       z-index: 100;
       justify-content: center;
       align-items: center;
     }
-
     .lightboxContent {
       position: relative;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
     }
-
     .closeBtn {
       position: absolute;
       top: 10px;
-      right: 20px;
-      color: white;
-      font-size: 32px;
+      right: 15px;
+      font-size: 28px;
       font-weight: bold;
+      color: white;
       cursor: pointer;
-      z-index: 999;
+      user-select: none;
+      z-index: 101;
+    }
+    #sheepContainer, #galerieContainer {
+      width: 100%;
+      height: 100%;
+      position: relative;
     }
   </style>
 </head>
@@ -56,7 +55,7 @@
 
 <canvas id="starCanvas"></canvas>
 
-<!-- Sheep-Lightbox -->
+<!-- Schaf-Lightbox -->
 <div id="sheepLightbox" class="lightbox">
   <div class="lightboxContent">
     <div class="closeBtn" onclick="closeSheepLightbox()">&times;</div>
@@ -65,51 +64,57 @@
 </div>
 
 <!-- Galerie-Lightbox -->
-<div id="lightboxOverlay" class="lightbox">
+<div id="galerieLightbox" class="lightbox">
   <div class="lightboxContent">
     <div class="closeBtn" onclick="closeGalerieLightbox()">&times;</div>
     <div id="galerieContainer"></div>
   </div>
 </div>
 
+<script src="stars.js" type="module"></script>
+
 <script type="module">
   import { initSheep, stopSheep } from './sheep.js';
 
-  const sheepBox = document.getElementById('sheepLightbox');
-  const sheepContainer = document.getElementById('sheepContainer');
-
-  window.openSheepLightbox = () => {
-    sheepBox.style.display = 'flex';
-    initSheep(sheepContainer);
+  // Sheep
+  window.openLightbox = () => {
+    const box = document.getElementById('sheepLightbox');
+    const container = document.getElementById('sheepContainer');
+    box.style.display = 'flex';
+    initSheep(container);
   };
 
   window.closeSheepLightbox = () => {
-    sheepBox.style.display = 'none';
+    const box = document.getElementById('sheepLightbox');
+    const container = document.getElementById('sheepContainer');
+    box.style.display = 'none';
     stopSheep();
-    sheepContainer.innerHTML = '';
+    container.innerHTML = '';
   };
 
-  const galerieBox = document.getElementById('lightboxOverlay');
-  const galerieContainer = document.getElementById('galerieContainer');
+  // Galerie
   let galerieModule = null;
+  window.openGalerieLightbox = async () => {
+    const box = document.getElementById('galerieLightbox');
+    const container = document.getElementById('galerieContainer');
+    box.style.display = 'flex';
 
-  window.openLightbox = async () => {
-    galerieBox.style.display = 'flex';
     if (!galerieModule) {
       galerieModule = await import('./galerie.js');
     }
-    galerieModule.initGalerie(galerieContainer);
+    galerieModule.initGalerie(container);
   };
 
   window.closeGalerieLightbox = () => {
-    galerieBox.style.display = 'none';
-    galerieContainer.innerHTML = '';
+    const box = document.getElementById('galerieLightbox');
+    const container = document.getElementById('galerieContainer');
+    box.style.display = 'none';
+    container.innerHTML = '';
     if (galerieModule?.cleanupGalerie) {
       galerieModule.cleanupGalerie();
     }
   };
 </script>
 
-<script src="stars.js" type="module"></script>
 </body>
 </html>
