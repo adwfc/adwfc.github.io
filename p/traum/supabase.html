@@ -2,41 +2,54 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>🚀 Weltraum-Galerie mit fliegender Rakete und Bildwechsel</title>
+  <title>✨ Galerie mit Sternflug</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       margin: 0;
       background: black;
-      color: white;
-      font-family: sans-serif;
       overflow: hidden;
+      font-family: sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      user-select: none;
     }
 
     #galerie {
       position: relative;
       width: 100vw;
-      height: 260px;
-      overflow: visible;
-      background: black;
-      border-radius: 12px;
+      height: 90vh;
+      overflow: hidden;
     }
 
-    .bild {
+    .bild-container {
       position: absolute;
       top: 50%;
-      width: 200px;
-      height: auto;
+      left: 120vw;
+      width: 90vw;
       transform: translateY(-50%);
-      transition: left 1s ease;
-      user-select: none;
+      transition: left 1.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .bild-container img.bild {
+      width: 70%;
+      height: auto;
+      z-index: 2;
+      position: relative;
+    }
+
+    .bild-container img.stern-foreground {
+      position: absolute;
+      width: 90vw;
+      height: auto;
+      z-index: 3;
     }
 
     #rakete {
@@ -45,7 +58,6 @@
       left: 1.5rem;
       width: 50px;
       cursor: pointer;
-      user-select: none;
       z-index: 10;
       transition: transform 1s ease;
       transform: translateX(0);
@@ -53,6 +65,7 @@
 
     #login-form {
       text-align: center;
+      color: white;
       margin-bottom: 2rem;
     }
 
@@ -68,13 +81,12 @@
 <body>
 
   <form id="login-form">
-    <h1>🚀 Zugang zur Galerie</h1>
+    <h1>✨ Zugang zur Galerie</h1>
     <input type="password" id="password" placeholder="Passwort eingeben" required />
     <button type="submit">Start</button>
   </form>
 
   <div id="galerie" style="display:none;"></div>
-
   <img id="rakete" src="rakete.png" alt="Rakete" style="display:none;" />
 
   <script>
@@ -87,65 +99,66 @@
     let index = 0;
     let urls = [];
     let raketeState = 'links';
+    let currentBild = null;
 
     const form = document.getElementById('login-form');
     const galerie = document.getElementById('galerie');
     const rakete = document.getElementById('rakete');
 
-    let currentBild = null;
-
     function zeigeBild(i) {
-      console.log('zeigeBild:', i);
+      const container = document.createElement('div');
+      container.className = 'bild-container';
 
-      const neuesBild = document.createElement('img');
-      neuesBild.src = urls[i];
-      neuesBild.className = 'bild';
-      galerie.appendChild(neuesBild);
+      const bild = document.createElement('img');
+      bild.src = urls[i];
+      bild.className = 'bild';
 
-      neuesBild.style.left = '120vw'; // Start rechts außen
+      const stern = document.createElement('img');
+      stern.src = 'stern.png';
+      stern.className = 'stern-foreground';
 
-      // Altes Bild verschwindet nach links
+      container.appendChild(bild);
+      container.appendChild(stern);
+      galerie.appendChild(container);
+
+      // Trigger Einflug
+      void container.offsetWidth;
+      container.style.left = 'calc(50vw - 45vw)';
+
+      // Wenn ein vorheriges Bild da ist, erst rausfliegen lassen
       if (currentBild) {
-        currentBild.style.left = '-120vw';
-        const bildZumEntfernen = currentBild;
+        const alt = currentBild;
+        alt.style.left = '-120vw';
+
+        // Warte bis es draußen ist, dann neues fliegt ein
         setTimeout(() => {
-          if (bildZumEntfernen && bildZumEntfernen.parentElement) {
-            bildZumEntfernen.remove();
-          }
-        }, 1000);
+          alt.remove();
+        }, 1200);
       }
 
-      // Neues Bild nach 100ms in die Mitte
-      setTimeout(() => {
-        neuesBild.style.left = 'calc(50vw - 100px)';
-      }, 100);
-
-      currentBild = neuesBild;
+      currentBild = container;
     }
 
     rakete.addEventListener('click', () => {
       if (urls.length === 0) return;
-
       index = (index + 1) % urls.length;
+
       zeigeBild(index);
 
       if (raketeState === 'links') {
-        rakete.style.transition = 'transform 1s ease';
         rakete.style.transform = 'translateX(70vw)';
         raketeState = 'mitte';
       } else if (raketeState === 'mitte') {
-        rakete.style.transition = 'transform 1s ease';
         rakete.style.transform = 'translateX(120vw)';
         raketeState = 'rechts';
-
         setTimeout(() => {
           rakete.style.transition = 'none';
           rakete.style.transform = 'translateX(-100px)';
-          void rakete.offsetWidth; // Trigger Reflow
+          void rakete.offsetWidth;
           rakete.style.transition = 'transform 1s ease';
           rakete.style.transform = 'translateX(0)';
           raketeState = 'links';
-        }, 1000);
+        }, 300);
       }
     });
 
@@ -174,18 +187,14 @@
           .storage
           .from('bilder')
           .createSignedUrl(file.name, 300);
-        if (!urlErr) {
-          urls.push(signed.signedUrl);
-        }
+        if (!urlErr) urls.push(signed.signedUrl);
       }
 
       if (urls.length === 0) return alert("Keine gültigen Bilder");
 
-      zeigeBild(index);    
+      zeigeBild(index);
       form.style.display = 'none';
-
-
-   galerie.style.display = 'block';
+      galerie.style.display = 'block';
       rakete.style.display = 'block';
       raketeState = 'links';
       rakete.style.transform = 'translateX(0)';
