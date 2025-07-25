@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenhimmel mit Galerie-Stern</title>
+  <title>2 Sterne – Sheep & Galerie</title>
   <style>
     html, body {
       margin: 0;
@@ -15,42 +15,40 @@
     }
 
     #starCanvas {
+      width: 100vw;
+      height: 100vh;
       display: block;
       touch-action: none;
-      width: 100vw;
-      height: 100vh;
     }
 
-    #lightboxOverlay {
+    .lightbox {
       display: none;
       position: fixed;
-      top: 0;
-      left:  0;
+      top: 0; left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 100;
       justify-content: center;
       align-items: center;
     }
 
-    #lightboxContent {
+    .lightboxContent {
       position: relative;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
     }
 
-    #closeLightbox {
+    .closeBtn {
       position: absolute;
       top: 10px;
       right: 20px;
       color: white;
       font-size: 32px;
       font-weight: bold;
-      z-index: 999;
       cursor: pointer;
-      user-select: none;
+      z-index: 999;
     }
   </style>
 </head>
@@ -58,52 +56,60 @@
 
 <canvas id="starCanvas"></canvas>
 
+<!-- Sheep-Lightbox -->
+<div id="sheepLightbox" class="lightbox">
+  <div class="lightboxContent">
+    <div class="closeBtn" onclick="closeSheepLightbox()">&times;</div>
+    <div id="sheepContainer"></div>
+  </div>
+</div>
+
 <!-- Galerie-Lightbox -->
-<div id="lightboxOverlay">
-  <div id="lightboxContent">
-    <div id="closeLightbox">&times;</div>
+<div id="lightboxOverlay" class="lightbox">
+  <div class="lightboxContent">
+    <div class="closeBtn" onclick="closeGalerieLightbox()">&times;</div>
     <div id="galerieContainer"></div>
   </div>
 </div>
 
-<script src="stars.js" type="module"></script>
-
 <script type="module">
-  const overlay = document.getElementById('lightboxOverlay');
-  const galerieContainer = document.getElementById('galerieContainer');
-  const closeBtn = document.getElementById('closeLightbox');
+  import { initSheep, stopSheep } from './sheep.js';
 
+  const sheepBox = document.getElementById('sheepLightbox');
+  const sheepContainer = document.getElementById('sheepContainer');
+
+  window.openSheepLightbox = () => {
+    sheepBox.style.display = 'flex';
+    initSheep(sheepContainer);
+  };
+
+  window.closeSheepLightbox = () => {
+    sheepBox.style.display = 'none';
+    stopSheep();
+    sheepContainer.innerHTML = '';
+  };
+
+  const galerieBox = document.getElementById('lightboxOverlay');
+  const galerieContainer = document.getElementById('galerieContainer');
   let galerieModule = null;
 
   window.openLightbox = async () => {
-    overlay.style.display = 'flex';
-
+    galerieBox.style.display = 'flex';
     if (!galerieModule) {
-      try {
-        galerieModule = await import('./galerie.js');
-      } catch (err) {
-        console.error('Fehler beim Laden der Galerie:', err);
-        return;
-      }
+      galerieModule = await import('./galerie.js');
     }
-
     galerieModule.initGalerie(galerieContainer);
   };
 
-  closeBtn.addEventListener('click', () => {
-    overlay.style.display = 'none';
+  window.closeGalerieLightbox = () => {
+    galerieBox.style.display = 'none';
     galerieContainer.innerHTML = '';
     if (galerieModule?.cleanupGalerie) {
       galerieModule.cleanupGalerie();
     }
-  });
-
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) {
-      closeBtn.click();
-    }
-  });
+  };
 </script>
 
+<script src="stars.js" type="module"></script>
 </body>
 </html>
