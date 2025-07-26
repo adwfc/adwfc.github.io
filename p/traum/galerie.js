@@ -140,9 +140,9 @@ function zeigeBild(i, galerie) {
   void container.offsetWidth;
   container.style.left = 'calc(50vw - 45vw)';
 
-  if (currentBild) {
-    currentBild.style.left = '-120vw';
-    setTimeout(() => currentBild.remove(), 1200);
+  if (currentBild && currentBild !== container) {
+  currentBild.style.left = '-120vw';
+  setTimeout(() => currentBild.remove(), 1200);
   }
 
   currentBild = container;
