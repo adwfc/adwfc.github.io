@@ -29,8 +29,14 @@ export function initGalerie(container) {
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const password = document.getElementById('password').value;
-
+const passwordInput = container.querySelector('#galerie-pass');
+if (!passwordInput) {
+  console.error("❌ Passwortfeld nicht gefunden!");
+  alert("Interner Fehler: Passwortfeld nicht gefunden.");
+  return;
+}
+const password = passwordInput.value;
+  
   try {
     const { error: loginError } = await supabase.auth.signInWithPassword({
       email,
