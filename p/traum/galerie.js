@@ -85,12 +85,18 @@ const password = passwordInput.value;
       return;
     }
 
-    zeigeBild(index, galerie);
-    form.style.display = 'none';
-    galerie.style.display = 'block';
-    rakete.style.display = 'block';
-    raketeState = 'links';
-    rakete.style.transform = 'translateX(0)';
+zeigeBild(index, galerie);
+form.style.display = 'none';
+galerie.style.display = 'block';
+rakete.style.display = 'block';
+raketeState = 'links';
+rakete.style.transform = 'translateX(0)';
+
+rakete.onclick = () => {
+  index = (index + 1) % urls.length;
+  zeigeBild(index, galerie);
+  animateRakete();
+};
 
   } catch (err) {
     console.error('❌ Unerwarteter Fehler:', err);
