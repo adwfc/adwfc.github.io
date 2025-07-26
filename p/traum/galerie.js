@@ -27,82 +27,83 @@ export function initGalerie(container) {
   const form = container.querySelector('#galerie-login');
   const galerie = container.querySelector('#galerie-view');
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-const passwordInput = container.querySelector('#galerie-pass');
-if (!passwordInput) {
-  console.error("❌ Passwortfeld nicht gefunden!");
-  alert("Interner Fehler: Passwortfeld nicht gefunden.");
-  return;
-}
-const password = passwordInput.value;
-  
-  try {
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (loginError) {
-      console.error('❌ Login-Fehler:', loginError.message);
-      alert("Login fehlgeschlagen: " + loginError.message);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const passwordInput = container.querySelector('#galerie-pass');
+    if (!passwordInput) {
+      console.error("❌ Passwortfeld nicht gefunden!");
+      alert("Interner Fehler: Passwortfeld nicht gefunden.");
       return;
     }
+    const password = passwordInput.value;
 
-    const { data: files, error: listErr } = await supabase
-      .storage
-      .from('bilder')
-      .list('', { limit: 100 });
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    if (listErr) {
-      console.error('❌ Fehler beim Abrufen der Bilder:', listErr.message);
-      alert("Fehler beim Abrufen der Galerie: " + listErr.message);
-      return;
-    }
+      if (loginError) {
+        console.error('❌ Login-Fehler:', loginError.message);
+        alert("Login fehlgeschlagen: " + loginError.message);
+        return;
+      }
 
-    if (!files || files.length === 0) {
-      alert("⚠️ Keine Bilder gefunden.");
-      return;
-    }
-
-    files.sort((a, b) => a.name.localeCompare(b.name));
-    urls = [];
-
-    for (const file of files) {
-      const { data: signed, error: urlErr } = await supabase
+      const { data: files, error: listErr } = await supabase
         .storage
         .from('bilder')
-        .createSignedUrl(file.name, 300);
-      if (urlErr) {
-        console.warn(`⚠️ Fehler beim URL-Generieren für ${file.name}:`, urlErr.message);
-        continue;
+        .list('', { limit: 100 });
+
+      if (listErr) {
+        console.error('❌ Fehler beim Abrufen der Bilder:', listErr.message);
+        alert("Fehler beim Abrufen der Galerie: " + listErr.message);
+        return;
       }
-      urls.push(signed.signedUrl);
+
+      if (!files || files.length === 0) {
+        alert("⚠️ Keine Bilder gefunden.");
+        return;
+      }
+
+      files.sort((a, b) => a.name.localeCompare(b.name));
+      urls = [];
+
+      for (const file of files) {
+        const { data: signed, error: urlErr } = await supabase
+          .storage
+          .from('bilder')
+          .createSignedUrl(file.name, 300);
+        if (urlErr) {
+          console.warn(`⚠️ Fehler beim URL-Generieren für ${file.name}:`, urlErr.message);
+          continue;
+        }
+        urls.push(signed.signedUrl);
+      }
+
+      if (urls.length === 0) {
+        alert("⚠️ Keine gültigen URLs konnten erzeugt werden.");
+        return;
+      }
+
+      index = 0;
+      zeigeBild(index, galerie);
+      form.style.display = 'none';
+      galerie.style.display = 'block';
+      rakete.style.display = 'block';
+      raketeState = 'links';
+      rakete.style.transform = 'translateX(0)';
+
+      rakete.onclick = () => {
+        index = (index + 1) % urls.length;
+        zeigeBild(index, galerie);
+        animateRakete();
+      };
+
+    } catch (err) {
+      console.error('❌ Unerwarteter Fehler:', err);
+      alert("Ein unerwarteter Fehler ist aufgetreten.");
     }
-
-    if (urls.length === 0) {
-      alert("⚠️ Keine gültigen URLs konnten erzeugt werden.");
-      return;
-    }
-
-zeigeBild(index, galerie);
-form.style.display = 'none';
-galerie.style.display = 'block';
-rakete.style.display = 'block';
-raketeState = 'links';
-rakete.style.transform = 'translateX(0)';
-
-rakete.onclick = () => {
-  index = (index + 1) % urls.length;
-  zeigeBild(index, galerie);
-  animateRakete();
-};
-
-  } catch (err) {
-    console.error('❌ Unerwarteter Fehler:', err);
-    alert("Ein unerwarteter Fehler ist aufgetreten.");
-  }
-});
+  });
 }
 
 export function cleanupGalerie() {
@@ -117,8 +118,8 @@ function zeigeBild(i, galerie) {
     return;
   }
 
-  const neuerContainer = document.createElement('div');
-  neuerContainer.style = `
+  const container = document.createElement('div');
+  container.style = `
     position: absolute;
     top: 50%;
     left: 120vw;
@@ -141,23 +142,20 @@ function zeigeBild(i, galerie) {
   stern.src = 'stern.png';
   stern.style = 'position:absolute; width:90vw; z-index:3;';
 
-  neuerContainer.appendChild(bild);
-  neuerContainer.appendChild(stern);
-  galerie.appendChild(neuerContainer);
+  container.appendChild(bild);
+  container.appendChild(stern);
+  galerie.appendChild(container);
 
   requestAnimationFrame(() => {
-    neuerContainer.style.left = 'calc(50vw - 45vw)';
+    container.style.left = 'calc(50vw - 45vw)';
   });
 
-  if (currentBild && currentBild !== neuerContainer) {
+  if (currentBild && currentBild !== container) {
     currentBild.style.left = '-120vw';
     setTimeout(() => currentBild.remove(), 1300);
   }
 
-  currentBild = neuerContainer;
-}
-
-  currentBild = neuerContainer;
+  currentBild = container;
 }
 
 function animateRakete() {
