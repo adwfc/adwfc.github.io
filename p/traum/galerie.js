@@ -80,14 +80,56 @@ export function initGalerie(container) {
 }
 
 function zeigeBild(i, galerie) {
-  const imgToTest = new Image();
-  imgToTest.onload = () => {
-    baueBildContainer(imgToTest.src, galerie);
+  const neuerContainer = document.createElement('div');
+  neuerContainer.style = `
+    position: absolute;
+    top: 50%;
+    left: 120vw;
+    width: 90vw;
+    transform: translateY(-50%);
+    transition: left 1.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  const bild = new Image();
+  bild.src = urls[i];
+  bild.style = 'width: 70%; z-index:2;';
+  bild.onload = () => {
+    finalizeBild(neuerContainer, bild);
   };
-  imgToTest.onerror = () => {
-    baueBildContainer('thumbnail.png', galerie);
+  bild.onerror = () => {
+    console.warn(`⚠️ Bild konnte nicht geladen werden, zeige thumbnail.png stattdessen.`);
+    bild.src = 'thumbnail.png';
+    bild.onload = () => finalizeBild(neuerContainer, bild);
+    bild.onerror = () => {
+      console.error(`❌ Auch thumbnail.png konnte nicht geladen werden.`);
+    };
   };
-  imgToTest.src = urls[i] || 'thumbnail.png';
+
+  const stern = document.createElement('img');
+  stern.src = 'stern.png';
+  stern.style = 'position:absolute; width:90vw; z-index:3;';
+  neuerContainer.appendChild(stern);
+
+  function finalizeBild(container, bildEl) {
+    container.appendChild(bildEl);
+    galerie.appendChild(container);
+    requestAnimationFrame(() => {
+      container.style.left = 'calc(50vw - 45vw)';
+    });
+
+    if (currentBild && currentBild !== container) {
+      currentBild.style.left = '-120vw';
+      const toRemove = currentBild;
+      setTimeout(() => {
+        toRemove.remove();
+      }, 1300);
+    }
+
+    currentBild = container;
+  }
 }
 
 function baueBildContainer(imageSrc, galerie) {
