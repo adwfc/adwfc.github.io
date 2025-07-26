@@ -113,10 +113,7 @@ export function cleanupGalerie() {
 }
 
 function zeigeBild(i, galerie) {
-  if (!urls[i]) {
-    console.warn("⚠️ Kein Bild für Index", i);
-    return;
-  }
+  const bildURL = urls[i] || 'thumbnail.png';
 
   const neuerContainer = document.createElement('div');
   neuerContainer.style = `
@@ -132,10 +129,11 @@ function zeigeBild(i, galerie) {
   `;
 
   const bild = document.createElement('img');
-  bild.src = urls[i];
-  bild.style = 'width: 70%; z-index:2; opacity:0;';
+  bild.src = bildURL;
+  bild.style = 'width: 70%; z-index:2;';
   bild.onerror = () => {
-    console.error("❌ Bild konnte nicht geladen werden:", urls[i]);
+    console.warn(`⚠️ Bild bei ${bildURL} konnte nicht geladen werden. Zeige thumbnail.png`);
+    bild.src = 'thumbnail.png';
   };
 
   const stern = document.createElement('img');
@@ -146,26 +144,21 @@ function zeigeBild(i, galerie) {
   neuerContainer.appendChild(stern);
   galerie.appendChild(neuerContainer);
 
-  // Zeige Bild erst nach dem erfolgreichen Laden
-  bild.onload = () => {
-    bild.style.opacity = '1';
+  // Animation
+  requestAnimationFrame(() => {
+    neuerContainer.style.left = 'calc(50vw - 45vw)';
+  });
 
-    // Animation einleiten
-    requestAnimationFrame(() => {
-      neuerContainer.style.left = 'calc(50vw - 45vw)';
-    });
+  // Vorheriges Bild ausblenden
+  if (currentBild && currentBild !== neuerContainer) {
+    currentBild.style.left = '-120vw';
+    const toRemove = currentBild;
+    setTimeout(() => {
+      toRemove.remove();
+    }, 1300);
+  }
 
-    // Altes Bild entfernen, wenn vorhanden
-    if (currentBild && currentBild !== neuerContainer) {
-      currentBild.style.left = '-120vw';
-      const toRemove = currentBild;
-      setTimeout(() => {
-        toRemove.remove();
-      }, 1300);
-    }
-
-    currentBild = neuerContainer;
-  };
+  currentBild = neuerContainer;
 }
 
 function animateRakete() {
