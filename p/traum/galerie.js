@@ -27,56 +27,88 @@ export function initGalerie(container) {
   const form = container.querySelector('#galerie-login');
   const galerie = container.querySelector('#galerie-view');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const passwordInput = container.querySelector('#galerie-pass');
-    const password = passwordInput.value;
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+const passwordInput = container.querySelector('#galerie-pass');
+if (!passwordInput) {
+  console.error("❌ Passwortfeld nicht gefunden!");
+  alert("Interner Fehler: Passwortfeld nicht gefunden.");
+  return;
+}
+const password = passwordInput.value;
+  
+  try {
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    try {
-      const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-      if (loginError) {
-        alert("Login fehlgeschlagen: " + loginError.message);
-        return;
-      }
-
-      const { data: files, error: listErr } = await supabase.storage.from('bilder').list('', { limit: 100 });
-      if (listErr || !files || files.length === 0) {
-        alert("Keine Bilder gefunden oder Fehler beim Abrufen.");
-        return;
-      }
-
-      files.sort((a, b) => a.name.localeCompare(b.name));
-      urls = [];
-
-      for (const file of files) {
-        const { data: signed, error: urlErr } = await supabase.storage.from('bilder').createSignedUrl(file.name, 300);
-        if (signed?.signedUrl) {
-          urls.push(signed.signedUrl);
-        }
-      }
-
-      if (urls.length === 0) {
-        alert("Keine gültigen Bild-URLs gefunden.");
-        return;
-      }
-
-      zeigeBild(index, galerie);
-      form.style.display = 'none';
-      galerie.style.display = 'block';
-      rakete.style.display = 'block';
-      rakete.style.transform = 'translateX(0)';
-      raketeState = 'links';
-
-      rakete.onclick = () => {
-        index = (index + 1) % urls.length;
-        zeigeBild(index, galerie);
-        animateRakete();
-      };
-    } catch (err) {
-      alert("Ein Fehler ist aufgetreten.");
-      console.error(err);
+    if (loginError) {
+      console.error('❌ Login-Fehler:', loginError.message);
+      alert("Login fehlgeschlagen: " + loginError.message);
+      return;
     }
-  });
+
+    const { data: files, error: listErr } = await supabase
+      .storage
+      .from('bilder')
+      .list('', { limit: 100 });
+
+    if (listErr) {
+      console.error('❌ Fehler beim Abrufen der Bilder:', listErr.message);
+      alert("Fehler beim Abrufen der Galerie: " + listErr.message);
+      return;
+    }
+
+    if (!files || files.length === 0) {
+      alert("⚠️ Keine Bilder gefunden.");
+      return;
+    }
+
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    urls = [];
+
+    for (const file of files) {
+      const { data: signed, error: urlErr } = await supabase
+        .storage
+        .from('bilder')
+        .createSignedUrl(file.name, 300);
+      if (urlErr) {
+        console.warn(`⚠️ Fehler beim URL-Generieren für ${file.name}:`, urlErr.message);
+        continue;
+      }
+      urls.push(signed.signedUrl);
+    }
+
+    if (urls.length === 0) {
+      alert("⚠️ Keine gültigen URLs konnten erzeugt werden.");
+      return;
+    }
+
+zeigeBild(index, galerie);
+form.style.display = 'none';
+galerie.style.display = 'block';
+rakete.style.display = 'block';
+raketeState = 'links';
+rakete.style.transform = 'translateX(0)';
+
+rakete.onclick = () => {
+  index = (index + 1) % urls.length;
+  zeigeBild(index, galerie);
+  animateRakete();
+};
+
+  } catch (err) {
+    console.error('❌ Unerwarteter Fehler:', err);
+    alert("Ein unerwarteter Fehler ist aufgetreten.");
+  }
+});
+}
+
+export function cleanupGalerie() {
+  if (rakete) rakete.onclick = null;
+  urls = [];
+  currentBild = null;
 }
 
 function zeigeBild(i, galerie) {
@@ -93,61 +125,8 @@ function zeigeBild(i, galerie) {
     justify-content: center;
   `;
 
-  const bild = new Image();
-  bild.src = urls[i];
-  bild.style = 'width: 70%; z-index:2;';
-  bild.onload = () => {
-    finalizeBild(neuerContainer, bild);
-  };
-  bild.onerror = () => {
-    console.warn(`⚠️ Bild konnte nicht geladen werden, zeige thumbnail.png stattdessen.`);
-    bild.src = 'thumbnail.png';
-    bild.onload = () => finalizeBild(neuerContainer, bild);
-    bild.onerror = () => {
-      console.error(`❌ Auch thumbnail.png konnte nicht geladen werden.`);
-    };
-  };
-
-  const stern = document.createElement('img');
-  stern.src = 'stern.png';
-  stern.style = 'position:absolute; width:90vw; z-index:3;';
-  neuerContainer.appendChild(stern);
-
-  function finalizeBild(container, bildEl) {
-    container.appendChild(bildEl);
-    galerie.appendChild(container);
-    requestAnimationFrame(() => {
-      container.style.left = 'calc(50vw - 45vw)';
-    });
-
-    if (currentBild && currentBild !== container) {
-      currentBild.style.left = '-120vw';
-      const toRemove = currentBild;
-      setTimeout(() => {
-        toRemove.remove();
-      }, 1300);
-    }
-
-    currentBild = container;
-  }
-}
-
-function baueBildContainer(imageSrc, galerie) {
-  const neuerContainer = document.createElement('div');
-  neuerContainer.style = `
-    position: absolute;
-    top: 50%;
-    left: 120vw;
-    width: 90vw;
-    transform: translateY(-50%);
-    transition: left 1.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  `;
-
   const bild = document.createElement('img');
-  bild.src = imageSrc;
+  bild.src = urls[i];
   bild.style = 'width: 70%; z-index:2;';
 
   const stern = document.createElement('img');
@@ -158,13 +137,18 @@ function baueBildContainer(imageSrc, galerie) {
   neuerContainer.appendChild(stern);
   galerie.appendChild(neuerContainer);
 
+  // Trigger animation
   requestAnimationFrame(() => {
     neuerContainer.style.left = 'calc(50vw - 45vw)';
   });
 
+  // Entferne vorheriges Bild NACH der Animation
   if (currentBild && currentBild !== neuerContainer) {
     currentBild.style.left = '-120vw';
-    setTimeout(() => currentBild.remove(), 1300);
+    const toRemove = currentBild;
+    setTimeout(() => {
+      toRemove.remove();
+    }, 1300);
   }
 
   currentBild = neuerContainer;
@@ -172,7 +156,6 @@ function baueBildContainer(imageSrc, galerie) {
 
 function animateRakete() {
   if (!rakete) return;
-
   if (raketeState === 'links') {
     rakete.style.transform = 'translateX(70vw)';
     raketeState = 'mitte';
