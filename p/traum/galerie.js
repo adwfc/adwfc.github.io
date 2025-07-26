@@ -112,8 +112,8 @@ export function cleanupGalerie() {
 }
 
 function zeigeBild(i, galerie) {
-  const container = document.createElement('div');
-  container.style = `
+  const neuerContainer = document.createElement('div');
+  neuerContainer.style = `
     position: absolute;
     top: 50%;
     left: 120vw;
@@ -133,19 +133,25 @@ function zeigeBild(i, galerie) {
   stern.src = 'stern.png';
   stern.style = 'position:absolute; width:90vw; z-index:3;';
 
-  container.appendChild(bild);
-  container.appendChild(stern);
-  galerie.appendChild(container);
+  neuerContainer.appendChild(bild);
+  neuerContainer.appendChild(stern);
+  galerie.appendChild(neuerContainer);
 
-  void container.offsetWidth;
-  container.style.left = 'calc(50vw - 45vw)';
+  // Trigger animation
+  requestAnimationFrame(() => {
+    neuerContainer.style.left = 'calc(50vw - 45vw)';
+  });
 
-  if (currentBild && currentBild !== container) {
-  currentBild.style.left = '-120vw';
-  setTimeout(() => currentBild.remove(), 1200);
+  // Entferne vorheriges Bild NACH der Animation
+  if (currentBild && currentBild !== neuerContainer) {
+    currentBild.style.left = '-120vw';
+    const toRemove = currentBild;
+    setTimeout(() => {
+      toRemove.remove();
+    }, 1300);
   }
 
-  currentBild = container;
+  currentBild = neuerContainer;
 }
 
 function animateRakete() {
