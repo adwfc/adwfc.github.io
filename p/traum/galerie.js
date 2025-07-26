@@ -112,6 +112,11 @@ export function cleanupGalerie() {
 }
 
 function zeigeBild(i, galerie) {
+  if (!urls[i]) {
+    console.warn("⚠️ Kein Bild vorhanden für Index", i);
+    return;
+  }
+
   const neuerContainer = document.createElement('div');
   neuerContainer.style = `
     position: absolute;
@@ -128,6 +133,9 @@ function zeigeBild(i, galerie) {
   const bild = document.createElement('img');
   bild.src = urls[i];
   bild.style = 'width: 70%; z-index:2;';
+  bild.onerror = () => {
+    console.error("❌ Bild konnte nicht geladen werden:", urls[i]);
+  };
 
   const stern = document.createElement('img');
   stern.src = 'stern.png';
@@ -137,19 +145,17 @@ function zeigeBild(i, galerie) {
   neuerContainer.appendChild(stern);
   galerie.appendChild(neuerContainer);
 
-  // Trigger animation
   requestAnimationFrame(() => {
     neuerContainer.style.left = 'calc(50vw - 45vw)';
   });
 
-  // Entferne vorheriges Bild NACH der Animation
   if (currentBild && currentBild !== neuerContainer) {
     currentBild.style.left = '-120vw';
-    const toRemove = currentBild;
-    setTimeout(() => {
-      toRemove.remove();
-    }, 1300);
+    setTimeout(() => currentBild.remove(), 1300);
   }
+
+  currentBild = neuerContainer;
+}
 
   currentBild = neuerContainer;
 }
