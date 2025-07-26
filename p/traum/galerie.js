@@ -85,7 +85,7 @@ const password = passwordInput.value;
       return;
     }
 
-    zeigeBild(index);
+    zeigeBild(index, galerie);
     form.style.display = 'none';
     galerie.style.display = 'block';
     rakete.style.display = 'block';
