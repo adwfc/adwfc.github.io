@@ -75,9 +75,14 @@
       border-radius: 15px;
     }
     
+    #login-form div:hover {
+        border: 1px solid orange;
+    }
+    
     h2 {
         color: white;
         text-align: center;
+        margin-bottom: 15%;
     }
     
     p {
@@ -91,13 +96,14 @@
         background-color: transparent;
         color: white;
         border: none;
+        outline: none;
     }
     
     .login-btn {
       color: green;
+      font-size: 20px;
       width: 10%;
       background-color: transparent;
-      margin-right: 8%;
     }
 
     input, button {
@@ -107,18 +113,26 @@
       border-radius: 8px;
       border: none;
     }
+    
+    #upload-link {
+        margin-left: 25%;
+        position: absolute;
+        bottom: 50px;
+        color: #6ae0ff;
+        display: block;
+    }
   </style>
 </head>
 <body>
     
     
   <form id="login-form">
-    <h2>Login</h2>
-    <p>&#10024; zur Weltraumgalerie &#10024;</p>
+    <h2>Raketen-Zugang 🔐</h2>
     <div><input type="password" id="password" placeholder="Passwort" required />
          <button class="login-btn" type="submit">&#x2713;</button></div>
+  <a id="upload-link" href="upload.html">Zum Upload 🚀</a>
   </form>
-
+  
   <div id="galerie" style="display:none;"></div>
   <img id="rakete" src="rakete.png" alt="Rakete" style="display:none;" />
 
@@ -241,6 +255,7 @@
 
       zeigeBild(index);
       form.style.display = 'none';
+      document.getElementById("upload-link").style.display = "none";
       galerie.style.display = 'block';
       rakete.style.display = 'block';
       raketeState = 'links';
