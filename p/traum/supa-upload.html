@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Upload in die Weltraumgalerie</title>
+  <title>📤 Mehrfach-Bild hochladen mit Anzeige</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
@@ -97,7 +97,7 @@
     <h2>Upload zur Weltraum-Galerie</h2>
     <input type="file" id="file-input" accept="image/*" multiple />
     <div id="selected-files">Keine Dateien ausgewählt</div>
-    <button id="upload-btn">Rakete starten (Hochladen)</button>
+    <button id="upload-btn">Rakete starten 🚀 (Hochladen)</button>
     <div id="output"></div>
   </div>
 
@@ -149,39 +149,37 @@
       selectedFilesDiv.textContent = "Ausgewählte Dateien:\n" + names.join("\n");
     });
 
-    // Mehrfach-Upload
-    uploadBtn.addEventListener("click", async () => {
-      const files = fileInput.files;
-      if (!files.length) {
-        alert("Bitte mindestens ein Bild auswählen.");
-        return;
-      }
+uploadBtn.addEventListener("click", async () => {
+  const files = fileInput.files;
+  if (!files.length) {
+    alert("Bitte mindestens ein Bild auswählen.");
+    return;
+  }
 
-      output.textContent = "";
+  output.textContent = "⬆️ Starte Upload von " + files.length + " Datei(en)...\n\n";
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const path = `uploads/${Date.now()}-${Math.random().toString(36).substring(2,8)}-${file.name}`;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const safeName = `${Date.now()}-${Math.random().toString(36).substring(2,8)}-${file.name}`;
+    const path = `${safeName}`;
 
-        output.textContent += `⬆️ Lade hoch: ${file.name} ...\n`;
-
-        const { data, error } = await supabase
-          .storage
-          .from("bilder")
-          .upload(path, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (error) {
-          output.textContent += `❌ Fehler bei ${file.name}: ${error.message}\n`;
-        } else {
-          output.textContent += `✅ Erfolgreich hochgeladen: ${path}\n`;
-        }
-      }
-
-      output.textContent += "\n📌 Alle Uploads beendet.";
+    const { data, error } = await supabase
+      .storage
+      .from("bilder")
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
       });
+
+    if (error) {
+      output.textContent += `❌ ${file.name}: Fehler – ${error.message}\n`;
+    } else {
+      output.textContent += `✅ ${file.name} erfolgreich hochgeladen\n`;
+    }
+  }
+
+  output.textContent += "\n📌 Upload abgeschlossen.";
+});
   </script>
 </body>
 </html>
