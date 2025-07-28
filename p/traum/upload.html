@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload zur Sternengalerie</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    form, #upload-ui {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20%;
+      gap: 1rem;
+      padding: 2rem;
+    }
+    
+    #login-form div {
+      display: flex;
+      border: 1px dashed white;
+      margin-top: -7%;
+      border-radius: 15px;
+    }
+    
+    input, button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      border: none;
+      width: 100%;
+    }
+    
+    #password {
+        background-color: transparent;
+        color: white;
+        border: none;
+        padding: 20px;
+    }
+    
+    .login-btn {
+      color: green;
+      font-size: 20px;
+      width: 10%;
+      background-color: transparent;
+      margin-right: 8%;
+    }
+    
+    #upload-ui {
+      display: none;
+    }
+    
+    #selected-files {
+      max-height: 100px;
+      overflow-y: auto;
+      width: 100%;
+      background: #111;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #ccc;
+      white-space: pre-wrap;
+    }
+    
+    #output {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #aaa;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 100%;
+      background: #111;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+    
+    
+    #galerie-link {
+        text-align: center;
+        position: absolute;
+        bottom: 50px;
+        color: #6ae0ff;
+        display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="login-form">
+    <h2>Upload-Zugang 🔐</h2>
+    <div><input type="password" id="password" placeholder="Passwort" required />
+         <button class="login-btn" type="submit">&#x2713;</button></div>
+  <a id="galerie-link" href="galerie.html">Zur Galerie 🚀</a>
+  </form>
+
+  <div id="upload-ui">
+    <h2>Upload zur Weltraum-Galerie</h2>
+    <input type="file" id="file-input" accept="image/*" multiple />
+    <div id="selected-files">Keine Dateien ausgewählt</div>
+    <button id="upload-btn">Rakete starten 🚀 (Hochladen)</button>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://ziikbioeavgapnjumpju.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppaWtiaW9lYXZnYXBuanVtcGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMTc4MzIsImV4cCI6MjA2ODc5MzgzMn0.IK147XNWr8E8INYsgYZP45vME0CAASM2LBQWKuaJgyw'
+    );
+
+    const email = "bea@example.com";
+    const loginForm = document.getElementById("login-form");
+    const passwordInput = document.getElementById("password");
+    const uploadUI = document.getElementById("upload-ui");
+    const fileInput = document.getElementById("file-input");
+    const uploadBtn = document.getElementById("upload-btn");
+    const output = document.getElementById("output");
+    const selectedFilesDiv = document.getElementById("selected-files");
+
+    // Login
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const password = passwordInput.value;
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        alert("Login fehlgeschlagen: " + error.message);
+        return;
+      }
+
+      loginForm.style.display = "none";
+      document.getElementById("galerie-link").style.display = "none";
+      uploadUI.style.display = "flex";
+    });
+
+    // Dateien anzeigen, wenn Auswahl sich ändert
+    fileInput.addEventListener("change", () => {
+      const files = fileInput.files;
+      if (!files.length) {
+        selectedFilesDiv.textContent = "Keine Dateien ausgewählt";
+        return;
+      }
+      let names = [];
+      for(let i=0; i<files.length; i++) {
+        names.push(files[i].name);
+      }
+      selectedFilesDiv.textContent = "Ausgewählte Dateien:\n" + names.join("\n");
+    });
+
+uploadBtn.addEventListener("click", async () => {
+  const files = fileInput.files;
+  if (!files.length) {
+    alert("Bitte mindestens ein Bild auswählen.");
+    return;
+  }
+
+  // Nur einmal am Anfang
+  output.textContent = `⬆️ Starte Upload von ${files.length} Datei(en) 🚀\n\n`;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const safeName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${file.name}`;
+    const path = `${safeName}`;
+
+    const { error } = await supabase
+      .storage
+      .from("bilder")
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      output.textContent += `❌ ${file.name}: Fehler – ${error.message} ^⁠_⁠_⁠_⁠_⁠_⁠_⁠_⁠_⁠_⁠^\n`;
+    } else {
+      output.textContent += `✅ ${file.name} Erfolgreich hochgeladen ¯\_(ツ)_/¯\n`;
+    }
+  }
+
+  output.textContent += `\n📌 Upload abgeschlossen.`;
+});
+  </script>
+</body>
+</html>
