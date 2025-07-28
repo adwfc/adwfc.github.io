@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>📤 Mehrfach-Bild hochladen</title>
+  <title>Upload in die Weltraumgalerie</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
@@ -13,24 +13,27 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       height: 100vh;
       margin: 0;
     }
-
+    
     form, #upload-ui {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-top: 20%;
       gap: 1rem;
       padding: 2rem;
-      background: #222;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
       max-width: 400px;
       width: 90vw;
     }
-
+    
+    #login-form div {
+      display: flex;
+      border: 1px dashed white;
+      margin-top: -7%;
+    }
+    
     input, button {
       padding: 0.8rem;
       font-size: 1rem;
@@ -38,11 +41,36 @@
       border: none;
       width: 100%;
     }
-
+    
+    #password {
+        background-color: transparent;
+        color: white;
+        border: none;
+    }
+    
+    .login-btn {
+      color: green;
+      width: 10%;
+      background-color: transparent;
+      margin-right: 8%;
+    }
+    
     #upload-ui {
       display: none;
     }
-
+    
+    #selected-files {
+      max-height: 100px;
+      overflow-y: auto;
+      width: 100%;
+      background: #111;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #ccc;
+      white-space: pre-wrap;
+    }
+    
     #output {
       margin-top: 1rem;
       font-size: 0.9rem;
@@ -59,18 +87,17 @@
 </head>
 <body>
 
-  <!-- Login -->
   <form id="login-form">
-    <h2>🔐 Login für Upload</h2>
-    <input type="password" id="password" placeholder="Passwort" required />
-    <button type="submit">Einloggen</button>
+    <h2>Login für Upload</h2>
+    <div><input type="password" id="password" placeholder="Passwort" required />
+         <button class="login-btn" type="submit">&#x2713;</button></div>
   </form>
 
-  <!-- Upload-UI -->
   <div id="upload-ui">
-    <h2>📤 Mehrere Bilder in Supabase hochladen</h2>
+    <h2>Upload zur Weltraum-Galerie</h2>
     <input type="file" id="file-input" accept="image/*" multiple />
-    <button id="upload-btn">Alle hochladen</button>
+    <div id="selected-files">Keine Dateien ausgewählt</div>
+    <button id="upload-btn">Rakete starten (Hochladen)</button>
     <div id="output"></div>
   </div>
 
@@ -87,6 +114,7 @@
     const fileInput = document.getElementById("file-input");
     const uploadBtn = document.getElementById("upload-btn");
     const output = document.getElementById("output");
+    const selectedFilesDiv = document.getElementById("selected-files");
 
     // Login
     loginForm.addEventListener("submit", async (e) => {
@@ -105,6 +133,20 @@
 
       loginForm.style.display = "none";
       uploadUI.style.display = "flex";
+    });
+
+    // Dateien anzeigen, wenn Auswahl sich ändert
+    fileInput.addEventListener("change", () => {
+      const files = fileInput.files;
+      if (!files.length) {
+        selectedFilesDiv.textContent = "Keine Dateien ausgewählt";
+        return;
+      }
+      let names = [];
+      for(let i=0; i<files.length; i++) {
+        names.push(files[i].name);
+      }
+      selectedFilesDiv.textContent = "Ausgewählte Dateien:\n" + names.join("\n");
     });
 
     // Mehrfach-Upload
@@ -139,7 +181,7 @@
       }
 
       output.textContent += "\n📌 Alle Uploads beendet.";
-    });
+      });
   </script>
 </body>
 </html>
