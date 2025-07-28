@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>📤 Mehrfach-Bild hochladen</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    form, #upload-ui {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem;
+      background: #222;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+      max-width: 400px;
+      width: 90vw;
+    }
+
+    input, button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      border: none;
+      width: 100%;
+    }
+
+    #upload-ui {
+      display: none;
+    }
+
+    #output {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #aaa;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 100%;
+      background: #111;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login -->
+  <form id="login-form">
+    <h2>🔐 Login für Upload</h2>
+    <input type="password" id="password" placeholder="Passwort" required />
+    <button type="submit">Einloggen</button>
+  </form>
+
+  <!-- Upload-UI -->
+  <div id="upload-ui">
+    <h2>📤 Mehrere Bilder in Supabase hochladen</h2>
+    <input type="file" id="file-input" accept="image/*" multiple />
+    <button id="upload-btn">Alle hochladen</button>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://ziikbioeavgapnjumpju.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppaWtiaW9lYXZnYXBuanVtcGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMTc4MzIsImV4cCI6MjA2ODc5MzgzMn0.IK147XNWr8E8INYsgYZP45vME0CAASM2LBQWKuaJgyw'
+    );
+
+    const email = "bea@example.com";
+    const loginForm = document.getElementById("login-form");
+    const passwordInput = document.getElementById("password");
+    const uploadUI = document.getElementById("upload-ui");
+    const fileInput = document.getElementById("file-input");
+    const uploadBtn = document.getElementById("upload-btn");
+    const output = document.getElementById("output");
+
+    // Login
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const password = passwordInput.value;
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        alert("Login fehlgeschlagen: " + error.message);
+        return;
+      }
+
+      loginForm.style.display = "none";
+      uploadUI.style.display = "flex";
+    });
+
+    // Mehrfach-Upload
+    uploadBtn.addEventListener("click", async () => {
+      const files = fileInput.files;
+      if (!files.length) {
+        alert("Bitte mindestens ein Bild auswählen.");
+        return;
+      }
+
+      output.textContent = "";
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const path = `uploads/${Date.now()}-${Math.random().toString(36).substring(2,8)}-${file.name}`;
+
+        output.textContent += `⬆️ Lade hoch: ${file.name} ...\n`;
+
+        const { data, error } = await supabase
+          .storage
+          .from("bilder")
+          .upload(path, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          output.textContent += `❌ Fehler bei ${file.name}: ${error.message}\n`;
+        } else {
+          output.textContent += `✅ Erfolgreich hochgeladen: ${path}\n`;
+        }
+      }
+
+      output.textContent += "\n📌 Alle Uploads beendet.";
+    });
+  </script>
+</body>
+</html>
