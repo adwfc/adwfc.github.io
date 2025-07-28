@@ -156,14 +156,15 @@ uploadBtn.addEventListener("click", async () => {
     return;
   }
 
-  output.textContent = "⬆️ Starte Upload von " + files.length + " Datei(en)...\n\n";
+  // Nur einmal am Anfang
+  output.textContent = `⬆️ Starte Upload von ${files.length} Datei(en) 🚀\n\n`;
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const safeName = `${Date.now()}-${Math.random().toString(36).substring(2,8)}-${file.name}`;
+    const safeName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${file.name}`;
     const path = `${safeName}`;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .storage
       .from("bilder")
       .upload(path, file, {
@@ -172,13 +173,13 @@ uploadBtn.addEventListener("click", async () => {
       });
 
     if (error) {
-      output.textContent += `❌ ${file.name}: Fehler – ${error.message}\n`;
+      output.textContent += `❌ ${file.name}: Fehler – ${error.message} ^⁠_⁠_⁠_⁠_⁠_⁠_⁠_⁠_⁠_⁠^\n`;
     } else {
-      output.textContent += `✅ ${file.name} erfolgreich hochgeladen\n`;
+      output.textContent += `✅ ${file.name} Erfolgreich hochgeladen ¯\_(ツ)_/¯\n`;
     }
   }
 
-  output.textContent += "\n📌 Upload abgeschlossen.";
+  output.textContent += `\n📌 Upload abgeschlossen.`;
 });
   </script>
 </body>
