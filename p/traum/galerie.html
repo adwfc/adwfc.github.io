@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>✨ Galerie mit Sternflug</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #galerie {
+      position: relative;
+      width: 100vw;
+      height: 90vh;
+      overflow: hidden;
+    }
+
+    .bild-container {
+      position: absolute;
+      top: 50%;
+      left: 120vw;
+      width: 90vw;
+      transform: translateY(-50%);
+      transition: left 1.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .bild-container img.bild {
+      width: 70%;
+      height: auto;
+      z-index: 2;
+      position: relative;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .bild-container img.stern-foreground {
+      position: absolute;
+      width: 90vw;
+      height: auto;
+      z-index: 3;
+    }
+
+    #rakete {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      width: 50px;
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 1s ease;
+      transform: translateX(0);
+    }
+    
+    #login-form {
+        margin-top: 20%;
+    }
+
+    #login-form div {
+      display: flex;
+      border: 1px dashed white;
+      margin-top: -7%;
+      border-radius: 15px;
+    }
+    
+    h2 {
+        color: white;
+        text-align: center;
+    }
+    
+    p {
+        color: white;
+        margin-bottom: 15%;
+        margin-top: -5%;
+        text-align: center;
+    }
+ 
+    #password {
+        background-color: transparent;
+        color: white;
+        border: none;
+    }
+    
+    .login-btn {
+      color: green;
+      width: 10%;
+      background-color: transparent;
+      margin-right: 8%;
+    }
+
+    input, button {
+      padding: 1rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+    
+    
+  <form id="login-form">
+    <h2>Login</h2>
+    <p>&#10024; zur Weltraumgalerie &#10024;</p>
+    <div><input type="password" id="password" placeholder="Passwort" required />
+         <button class="login-btn" type="submit">&#x2713;</button></div>
+  </form>
+
+  <div id="galerie" style="display:none;"></div>
+  <img id="rakete" src="rakete.png" alt="Rakete" style="display:none;" />
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://ziikbioeavgapnjumpju.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppaWtiaW9lYXZnYXBuanVtcGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMTc4MzIsImV4cCI6MjA2ODc5MzgzMn0.IK147XNWr8E8INYsgYZP45vME0CAASM2LBQWKuaJgyw'
+    );
+
+    const email = "bea@example.com";
+    let index = 0;
+    let urls = []; // wird ein Array aus { url, image }
+    let raketeState = 'links';
+    let currentBild = null;
+
+    const form = document.getElementById('login-form');
+    const galerie = document.getElementById('galerie');
+    const rakete = document.getElementById('rakete');
+
+    function zeigeBild(i) {
+      const container = document.createElement('div');
+      container.className = 'bild-container';
+
+      const { url, image } = urls[i];
+
+      const bild = document.createElement('img');
+      bild.className = 'bild';
+
+      // Stern-Hintergrund (immer da)
+      const stern = document.createElement('img');
+      stern.src = 'stern.png';
+      stern.className = 'stern-foreground';
+
+      container.appendChild(bild);
+      container.appendChild(stern);
+      galerie.appendChild(container);
+
+      // Bild nur setzen, wenn es geladen ist
+      if (image.complete) {
+        bild.src = url;
+        requestAnimationFrame(() => bild.style.opacity = '1');
+      } else {
+        image.onload = () => {
+          bild.src = url;
+          requestAnimationFrame(() => bild.style.opacity = '1');
+        };
+      }
+
+      // Trigger Einflug
+      void container.offsetWidth;
+      container.style.left = 'calc(50vw - 45vw)';
+
+      // Altes Bild rauswerfen
+      if (currentBild) {
+        const alt = currentBild;
+        alt.style.left = '-120vw';
+        setTimeout(() => alt.remove(), 1200);
+      }
+
+      currentBild = container;
+    }
+
+    rakete.addEventListener('click', () => {
+      if (urls.length === 0) return;
+      index = (index + 1) % urls.length;
+      zeigeBild(index);
+
+      if (raketeState === 'links') {
+        rakete.style.transform = 'translateX(70vw)';
+        raketeState = 'mitte';
+      } else if (raketeState === 'mitte') {
+        rakete.style.transform = 'translateX(120vw)';
+        raketeState = 'rechts';
+        setTimeout(() => {
+          rakete.style.transition = 'none';
+          rakete.style.transform = 'translateX(-100px)';
+          void rakete.offsetWidth;
+          rakete.style.transition = 'transform 1s ease';
+          rakete.style.transform = 'translateX(0)';
+          raketeState = 'links';
+        }, 300);
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return alert("Login fehlgeschlagen: " + error.message);
+
+      const { data: files, error: listErr } = await supabase
+        .storage
+        .from('bilder')
+        .list('', { limit: 100 });
+
+      if (listErr || !files || files.length === 0) {
+        alert("Keine Bilder gefunden");
+        return;
+      }
+
+      files.sort((a, b) => a.name.localeCompare(b.name));
+      urls = [];
+
+      // Preload alle Bilder
+      for (const file of files) {
+        const { data: signed, error: urlErr } = await supabase
+          .storage
+          .from('bilder')
+          .createSignedUrl(file.name, 300);
+
+        if (!urlErr && signed?.signedUrl) {
+          const img = new Image();
+          img.src = signed.signedUrl;
+          urls.push({ url: signed.signedUrl, image: img });
+        }
+      }
+
+      if (urls.length === 0) return alert("Keine gültigen Bilder");
+
+      zeigeBild(index);
+      form.style.display = 'none';
+      galerie.style.display = 'block';
+      rakete.style.display = 'block';
+      raketeState = 'links';
+      rakete.style.transform = 'translateX(0)';
+    });
+  </script>
+</body>
+</html>
