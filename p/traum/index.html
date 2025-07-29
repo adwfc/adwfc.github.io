@@ -1,205 +1,254 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sternenhimmel mit Schaf</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
-  }
-  canvas {
-    display: block;
-    touch-action: none;
-  }
-  #lightbox {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sternenhimmel mit Schaf-Lightbox</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
+      font-family: sans-serif;
+    }
+    #starCanvas {
+      display: block;
+      touch-action: none;
+      width: 100vw;
+      height: 100vh;
+    }
+    #sheepThumbnail {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      cursor: pointer;
+      z-index: 10;
+      border-radius: 12px;
+      border: 2px solid white;
+      background: white;
+    }
+    #lightboxOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    #lightboxContent {
+      position: relative;
+      width: 80vw;
+      height: 60vh;
+      background: #222;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255,255,255,0.5);
+    }
+    #sheepContainer {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    #closeLightbox {
+      position: absolute;
+      top: 10px; right: 15px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      z-index: 101;
+    }
 </style>
 </head>
 <body>
+
 <canvas id="starCanvas"></canvas>
-<div id="lightbox">
-  <img src="schaf.gif" alt="Schaf Animation" style="max-width: 90vw; max-height: 90vh;"/>
+
+
+<div id="lightboxOverlay">
+  <div id="lightboxContent">
+    <div id="closeLightbox">&times;</div>
+    <div id="sheepContainer"></div>
+  </div>
 </div>
-<script>
-(() => {
-  const canvas = document.getElementById('starCanvas');
-  const ctx = canvas.getContext('2d');
 
-  let w, h;
-  function resize() {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = w;
-    canvas.height = h;
-  }
-  resize();
-  window.addEventListener('resize', resize);
+<script src="stars.js"></script>
 
-  const stars = [], bgStars = [];
-  const starCount = 100, bgStarCount = 50, maxStars = 600, maxBgStars = 300;
-  for(let i = 0; i < starCount; i++) {
-    stars.push({ angle: Math.random() * Math.PI * 2, y: Math.random() * h, radius: 2, alpha: 0.0, targetAlpha: 0.7 });
-  }
-  for(let i = 0; i < bgStarCount; i++) {
-    bgStars.push({ angle: Math.random() * Math.PI * 2, y: Math.random() * h, radius: 1, alpha: 0.0, targetAlpha: 0.3 });
+<script type="module">
+  import { initSheep, stopSheep } from './sheep.js';
+
+  const sheepThumbnail = document.getElementById('sheepThumbnail');
+  const lightboxOverlay = document.getElementById('lightboxOverlay');
+  const closeLightbox = document.getElementById('closeLightbox');
+  const sheepContainer = document.getElementById('sheepContainer');
+
+  function openLightbox() {
+    lightboxOverlay.style.display = 'flex';
+    initSheep(sheepContainer);
   }
 
-  let cameraAngle = 0, velocity = 0, zoomFactor = 1.0, zoomVelocity = 0;
-  let verticalOffset = 0, verticalVelocity = 0;
-  let isDragging = false, lastDragX = 0, lastDragY = 0, lastDistance = null;
-  const anchorAngle = 0;
-
-  const triggerImage = new Image();
-  triggerImage.src = 'schaf-trigger.png';
-  let triggerScreenX = null, triggerScreenY = null;
-
-  function angleToScreenX(angleDiff, fov) {
-    return (angleDiff + fov / 2) / fov * w;
+  function closeLightboxFunc() {
+    lightboxOverlay.style.display = 'none';
+    stopSheep();
+    sheepContainer.innerHTML = '';
   }
 
-  function drawStars(starArray, fov) {
-    starArray.forEach(star => {
-      let diff = star.angle - cameraAngle;
-      if (diff > Math.PI) diff -= 2 * Math.PI;
-      if (diff < -Math.PI) diff += 2 * Math.PI;
-      if (diff > -fov / 2 && diff < fov / 2) {
-        const screenX = angleToScreenX(diff, fov);
-        const centerY = h / 2;
-        const offsetY = (star.y - centerY) * zoomFactor + verticalOffset;
-        const screenY = centerY + offsetY;
-        ctx.globalAlpha = star.alpha;
-        ctx.beginPath();
-        ctx.arc(screenX, screenY, star.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-      }
-    });
-  }
+  sheepThumbnail.addEventListener('click', openLightbox);
+  closeLightbox.addEventListener('click', closeLightboxFunc);
 
-  function updateStarsForZoom() {
-    const zoomProgress = (zoomFactor - 1) / 3;
-    const targetCount = Math.floor(starCount + (maxStars - starCount) * zoomProgress);
-    while(stars.length < targetCount) {
-      stars.push({ angle: Math.random() * Math.PI * 2, y: Math.random() * h, radius: 2, alpha: 0.0, targetAlpha: 0.7 });
-    }
-    for(let i = stars.length - 1; i >= targetCount; i--) {
-      if (stars[i].alpha > 0) stars[i].alpha -= 0.05;
-      else stars.splice(i, 1);
-    }
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'white';
-
-    const fov = (90 / zoomFactor) * Math.PI / 180;
-    drawStars(bgStars, fov);
-    drawStars(stars, fov);
-
-    let diffAnchor = anchorAngle - cameraAngle;
-    if (diffAnchor > Math.PI) diffAnchor -= 2 * Math.PI;
-    if (diffAnchor < -Math.PI) diffAnchor += 2 * Math.PI;
-
-    if (diffAnchor > -fov / 2 && diffAnchor < fov / 2) {
-      triggerScreenX = angleToScreenX(diffAnchor, fov);
-      triggerScreenY = h / 2 + verticalOffset;
-      if (triggerImage.complete && triggerImage.naturalWidth !== 0) {
-        ctx.drawImage(triggerImage, triggerScreenX - 20, triggerScreenY - 20, 40, 40);
-      }
-    } else {
-      triggerScreenX = null;
-      triggerScreenY = null;
-    }
-  }
-
-  function animate() {
-    if (!isDragging) {
-      if (Math.abs(velocity) > 0.0001) { cameraAngle -= velocity; velocity *= 0.98; }
-      if (Math.abs(zoomVelocity) > 0.0005) { zoomFactor += zoomVelocity; zoomVelocity *= 0.98; zoomFactor = Math.max(1, Math.min(4, zoomFactor)); }
-    } else {
-      verticalOffset += verticalVelocity; verticalVelocity *= 0.9;
-    }
-    draw();
-    updateStarsForZoom();
-    requestAnimationFrame(animate);
-  }
-  animate();
-
-  canvas.addEventListener('click', function(e) {
-    if (triggerScreenX === null || triggerScreenY === null) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left, y = e.clientY - rect.top;
-    if ((x - triggerScreenX) ** 2 + (y - triggerScreenY) ** 2 < 900) {
-      // Link in neuem Tab öffnen
-      window.open('https://example.com', '_blank', 'noopener');
-      
-      // Falls du die Lightbox auch öffnen willst, kannst du die Zeile hier aktivieren:
-      // document.getElementById('lightbox').style.display = 'flex';
+  lightboxOverlay.addEventListener('click', e => {
+    if (e.target === lightboxOverlay) {
+      closeLightboxFunc();
     }
   });
-
-  function getTouchDistance(e) {
-    if (e.touches.length < 2) return null;
-    const dx = e.touches[0].clientX - e.touches[1].clientX;
-    const dy = e.touches[0].clientY - e.touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  function pointerDown(e) {
-    if (e.touches && e.touches.length === 2) {
-      lastDistance = getTouchDistance(e);
-    } else {
-      isDragging = true;
-      velocity = 0;
-      lastDragX = e.clientX || e.touches[0].clientX;
-      lastDragY = e.clientY || e.touches[0].clientY;
-    }
-  }
-  function pointerMove(e) {
-    if (e.touches && e.touches.length === 2) {
-      const distance = getTouchDistance(e);
-      if (lastDistance != null) {
-        const delta = distance - lastDistance;
-        lastDistance = distance;
-        const zoomSensitivity = 0.005;
-        zoomFactor += delta * zoomSensitivity;
-        zoomFactor = Math.max(1, Math.min(4, zoomFactor));
-        zoomVelocity = delta * zoomSensitivity * 0.3;
-      }
-    } else if (isDragging) {
-      const x = e.clientX || e.touches[0].clientX;
-      const y = e.clientY || e.touches[0].clientY;
-      const dx = x - lastDragX, dy = y - lastDragY;
-      lastDragX = x; lastDragY = y;
-      cameraAngle -= dx * 0.0015;
-      cameraAngle = (cameraAngle + 2 * Math.PI) % (2 * Math.PI);
-      velocity = dx * 0.0015;
-      if (zoomFactor <= 1.1) verticalVelocity += dy * 0.3;
-    }
-  }
-  function pointerUp(e) {
-    isDragging = false;
-    lastDistance = null;
-    velocity *= 0.9;
-    zoomVelocity *= 0.9;
-  }
-  canvas.addEventListener('touchstart', pointerDown, { passive: false });
-  canvas.addEventListener('touchmove', pointerMove, { passive: false });
-  canvas.addEventListener('touchend', pointerUp);
-  canvas.addEventListener('mousedown', pointerDown);
-  canvas.addEventListener('mousemove', pointerMove);
-  canvas.addEventListener('mouseup', pointerUp);
-})();
 </script>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      position: relative;
+      font-family: sans-serif;
+    }
+
+    .rakete-wrapper {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      animation: fly 12s linear forwards;
+    }
+
+    .rakete {
+      height: 80px;
+    }
+
+    .spruch {
+      position: absolute;
+      top: 42px;
+      left: 115px;
+      color: black;
+      white-space: normal;
+      word-wrap: break-word;
+      max-width: 300px;
+      font-weight: normal;
+      text-shadow: none;
+    }
+
+    .spruch.kurz {
+      font-size: 24px;
+    }
+
+    .spruch.mittel {
+      font-size: 12px;
+    }
+
+    .spruch.lang {
+      font-size: 8px;
+    }
+
+    @keyframes fly {
+      from {
+        left: 100%;
+      }
+      to {
+        left: -400px;
+      }
+    }
+</style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.appspot.com",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function getNaechsterSpruch() {
+    const docRef = doc(db, "p", "sprueche");
+    const snap = await getDoc(docRef);
+
+    if (!snap.exists()) {
+      console.warn("Dokument 'sprueche' nicht gefunden.");
+      return "Keine Sprüche vorhanden.";
+    }
+
+    const data = snap.data();
+    const keys = Object.keys(data).filter(k => k !== "status").sort((a, b) => parseInt(a) - parseInt(b));
+    let status = parseInt(data.status || "0");
+    console.log("Aktueller Status:", status);
+
+    // Fallback
+    if (isNaN(status) || status >= keys.length) {
+      console.warn("Status ungültig. Setze auf 0 zurück.");
+      status = 0;
+    }
+
+const spruchKey = keys[status] || keys[0];
+const spruch = data[spruchKey];
+
+    const next = (status + 1) % keys.length;
+    try {
+      await updateDoc(docRef, { status: next });
+      console.log("Neuer Status gespeichert:", next);
+    } catch (err) {
+      console.error("Fehler beim Speichern des Status:", err);
+    }
+
+    return spruch;
+  }
+
+  async function starteRakete() {
+    const spruchText = await getNaechsterSpruch();
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "rakete-wrapper";
+    wrapper.style.top = Math.floor(Math.random() * 80 + 10) + "vh";
+
+    const rakete = document.createElement("img");
+    rakete.src = "rakete-mit-banner.png";
+    rakete.className = "rakete";
+
+    const spruch = document.createElement("div");
+    spruch.className = "spruch";
+
+    // Schriftgröße dynamisch zuweisen
+    if (spruchText.length > 50) {
+      spruch.classList.add("lang");
+    } else if (spruchText.length > 25) {
+      spruch.classList.add("mittel");
+    } else {
+      spruch.classList.add("kurz");
+    }
+
+    spruch.textContent = spruchText;
+
+    wrapper.appendChild(rakete);
+    wrapper.appendChild(spruch);
+    document.body.appendChild(wrapper);
+
+    setTimeout(() => {
+      wrapper.remove();
+    }, 12000);
+  }
+
+  // Erste Rakete sofort starten + alle 15 Sekunden erneut
+  starteRakete();
+  setInterval(starteRakete, 30000);
+</script>
+
 </body>
 </html>
