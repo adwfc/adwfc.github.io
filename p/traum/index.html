@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenhimmel mit Schaf-Lightbox</title>
+  <title>Traum</title>
   <style>
     html, body {
       margin: 0; padding: 0; overflow: hidden; background: black; height: 100%;
@@ -60,11 +60,22 @@
       user-select: none;
       z-index: 101;
     }
+    #musicToggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 20px;
+      height: auto;
+      z-index: 11;
+      cursor: pointer;
+    }
 </style>
 </head>
 <body>
 
 <canvas id="starCanvas"></canvas>
+<img id="musicToggle" src="musik-trigger.png" alt="Musik">
+<audio id="bgMusic" src="musik.mp3" loop></audio>
 
 
 <div id="lightboxOverlay">
@@ -75,7 +86,6 @@
 </div>
 
 <script src="stars.js"></script>
-
 <script type="module">
   import { initSheep, stopSheep } from './sheep.js';
 
@@ -83,6 +93,8 @@
   const lightboxOverlay = document.getElementById('lightboxOverlay');
   const closeLightbox = document.getElementById('closeLightbox');
   const sheepContainer = document.getElementById('sheepContainer');
+  const musicToggle = document.getElementById('musicToggle');
+  const bgMusic = document.getElementById('bgMusic');
 
   function openLightbox() {
     lightboxOverlay.style.display = 'flex';
@@ -103,9 +115,21 @@
       closeLightboxFunc();
     }
   });
+
+  // Musik abspielen bei Klick auf das Icon
+  musicToggle.addEventListener('click', () => {
+    if (bgMusic.paused) {
+      bgMusic.play().catch(err => console.error("Audio-Start fehlgeschlagen:", err));
+      musicToggle.style.opacity = 1.0;
+    } else {
+      bgMusic.pause();
+      musicToggle.style.opacity = 0.5;
+    }
+  });
 </script>
 
-  <style>
+
+<style>
     body {
       margin: 0;
       background: black;
