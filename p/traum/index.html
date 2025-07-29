@@ -87,36 +87,9 @@
 
 <script src="stars.js"></script>
 <script type="module">
-  import { initSheep, stopSheep } from './sheep.js';
-
-  const sheepThumbnail = document.getElementById('sheepThumbnail');
-  const lightboxOverlay = document.getElementById('lightboxOverlay');
-  const closeLightbox = document.getElementById('closeLightbox');
-  const sheepContainer = document.getElementById('sheepContainer');
   const musicToggle = document.getElementById('musicToggle');
   const bgMusic = document.getElementById('bgMusic');
-
-  function openLightbox() {
-    lightboxOverlay.style.display = 'flex';
-    initSheep(sheepContainer);
-  }
-
-  function closeLightboxFunc() {
-    lightboxOverlay.style.display = 'none';
-    stopSheep();
-    sheepContainer.innerHTML = '';
-  }
-
-  sheepThumbnail.addEventListener('click', openLightbox);
-  closeLightbox.addEventListener('click', closeLightboxFunc);
-
-  lightboxOverlay.addEventListener('click', e => {
-    if (e.target === lightboxOverlay) {
-      closeLightboxFunc();
-    }
-  });
-
-  // Musik abspielen bei Klick auf das Icon
+  
   musicToggle.addEventListener('click', () => {
     if (bgMusic.paused) {
       bgMusic.play().catch(err => console.error("Audio-Start fehlgeschlagen:", err));
