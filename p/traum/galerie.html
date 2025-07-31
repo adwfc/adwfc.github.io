@@ -44,6 +44,8 @@
       position: relative;
       opacity: 0;
       transition: opacity 0.4s ease;
+      pointer-events: auto;
+      cursor: pointer;
     }
 
     .bild-container img.stern-foreground {
@@ -63,9 +65,9 @@
       transition: transform 1s ease;
       transform: translateX(0);
     }
-    
+
     #login-form {
-        margin-top: 20%;
+      margin-top: 20%;
     }
 
     #login-form div {
@@ -74,31 +76,31 @@
       margin-top: -7%;
       border-radius: 15px;
     }
-    
+
     #login-form div:hover {
-        border: 1px solid orange;
+      border: 1px solid orange;
     }
-    
+
     h2 {
-        color: white;
-        text-align: center;
-        margin-bottom: 15%;
+      color: white;
+      text-align: center;
+      margin-bottom: 15%;
     }
-    
+
     p {
-        color: white;
-        margin-bottom: 15%;
-        margin-top: -5%;
-        text-align: center;
+      color: white;
+      margin-bottom: 15%;
+      margin-top: -5%;
+      text-align: center;
     }
- 
+
     #password {
-        background-color: transparent;
-        color: white;
-        border: none;
-        outline: none;
+      background-color: transparent;
+      color: white;
+      border: none;
+      outline: none;
     }
-    
+
     .login-btn {
       color: green;
       font-size: 20px;
@@ -113,28 +115,54 @@
       border-radius: 8px;
       border: none;
     }
-    
+
     #upload-link {
-        margin-left: 25%;
-        position: absolute;
-        bottom: 50px;
-        color: #6ae0ff;
-        display: block;
+      margin-left: 25%;
+      position: absolute;
+      bottom: 50px;
+      color: #6ae0ff;
+      display: block;
+    }
+
+    /* --- Lightbox --- */
+    #lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    #lightbox-overlay img {
+      max-width: 95vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
     }
   </style>
 </head>
 <body>
-    
-    
+
   <form id="login-form">
     <h2>Raketen-Zugang 🔐</h2>
-    <div><input type="password" id="password" placeholder="Passwort" required />
-         <button class="login-btn" type="submit">&#x2713;</button></div>
-  <a id="upload-link" href="upload.html">Zum Upload 🚀</a>
+    <div>
+      <input type="password" id="password" placeholder="Passwort" required />
+      <button class="login-btn" type="submit">&#x2713;</button>
+    </div>
+    <a id="upload-link" href="upload.html">Zum Upload 🚀</a>
   </form>
-  
+
   <div id="galerie" style="display:none;"></div>
   <img id="rakete" src="m/rakete.png" alt="Rakete" style="display:none;" />
+
+  <div id="lightbox-overlay">
+    <img id="lightbox-img" src="" alt="Großansicht" />
+  </div>
 
   <script>
     const supabase = window.supabase.createClient(
@@ -144,13 +172,15 @@
 
     const email = "bea@example.com";
     let index = 0;
-    let urls = []; // wird ein Array aus { url, image }
+    let urls = [];
     let raketeState = 'links';
     let currentBild = null;
 
     const form = document.getElementById('login-form');
     const galerie = document.getElementById('galerie');
     const rakete = document.getElementById('rakete');
+    const lightboxOverlay = document.getElementById('lightbox-overlay');
+    const lightboxImg = document.getElementById('lightbox-img');
 
     function zeigeBild(i) {
       const container = document.createElement('div');
@@ -160,8 +190,9 @@
 
       const bild = document.createElement('img');
       bild.className = 'bild';
+      bild.src = '';
+      bild.setAttribute('data-full', url);
 
-      // Stern-Hintergrund (immer da)
       const stern = document.createElement('img');
       stern.src = 'm/stern.png';
       stern.className = 'stern-foreground';
@@ -170,7 +201,6 @@
       container.appendChild(stern);
       galerie.appendChild(container);
 
-      // Bild nur setzen, wenn es geladen ist
       if (image.complete) {
         bild.src = url;
         requestAnimationFrame(() => bild.style.opacity = '1');
@@ -181,11 +211,9 @@
         };
       }
 
-      // Trigger Einflug
       void container.offsetWidth;
       container.style.left = 'calc(50vw - 45vw)';
 
-      // Altes Bild rauswerfen
       if (currentBild) {
         const alt = currentBild;
         alt.style.left = '-120vw';
@@ -237,7 +265,6 @@
       files.sort((a, b) => a.name.localeCompare(b.name));
       urls = [];
 
-      // Preload alle Bilder
       for (const file of files) {
         const { data: signed, error: urlErr } = await supabase
           .storage
@@ -260,6 +287,22 @@
       rakete.style.display = 'block';
       raketeState = 'links';
       rakete.style.transform = 'translateX(0)';
+    });
+
+    // Lightbox-Interaktion
+    galerie.addEventListener('click', (e) => {
+      if (e.target.classList.contains('bild')) {
+        const src = e.target.getAttribute('data-full');
+        lightboxImg.src = src;
+        lightboxOverlay.style.display = 'flex';
+      }
+    });
+
+    lightboxOverlay.addEventListener('click', (e) => {
+      if (e.target === lightboxOverlay) {
+        lightboxOverlay.style.display = 'none';
+        lightboxImg.src = '';
+      }
     });
   </script>
 </body>
