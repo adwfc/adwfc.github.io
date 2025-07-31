@@ -74,9 +74,6 @@
 <body>
 
 <canvas id="starCanvas"></canvas>
-<img id="musicToggle" src="musik-trigger.png" alt="Musik">
-<audio id="bgMusic" src="musik.mp3" loop></audio>
-
 
 <div id="lightboxOverlay">
   <div id="lightboxContent">
@@ -86,6 +83,9 @@
 </div>
 
 <script src="stars.js"></script>
+
+<img id="musicToggle" src="m/musik-trigger.png" alt="Musik">
+<audio id="bgMusic" src="m/musik.mp3" loop></audio>
 <script type="module">
   const musicToggle = document.getElementById('musicToggle');
   const bgMusic = document.getElementById('bgMusic');
@@ -216,7 +216,7 @@ const spruch = data[spruchKey];
     wrapper.style.top = Math.floor(Math.random() * 80 + 10) + "vh";
 
     const rakete = document.createElement("img");
-    rakete.src = "rakete-mit-banner.png";
+    rakete.src = "m/rakete-mit-banner.png";
     rakete.className = "rakete";
 
     const spruch = document.createElement("div");

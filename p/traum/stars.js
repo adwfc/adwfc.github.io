@@ -63,13 +63,13 @@
   const fovDegBase = 90;
 
   const triggerImg1 = new Image();
-  triggerImg1.src = 'schaf-trigger.png';
+  triggerImg1.src = 'm/schaf-trigger.png';
   const triggerRadius1 = 30;
   const triggerAngle1 = 0;
   const triggerYOffset1 = -40;
 
   const triggerImg2 = new Image();
-  triggerImg2.src = 'galerie-trigger.png';
+  triggerImg2.src = 'm/galerie-trigger.png';
   const triggerRadius2 = 30;
   const triggerAngle2 = 0.5;
   const triggerOffsetX2 = 80;
@@ -77,7 +77,7 @@
 
   // Neuer Trigger 3
   const triggerImg3 = new Image();
-  triggerImg3.src = 'kreise-trigger.png';
+  triggerImg3.src = 'm/kreise-trigger.png';
   const triggerRadius3 = 30;
   const triggerAngle3 = -0.5;
   const triggerOffsetX3 = -80;
