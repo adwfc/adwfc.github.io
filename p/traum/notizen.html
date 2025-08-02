@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notizen</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #000;
+      color: #eee;
+      font-family: sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #header {
+      height: 50px;
+      display: flex;
+      align-items: center;
+    }
+    #toggleSidebar {
+      width: 25px;
+      height: 25px;
+      background: url('m/sidebar-toggle.png') no-repeat center;
+      background-size: contain;
+      border: none;
+      cursor: pointer;
+      margin-left: 12px;
+      margin-top: 20px;
+    }
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: #111;
+      transition: left 0.3s;
+      padding: 1rem;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    #sidebar.open {
+      left: 0;
+    }
+    #sidebar h2 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .note-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    .note-entry.active {
+      background-color: #333;
+    }
+    .note-title {
+      flex: 1;
+      cursor: pointer;
+    }
+    .edit-icon {
+      width: 18px;
+      height: 18px;
+      background: url('m/edit.png') no-repeat center;
+      background-size: contain;
+      cursor: pointer;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    #content {
+      padding: 1rem;
+      margin-top: 50px;
+      height: calc(100vh - 50px);
+      overflow-y: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      color: #eee;
+      border: none;
+      resize: none;
+      font-size: 1rem;
+      line-height: 1.5;
+      outline: none;
+    }
+    #newNoteBtn {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: #222;
+      border: 1px solid #444;
+      color: #ccc;
+      width: 100%;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <button id="toggleSidebar" title="Menü"></button>
+  </div>
+
+  <div id="sidebar">
+    <h2>Notizen</h2>
+    <div id="noteList"></div>
+    <button id="newNoteBtn">+ Neue Notiz</button>
+  </div>
+
+  <div id="content">
+    <textarea id="noteArea" placeholder="Wähle oder erstelle eine Notiz…" disabled></textarea>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+      authDomain: "auth-adfwc.firebaseapp.com",
+      projectId: "auth-adfwc",
+      storageBucket: "auth-adfwc.appspot.com",
+      messagingSenderId: "221420792742",
+      appId: "1:221420792742:web:f75515331cb4c5b4603d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const sidebar = document.getElementById("sidebar");
+    const toggleBtn = document.getElementById("toggleSidebar");
+    const noteList = document.getElementById("noteList");
+    const noteArea = document.getElementById("noteArea");
+    const newNoteBtn = document.getElementById("newNoteBtn");
+
+    let currentTitle = null;
+    let currentContent = "";
+    let saveTimeout = null;
+
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    async function loadNotes() {
+      const docRef = doc(db, "p", "notizen");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        noteList.innerHTML = "";
+        Object.entries(data).forEach(([title, content]) => {
+          const entry = document.createElement("div");
+          entry.classList.add("note-entry");
+          if (title === currentTitle) entry.classList.add("active");
+
+          const titleSpan = document.createElement("span");
+          titleSpan.classList.add("note-title");
+          titleSpan.textContent = title;
+
+          const editIcon = document.createElement("div");
+          editIcon.classList.add("edit-icon");
+          editIcon.title = "Umbenennen";
+          editIcon.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const newTitle = prompt("Neuer Titel für die Notiz:", title);
+            if (!newTitle || newTitle === title) return;
+
+            const docRef = doc(db, "p", "notizen");
+            await updateDoc(docRef, { [newTitle]: data[title] });
+            await updateDoc(docRef, { [title]: deleteField() });
+
+            if (title === currentTitle) {
+              currentTitle = newTitle;
+              noteArea.value = data[title];
+            }
+
+            loadNotes();
+          });
+
+          titleSpan.addEventListener("click", () => {
+            if (currentTitle !== null) saveCurrentNote();
+            currentTitle = title;
+            currentContent = content;
+            noteArea.value = content;
+            noteArea.disabled = false;
+            loadNotes();
+            sidebar.classList.remove("open");
+          });
+
+          entry.appendChild(titleSpan);
+          entry.appendChild(editIcon);
+          noteList.appendChild(entry);
+        });
+      }
+    }
+
+    async function saveCurrentNote() {
+      if (!currentTitle) return;
+      const docRef = doc(db, "p", "notizen");
+      currentContent = noteArea.value;
+      await updateDoc(docRef, { [currentTitle]: currentContent });
+    }
+
+    newNoteBtn.addEventListener("click", async () => {
+      const newTitle = prompt("Titel für neue Notiz:");
+      if (!newTitle) return;
+      const docRef = doc(db, "p", "notizen");
+      await updateDoc(docRef, { [newTitle]: "" });
+      currentTitle = newTitle;
+      noteArea.value = "";
+      noteArea.disabled = false;
+      loadNotes();
+      sidebar.classList.remove("open");
+    });
+
+    noteArea.addEventListener("input", () => {
+      currentContent = noteArea.value;
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveCurrentNote();
+      }, 1000);
+    });
+
+    window.addEventListener("beforeunload", saveCurrentNote);
+
+    loadNotes();
+  </script>
+</body>
+</html>
+  
