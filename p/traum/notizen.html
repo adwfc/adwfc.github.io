@@ -125,7 +125,7 @@
       overflow-y: auto;
     }
 
-    #noteArea {
+    textarea {
       width: 100%;
       height: 100%;
       background: transparent;
@@ -135,12 +135,6 @@
       font-size: 1rem;
       line-height: 1.5;
       outline: none;
-    }
-
-    .word-hover {
-      background-color: rgba(255, 165, 0, 0.2);
-      padding: 0 2px;
-      border-radius: 4px;
     }
 
     #newNoteBtn {
@@ -167,7 +161,6 @@
   <div id="note-app">
     <div id="header">
       <button id="toggleSidebar" title="Menü"></button>
-      <button onclick="startPush()" style="margin-left: auto; color: orange; background: none; border: none;">🔔 Aktivieren</button>
     </div>
 
     <div id="sidebar">
@@ -177,7 +170,7 @@
     </div>
 
     <div id="content">
-      <div id="noteArea" contenteditable="true" placeholder="Wähle oder erstelle eine Notiz…"></div>
+      <textarea id="noteArea" placeholder="Wähle oder erstelle eine Notiz…" disabled></textarea>
     </div>
   </div>
 
@@ -203,13 +196,6 @@
   let currentTitle = null;
   let currentContent = "";
   let saveTimeout = null;
-  const noteArea = document.getElementById("noteArea");
-  const wortliste = ["Traum", "Stern", "Rakete"];
-
-  function highlightWords(text) {
-    const regex = new RegExp(`\\b(${wortliste.join("|")})\\b`, "gi");
-    return text.replace(regex, (match) => `<span class="word-hover">${match}</span>`);
-  }
 
   window.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById("login-form");
@@ -224,7 +210,32 @@
         loginForm.style.display = "none";
         noteApp.style.display = "block";
         loadNotes();
-        listenToChanges();
+
+        // Push aktivieren & Firestore-Änderungen überwachen
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted' && 'serviceWorker' in navigator) {
+            const reg = await navigator.serviceWorker.register('sw.js');
+            console.log('Push bereit:', reg);
+
+            const docRef = doc(db, "p", "notizen");
+            let initialData = (await getDoc(docRef)).data();
+
+            onSnapshot(docRef, (snapshot) => {
+              const newData = snapshot.data();
+              const changedKeys = Object.keys(newData || {}).filter(
+                key => initialData[key] !== newData[key]
+              );
+              if (changedKeys.length > 0) {
+                reg.active?.postMessage("note-update");
+              }
+              initialData = newData;
+            });
+          }
+        } catch (e) {
+          console.warn('Push konnte nicht aktiviert werden:', e);
+        }
+
       } catch (err) {
         alert("Fehler beim Login: " + err.message);
       }
@@ -233,6 +244,7 @@
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("toggleSidebar");
     const noteList = document.getElementById("noteList");
+    const noteArea = document.getElementById("noteArea");
     const newNoteBtn = document.getElementById("newNoteBtn");
 
     toggleBtn.addEventListener("click", () => {
@@ -267,7 +279,7 @@
 
             if (title === currentTitle) {
               currentTitle = newTitle;
-              noteArea.innerHTML = highlightWords(data[title]);
+              noteArea.value = data[title];
             }
 
             loadNotes();
@@ -277,7 +289,8 @@
             if (currentTitle !== null) saveCurrentNote();
             currentTitle = title;
             currentContent = content;
-            noteArea.innerHTML = highlightWords(content || "");
+            noteArea.value = content;
+            noteArea.disabled = false;
             loadNotes();
             sidebar.classList.remove("open");
           });
@@ -292,7 +305,7 @@
     async function saveCurrentNote() {
       if (!currentTitle) return;
       const docRef = doc(db, "p", "notizen");
-      currentContent = noteArea.innerText;
+      currentContent = noteArea.value;
       await updateDoc(docRef, { [currentTitle]: currentContent });
     }
 
@@ -302,13 +315,14 @@
       const docRef = doc(db, "p", "notizen");
       await updateDoc(docRef, { [newTitle]: "" });
       currentTitle = newTitle;
-      noteArea.innerHTML = "";
+      noteArea.value = "";
+      noteArea.disabled = false;
       loadNotes();
       sidebar.classList.remove("open");
     });
 
     noteArea.addEventListener("input", () => {
-      currentContent = noteArea.innerText;
+      currentContent = noteArea.value;
       if (saveTimeout) clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => {
         saveCurrentNote();
@@ -317,24 +331,6 @@
 
     window.addEventListener("beforeunload", saveCurrentNote);
   });
-
-  async function startPush() {
-    if (!('serviceWorker' in navigator)) return alert("Kein SW");
-    const reg = await navigator.serviceWorker.register('sw.js');
-    await Notification.requestPermission();
-    window.swReg = reg;
-  }
-
-  function listenToChanges() {
-    const docRef = doc(db, "p", "notizen");
-    onSnapshot(docRef, (docSnap) => {
-      if (!docSnap.metadata.hasPendingWrites) {
-        if (window.swReg && Notification.permission === "granted") {
-          window.swReg.active?.postMessage("note-update");
-        }
-      }
-    });
-  }
 </script>
 </body>
 </html>
