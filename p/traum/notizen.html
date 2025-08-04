@@ -31,7 +31,7 @@
       border-radius: 12px;
       overflow: hidden;
     }
-    
+
     #login-form div:hover {
       border: 1px solid orange;
     }
@@ -125,7 +125,7 @@
       overflow-y: auto;
     }
 
-    textarea {
+    #noteArea {
       width: 100%;
       height: 100%;
       background: transparent;
@@ -135,6 +135,12 @@
       font-size: 1rem;
       line-height: 1.5;
       outline: none;
+    }
+
+    .word-hover {
+      background-color: rgba(255, 165, 0, 0.2);
+      padding: 0 2px;
+      border-radius: 4px;
     }
 
     #newNoteBtn {
@@ -161,6 +167,7 @@
   <div id="note-app">
     <div id="header">
       <button id="toggleSidebar" title="Menü"></button>
+      <button onclick="startPush()" style="margin-left: auto; color: orange; background: none; border: none;">🔔 Aktivieren</button>
     </div>
 
     <div id="sidebar">
@@ -170,142 +177,164 @@
     </div>
 
     <div id="content">
-      <textarea id="noteArea" placeholder="Wähle oder erstelle eine Notiz…" disabled></textarea>
+      <div id="noteArea" contenteditable="true" placeholder="Wähle oder erstelle eine Notiz…"></div>
     </div>
   </div>
-  
+
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, deleteField, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
-      authDomain: "auth-adfwc.firebaseapp.com",
-      projectId: "auth-adfwc",
-      storageBucket: "auth-adfwc.appspot.com",
-      messagingSenderId: "221420792742",
-      appId: "1:221420792742:web:f75515331cb4c5b4603d"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+    authDomain: "auth-adfwc.firebaseapp.com",
+    projectId: "auth-adfwc",
+    storageBucket: "auth-adfwc.appspot.com",
+    messagingSenderId: "221420792742",
+    appId: "1:221420792742:web:f75515331cb4c5b4603d"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const email = "bea@example.com";
-    let currentTitle = null;
-    let currentContent = "";
-    let saveTimeout = null;
+  const email = "bea@example.com";
+  let currentTitle = null;
+  let currentContent = "";
+  let saveTimeout = null;
+  const noteArea = document.getElementById("noteArea");
+  const wortliste = ["Traum", "Stern", "Rakete"];
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const loginForm = document.getElementById("login-form");
-      const noteApp = document.getElementById("note-app");
-      const passwordInput = document.getElementById("password");
+  function highlightWords(text) {
+    const regex = new RegExp(`\\b(${wortliste.join("|")})\\b`, "gi");
+    return text.replace(regex, (match) => `<span class="word-hover">${match}</span>`);
+  }
 
-      loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const password = passwordInput.value;
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          loginForm.style.display = "none";
-          noteApp.style.display = "block";
-          loadNotes();
-        } catch (err) {
-          alert("Fehler beim Login: " + err.message);
-        }
-      });
+  window.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById("login-form");
+    const noteApp = document.getElementById("note-app");
+    const passwordInput = document.getElementById("password");
 
-      const sidebar = document.getElementById("sidebar");
-      const toggleBtn = document.getElementById("toggleSidebar");
-      const noteList = document.getElementById("noteList");
-      const noteArea = document.getElementById("noteArea");
-      const newNoteBtn = document.getElementById("newNoteBtn");
-
-      toggleBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("open");
-      });
-
-      async function loadNotes() {
-        const docRef = doc(db, "p", "notizen");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          noteList.innerHTML = "";
-          Object.entries(data).forEach(([title, content]) => {
-            const entry = document.createElement("div");
-            entry.classList.add("note-entry");
-            if (title === currentTitle) entry.classList.add("active");
-
-            const titleSpan = document.createElement("span");
-            titleSpan.classList.add("note-title");
-            titleSpan.textContent = title;
-
-            const editIcon = document.createElement("div");
-            editIcon.classList.add("edit-icon");
-            editIcon.title = "Umbenennen";
-            editIcon.addEventListener("click", async (e) => {
-              e.stopPropagation();
-              const newTitle = prompt("Neuer Titel für die Notiz:", title);
-              if (!newTitle || newTitle === title) return;
-
-              await updateDoc(docRef, { [newTitle]: data[title] });
-              await updateDoc(docRef, { [title]: deleteField() });
-
-              if (title === currentTitle) {
-                currentTitle = newTitle;
-                noteArea.value = data[title];
-              }
-
-              loadNotes();
-            });
-
-            titleSpan.addEventListener("click", () => {
-              if (currentTitle !== null) saveCurrentNote();
-              currentTitle = title;
-              currentContent = content;
-              noteArea.value = content;
-              noteArea.disabled = false;
-              loadNotes();
-              sidebar.classList.remove("open");
-            });
-
-            entry.appendChild(titleSpan);
-            entry.appendChild(editIcon);
-            noteList.appendChild(entry);
-          });
-        }
-      }
-
-      async function saveCurrentNote() {
-        if (!currentTitle) return;
-        const docRef = doc(db, "p", "notizen");
-        currentContent = noteArea.value;
-        await updateDoc(docRef, { [currentTitle]: currentContent });
-      }
-
-      newNoteBtn.addEventListener("click", async () => {
-        const newTitle = prompt("Titel für neue Notiz:");
-        if (!newTitle) return;
-        const docRef = doc(db, "p", "notizen");
-        await updateDoc(docRef, { [newTitle]: "" });
-        currentTitle = newTitle;
-        noteArea.value = "";
-        noteArea.disabled = false;
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const password = passwordInput.value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        loginForm.style.display = "none";
+        noteApp.style.display = "block";
         loadNotes();
-        sidebar.classList.remove("open");
-      });
-
-      noteArea.addEventListener("input", 
-() => {
-        currentContent = noteArea.value;
-        if (saveTimeout) clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-          saveCurrentNote();
-        }, 1000);
-      });
-
-      window.addEventListener("beforeunload", saveCurrentNote);
+        listenToChanges();
+      } catch (err) {
+        alert("Fehler beim Login: " + err.message);
+      }
     });
+
+    const sidebar = document.getElementById("sidebar");
+    const toggleBtn = document.getElementById("toggleSidebar");
+    const noteList = document.getElementById("noteList");
+    const newNoteBtn = document.getElementById("newNoteBtn");
+
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    async function loadNotes() {
+      const docRef = doc(db, "p", "notizen");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        noteList.innerHTML = "";
+        Object.entries(data).forEach(([title, content]) => {
+          const entry = document.createElement("div");
+          entry.classList.add("note-entry");
+          if (title === currentTitle) entry.classList.add("active");
+
+          const titleSpan = document.createElement("span");
+          titleSpan.classList.add("note-title");
+          titleSpan.textContent = title;
+
+          const editIcon = document.createElement("div");
+          editIcon.classList.add("edit-icon");
+          editIcon.title = "Umbenennen";
+          editIcon.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const newTitle = prompt("Neuer Titel für die Notiz:", title);
+            if (!newTitle || newTitle === title) return;
+
+            await updateDoc(docRef, { [newTitle]: data[title] });
+            await updateDoc(docRef, { [title]: deleteField() });
+
+            if (title === currentTitle) {
+              currentTitle = newTitle;
+              noteArea.innerHTML = highlightWords(data[title]);
+            }
+
+            loadNotes();
+          });
+
+          titleSpan.addEventListener("click", () => {
+            if (currentTitle !== null) saveCurrentNote();
+            currentTitle = title;
+            currentContent = content;
+            noteArea.innerHTML = highlightWords(content || "");
+            loadNotes();
+            sidebar.classList.remove("open");
+          });
+
+          entry.appendChild(titleSpan);
+          entry.appendChild(editIcon);
+          noteList.appendChild(entry);
+        });
+      }
+    }
+
+    async function saveCurrentNote() {
+      if (!currentTitle) return;
+      const docRef = doc(db, "p", "notizen");
+      currentContent = noteArea.innerText;
+      await updateDoc(docRef, { [currentTitle]: currentContent });
+    }
+
+    newNoteBtn.addEventListener("click", async () => {
+      const newTitle = prompt("Titel für neue Notiz:");
+      if (!newTitle) return;
+      const docRef = doc(db, "p", "notizen");
+      await updateDoc(docRef, { [newTitle]: "" });
+      currentTitle = newTitle;
+      noteArea.innerHTML = "";
+      loadNotes();
+      sidebar.classList.remove("open");
+    });
+
+    noteArea.addEventListener("input", () => {
+      currentContent = noteArea.innerText;
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveCurrentNote();
+      }, 1000);
+    });
+
+    window.addEventListener("beforeunload", saveCurrentNote);
+  });
+
+  async function startPush() {
+    if (!('serviceWorker' in navigator)) return alert("Kein SW");
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await Notification.requestPermission();
+    window.swReg = reg;
+  }
+
+  function listenToChanges() {
+    const docRef = doc(db, "p", "notizen");
+    onSnapshot(docRef, (docSnap) => {
+      if (!docSnap.metadata.hasPendingWrites) {
+        if (window.swReg && Notification.permission === "granted") {
+          window.swReg.active?.postMessage("note-update");
+        }
+      }
+    });
+  }
 </script>
 </body>
 </html>
