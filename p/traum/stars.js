@@ -75,13 +75,19 @@
   const triggerOffsetX2 = 80;
   const triggerYOffset2 = 80;
 
-  // Neuer Trigger 3
   const triggerImg3 = new Image();
   triggerImg3.src = 'm/kreise-trigger.png';
   const triggerRadius3 = 30;
   const triggerAngle3 = -0.5;
   const triggerOffsetX3 = -80;
   const triggerYOffset3 = 60;
+  
+  const triggerImg4 = new Image();
+  triggerImg4.src = 'm/notizen-trigger.png';
+  const triggerRadius4 = 30;
+  const triggerAngle4 = -0.5;
+  const triggerOffsetX4 = -100;
+  const triggerYOffset4 = -90;
 
   function angleToScreenX(angleDiff, fov) {
     return (angleDiff + fov / 2) / fov * w;
@@ -206,6 +212,17 @@
       const x3 = angleToScreenX(diff3, fov) + triggerOffsetX3;
       const y3 = h / 2 + verticalOffset + triggerYOffset3;
       ctx.drawImage(triggerImg3, x3 - triggerRadius3, y3 - triggerRadius3, triggerRadius3 * 2, triggerRadius3 * 2);
+    }
+    
+    // Trigger 4
+    let diff4 = triggerAngle4 - cameraAngle;
+    if (diff4 > Math.PI) diff4 -= 2 * Math.PI;
+    if (diff4 < -Math.PI) diff4 += 2 * Math.PI;
+
+    if (diff4 > -fov / 2 && diff4 < fov / 2) {
+      const x4 = angleToScreenX(diff4, fov) + triggerOffsetX4;
+      const y4 = h / 2 + verticalOffset + triggerYOffset4;
+      ctx.drawImage(triggerImg4, x4 - triggerRadius4, y4 - triggerRadius4, triggerRadius4 * 2, triggerRadius4 * 2);
     }
   }
 
@@ -371,6 +388,23 @@
 
       if (dx3 * dx3 + dy3 * dy3 <= triggerRadius3 * triggerRadius3) {
         window.open('kreise.html', '_blank');
+        return;
+      }
+    }
+    
+    // Trigger 4
+    let diff4 = triggerAngle4 - cameraAngle;
+    if (diff4 > Math.PI) diff4 -= 2 * Math.PI;
+    if (diff4 < -Math.PI) diff4 += 2 * Math.PI;
+
+    if (diff4 > -fov / 2 && diff4 < fov / 2) {
+      const x4 = angleToScreenX(diff4, fov) + triggerOffsetX4;
+      const y4 = h / 2 + verticalOffset + triggerYOffset4;
+      const dx4 = clickX - x4;
+      const dy4 = clickY - y4;
+
+      if (dx4 * dx4 + dy4 * dy4 <= triggerRadius4 * triggerRadius4) {
+        window.open('notizen.html', '_blank');
         return;
       }
     }
