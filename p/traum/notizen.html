@@ -177,7 +177,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, updateDoc, deleteField, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
@@ -210,32 +210,6 @@
         loginForm.style.display = "none";
         noteApp.style.display = "block";
         loadNotes();
-
-        // Push aktivieren & Firestore-Änderungen überwachen
-        try {
-          const permission = await Notification.requestPermission();
-          if (permission === 'granted' && 'serviceWorker' in navigator) {
-            const reg = await navigator.serviceWorker.register('sw.js');
-            console.log('Push bereit:', reg);
-
-            const docRef = doc(db, "p", "notizen");
-            let initialData = (await getDoc(docRef)).data();
-
-            onSnapshot(docRef, (snapshot) => {
-              const newData = snapshot.data();
-              const changedKeys = Object.keys(newData || {}).filter(
-                key => initialData[key] !== newData[key]
-              );
-              if (changedKeys.length > 0) {
-                reg.active?.postMessage("note-update");
-              }
-              initialData = newData;
-            });
-          }
-        } catch (e) {
-          console.warn('Push konnte nicht aktiviert werden:', e);
-        }
-
       } catch (err) {
         alert("Fehler beim Login: " + err.message);
       }
