@@ -136,11 +136,18 @@
 
 <p style="position: absolute; bottom: 20px; max-width: 80%;">Diese Seite speichert keine Daten 🍪🚫, <br>betreibt kein Tracking. Vergewissere dich im <a href="https://github.com/adwfc/adwfc.github.io/blob/main/p/clipboard.html" style="color: #709fff;">Code auf Github</a>.</p>
  
-
 <script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
   import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
+  // --- Supabase-Konfiguration ---
+  const supabaseUrl = 'https://jgdbrtxptkfvxfovbsix.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnZGJydHhwdGtmdnhmb3Zic2l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MjIzMjksImV4cCI6MjA3MjI5ODMyOX0.LInNeWLI_Qk1cE1mLyfV6Fq_sZAt5kJkSTWvcpA5dYA';
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const bucket = 'clipboard';
+
+  // --- Firebase-Konfiguration ---
   const firebaseConfig = {
     apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
     authDomain: "auth-adfwc.firebaseapp.com",
@@ -164,6 +171,7 @@
   const loadBtn = document.getElementById("loadBtn");
 
   let uploadedFileUrl = null;
+  let uploadedFileName = null;
 
   pinInput.addEventListener("input", (e) => {
     e.target.value = e.target.value.slice(0, 2);
@@ -180,28 +188,35 @@
     const file = fileInput.files[0];
     if (!file) return;
 
+    const extension = file.name.split(".").pop();
+    const fileName = `latest.${extension}`;
+    uploadedFileName = fileName;
+
     status.textContent = "📤 Lade Datei hoch...";
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
-      const res = await fetch("https://tmpfiles.org/api/v1/upload", {
-        method: "POST",
-        body: formData
+      // 1. Alte Datei löschen, falls vorhanden
+      await supabase.storage.from(bucket).remove([fileName]);
+
+      // 2. Neue Datei hochladen
+      const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: true
       });
 
-      if (!res.ok) throw new Error("Upload fehlgeschlagen");
+      if (error) throw error;
 
-      const data = await res.json();
-      // Entferne fehlerhaftes "http//" am Anfang, damit Browser https:// ergänzt
-      uploadedFileUrl = data.data.url.replace(/^http\/\/?/, "");
+      // 3. URL holen
+      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
+      uploadedFileUrl = publicUrlData.publicUrl;
+
       status.textContent = "✅ Datei hochgeladen!";
     } catch (err) {
-      status.textContent = "❌ Upload fehlgeschlagen.";
       console.error(err);
+      status.textContent = "❌ Upload fehlgeschlagen.";
     }
   });
-  
+
   saveBtn.addEventListener("click", async () => {
     const content = textInput.value.trim();
 
@@ -210,7 +225,7 @@
     }
     const pin = pinInput.value.trim();
 
-    if (!content) {
+    if (!content && !uploadedFileUrl) {
       alert("Text/Datei fehlt");
       return;
     }
@@ -240,7 +255,7 @@
         textInput.value = data.content || "";
         uploadedFileUrl = data.url || null;
         downloadLink.innerHTML = uploadedFileUrl
-          ? `<a href="${uploadedFileUrl}" target="_blank" rel="noopener noreferrer">📎 Datei öffnen</a>` : "";
+          ? `<a href="${uploadedFileUrl}" download>📎 Datei öffnen</a>` : "";
         copyBtn.classList.remove("hidden");
         status.textContent = "";
       } else {
@@ -255,6 +270,7 @@
     await navigator.clipboard.writeText(textInput.value);
   });
 </script>
+
   
 
 </body>
