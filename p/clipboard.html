@@ -254,8 +254,19 @@
       if (data.pin === pinInput.value.trim()) {
         textInput.value = data.content || "";
         uploadedFileUrl = data.url || null;
-        downloadLink.innerHTML = uploadedFileUrl
-          ? `<a href="${uploadedFileUrl}" download>📎 Datei öffnen</a>` : "";
+        if (uploadedFileUrl) {
+  const response = await fetch(uploadedFileUrl);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = uploadedFileName || 'downloaded_file';
+  a.textContent = '📎 Datei herunterladen';
+  a.style.color = 'lightblue';
+  downloadLink.innerHTML = '';
+  downloadLink.appendChild(a);
+  }
+        
         copyBtn.classList.remove("hidden");
         status.textContent = "";
       } else {
