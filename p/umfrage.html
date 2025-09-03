@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Treffzeit Auswahl</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    h3 {
+      font-weight: normal;
+      font-size: 15px;
+      margin-top: -15px;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0 auto 20px;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px 16px;
+      text-align: center;
+      cursor: pointer;
+      min-width: 100px;
+    }
+    th {
+      background: #007acc;
+      color: white;
+    }
+    td:hover {
+      background: #e0f3ff;
+    }
+    .names {
+      font-size: 0.8em;
+      color: #444;
+      margin-top: 4px;
+    }
+    .eigene-auswahl {
+      background-color: #c9f7c9 !important;
+    }
+    #top3 {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: left;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    #top3 h2 {
+      text-align: center;
+      color: #333;
+    }
+    .top-item {
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #eee;
+    }
+    #naechsteWocheContainer {
+      margin-bottom: 5%;
+      font-size: 1em;
+    }
+    #naechsteWocheCount {
+      font-weight: bold;
+      color: lightgrey;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wann hast du Zeit?</h1>
+  <h3>(nächste Woche, 08-12.09.)</h3>
+  <table id="zeitTabelle">
+    <thead><tr><th></th>
+               <th>13h</th>
+               <th>14h</th>
+               <th>15:30h</th></tr></thead>
+    <tbody id="tabelleBody"></tbody>
+  </table>
+
+  <div id="naechsteWocheContainer">
+    <label><input type="checkbox" id="naechsteWocheCheckbox" />übernächste Woche wäre mir lieber</label>
+    <span id="naechsteWocheCount">(0 Stimmen)</span>
+  </div>
+
+  <div id="top3">
+    <h2>Top 3 Zeiten</h2>
+    <div id="topList"></div>
+  </div>
+
+  <!--<button onclick="resetAbstimmungen()" style="margin-bottom: 20px; padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+    ❌ Alle Abstimmungen löschen
+  </button>-->
+
+  <script>
+    const getUrl = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/135effda-b463-4a42-b1d1-6fb55cbaf4ad";
+    const putUrl = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/135effda-b463-4a42-b1d1-6fb55cbaf4ad?apiKey=964d990f-a587-4a16-b2b7-02557639fc98";
+
+    const tage = ["Mo", "Di", "Mi", "Do", "Fr"];
+    const zeiten = ["13h", "14h", "15:30h"];
+    let daten = {};
+    let userName = "";
+
+    const tabelleBody = document.getElementById("tabelleBody");
+    const topList = document.getElementById("topList");
+    const naechsteWocheCheckbox = document.getElementById("naechsteWocheCheckbox");
+    const naechsteWocheCount = document.getElementById("naechsteWocheCount");
+
+    function frageNachName() {
+      userName = localStorage.getItem("userName");
+      if (!userName) {
+        userName = prompt("Dein Vorname?");
+        if (!userName) {
+          alert("Name wird benötigt.");
+          location.reload();
+        }
+        localStorage.setItem("userName", userName);
+      }
+    }
+
+    function baueTabelle() {
+      tabelleBody.innerHTML = "";
+      tage.forEach(tag => {
+        const row = document.createElement("tr");
+        const tagZelle = document.createElement("td");
+        tagZelle.textContent = tag;
+        row.appendChild(tagZelle);
+
+        zeiten.forEach(zeit => {
+          const cell = document.createElement("td");
+          const teilnehmer = daten[tag]?.[zeit] || [];
+
+          const istDrin = teilnehmer.includes(userName);
+          if (istDrin) {
+            cell.classList.add("eigene-auswahl");
+          }
+
+          cell.innerHTML = `${teilnehmer.length}`;
+          if (teilnehmer.length > 0) {
+            const nameList = document.createElement("div");
+            nameList.classList.add("names");
+            nameList.textContent = teilnehmer.join(", ");
+            cell.appendChild(nameList);
+          }
+
+          cell.onclick = () => handleClick(tag, zeit);
+          row.appendChild(cell);
+        });
+
+        tabelleBody.appendChild(row);
+      });
+
+      const naechsteWocheVotes = daten.naechsteWoche || [];
+      naechsteWocheCheckbox.checked = naechsteWocheVotes.includes(userName);
+
+      naechsteWocheCount.textContent = `(${naechsteWocheVotes.length} ${naechsteWocheVotes.length === 1 ? "Stimme" : "Stimmen"})`;
+
+      berechneTop3();
+    }
+
+    function berechneTop3() {
+      const alleSlots = [];
+
+      tage.forEach(tag => {
+        zeiten.forEach(zeit => {
+          const teilnehmer = daten[tag]?.[zeit] || [];
+          alleSlots.push({
+            tag,
+            zeit,
+            anzahl: teilnehmer.length,
+            teilnehmer
+          });
+        });
+      });
+
+      alleSlots.sort((a, b) => b.anzahl - a.anzahl);
+
+      const topDrei = alleSlots.slice(0, 3);
+
+      topList.innerHTML = "";
+
+      topDrei.forEach(slot => {
+        const div = document.createElement("div");
+        div.classList.add("top-item");
+        div.innerHTML = `<strong>${slot.anzahl} &nbsp;${slot.tag} / ${slot.zeit}:</strong>&nbsp;&nbsp;<span style="font-size: 0.9em; color: #555;">${slot.teilnehmer.join(", ")}</span>`;       
+        topList.appendChild(div);
+      });
+
+      const naechsteWocheVotes = daten.naechsteWoche || [];
+      const divNW = document.createElement("div");
+      divNW.classList.add("top-item");
+      divNW.innerHTML = `${naechsteWocheVotes.length} &nbsp;übernächste Woche wäre mir lieber&nbsp;&nbsp;<span style="font-size: 0.9em; color: #555;">${naechsteWocheVotes.join(", ")}</span>`;
+      topList.appendChild(divNW);
+    }
+
+    async function ladeDaten() {
+      try {
+        const res = await fetch(getUrl);
+        daten = await res.json();
+
+        if (!daten.naechsteWoche) daten.naechsteWoche = [];
+
+        baueTabelle();
+      } catch (err) {
+        alert("Fehler beim Laden der Daten.");
+        console.error(err);
+      }
+    }
+
+    async function handleClick(tag, zeit) {
+      if (!daten[tag]) daten[tag] = {};
+      if (!daten[tag][zeit]) daten[tag][zeit] = [];
+
+      const liste = daten[tag][zeit];
+      const index = liste.indexOf(userName);
+
+      if (index !== -1) {
+        // Austragen
+        liste.splice(index, 1);
+      } else {
+        // Eintragen
+        liste.push(userName);
+      }
+
+      await speichereDaten();
+      baueTabelle();
+    }
+
+    naechsteWocheCheckbox.addEventListener("change", async () => {
+      if (!daten.naechsteWoche) daten.naechsteWoche = [];
+      const index = daten.naechsteWoche.indexOf(userName);
+
+      if (naechsteWocheCheckbox.checked) {
+        if (index === -1) {
+          daten.naechsteWoche.push(userName);
+        }
+      } else {
+        if (index !== -1) {
+          daten.naechsteWoche.splice(index, 1);
+        }
+      }
+
+      await speichereDaten();
+      baueTabelle();
+    });
+
+    async function speichereDaten() {
+      try {
+        const res = await fetch(putUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(daten)
+        });
+        if (!res.ok) throw new Error("Fehler beim Speichern.");
+      } catch (err) {
+        alert("Fehler beim Speichern.");
+        console.error(err);
+      }
+    }
+
+    async function resetAbstimmungen() {
+      const sicher = confirm("Willst du wirklich ALLE Einträge löschen?");
+      if (!sicher) return;
+
+      tage.forEach(tag => {
+        zeiten.forEach(zeit => {
+          if (!daten[tag]) daten[tag] = {};
+          daten[tag][zeit] = [];
+        });
+      });
+
+      daten.naechsteWoche = [];
+
+      await speichereDaten();
+      baueTabelle();
+    }
+
+    frageNachName();
+    ladeDaten();
+  </script>
+</body>
+  </html>
