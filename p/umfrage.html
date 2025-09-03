@@ -74,6 +74,9 @@
       color: lightgrey;
       margin-left: 8px;
     }
+    table tr:nth-child(2){
+        background-color: #ff6a7f !important;
+    }
   </style>
 </head>
 <body>
@@ -91,7 +94,8 @@
     <label><input type="checkbox" id="naechsteWocheCheckbox" />übernächste Woche wäre mir lieber</label>
     <span id="naechsteWocheCount">(0 Stimmen)</span>
   </div>
-
+  <p>* Dienstag entfällt wegen Hausarbeitstag</p>
+  
   <div id="top3">
     <h2>Top 3 Zeiten</h2>
     <div id="topList"></div>
@@ -105,7 +109,7 @@
     const getUrl = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/135effda-b463-4a42-b1d1-6fb55cbaf4ad";
     const putUrl = "https://api.jsonstorage.net/v1/json/cc0ffdd9-2174-49c8-b6d0-8cd42b2f79c5/135effda-b463-4a42-b1d1-6fb55cbaf4ad?apiKey=964d990f-a587-4a16-b2b7-02557639fc98";
 
-    const tage = ["Mo", "Di", "Mi", "Do", "Fr"];
+    const tage = ["Mo", "Di *", "Mi", "Do", "Fr"];
     const zeiten = ["13h", "14h", "15:30h"];
     let daten = {};
     let userName = "";
