@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Radialmenü 360°</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    svg {
+      width: 400px;
+      height: 400px;
+    }
+
+    .segment {
+      cursor: pointer;
+      transition: transform 0.3s, opacity 0.3s;
+      opacity: 0;
+      transform: scale(0);
+      pointer-events: none;
+    }
+
+    .segment.active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .segment.hovered {
+      transform: scale(1.2);
+    }
+
+    .hitarea {
+      fill: transparent;
+      pointer-events: none;
+    }
+
+    .label {
+      font-family: sans-serif;
+      font-size: 14px;
+      fill: white;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .center-circle {
+      fill: #666;
+      cursor: pointer;
+      transition: fill 0.3s;
+    }
+
+    .center-circle:active {
+      fill: #888;
+    }
+
+    .center-label {
+      font-size: 20px;
+      fill: white;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<svg viewBox="0 0 400 400">
+  <g id="menu" transform="translate(200, 200)"></g>
+  <circle id="center" class="center-circle" cx="200" cy="200" r="60"/>
+  <text x="200" y="200" class="center-label">Menü</text>
+</svg>
+
+<script>
+const menu = document.getElementById("menu");
+const center = document.getElementById("center");
+
+const segments = 6;
+const labels = ["Homepage", "Drive", "Fight", "More...", "Weapon", "Walk"];
+const colors = ["#e74c3c", "#f39c12", "#27ae60", "#555", "#555", "#555"];
+const innerRadius = 60;
+const outerRadius = 130;
+const hitInnerRadius = 10;
+const hitOuterRadius = 150;
+
+const innerLabelRadius = 30;
+const outerLabelRadius = 90;
+
+let currentHovered = null;
+const segmentElements = [];
+const hitElements = [];
+const labelElements = [];
+const anglePerSegment = 360 / segments;
+
+function createSegmentPath(start, end, innerR, outerR) {
+  const rad = deg => deg * Math.PI / 180;
+  const x1 = Math.cos(rad(start)) * outerR;
+  const y1 = Math.sin(rad(start)) * outerR;
+  const x2 = Math.cos(rad(end)) * outerR;
+  const y2 = Math.sin(rad(end)) * outerR;
+  const x3 = Math.cos(rad(end)) * innerR;
+  const y3 = Math.sin(rad(end)) * innerR;
+  const x4 = Math.cos(rad(start)) * innerR;
+  const y4 = Math.sin(rad(start)) * innerR;
+  const largeArc = end - start > 180 ? 1 : 0;
+  return `
+    M${x1},${y1}
+    A${outerR},${outerR} 0 ${largeArc},1 ${x2},${y2}
+    L${x3},${y3}
+    A${innerR},${innerR} 0 ${largeArc},0 ${x4},${y4}
+    Z`;
+}
+
+// Erzeuge Segmente, Hitflächen, Labels
+for (let i = 0; i < segments; i++) {
+  const startAngle = i * anglePerSegment - 90;
+  const endAngle = (i + 1) * anglePerSegment - 90;
+
+  // Segment
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", createSegmentPath(startAngle, endAngle, innerRadius, outerRadius));
+  path.setAttribute("fill", colors[i % colors.length]);
+  path.classList.add("segment");
+  path.dataset.label = labels[i];
+  menu.appendChild(path);
+  segmentElements.push(path);
+
+  // Hitfläche
+  const hit = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  hit.setAttribute("d", createSegmentPath(startAngle, endAngle, hitInnerRadius, hitOuterRadius));
+  hit.classList.add("hitarea");
+  hit.style.pointerEvents = "none"; // START: keine Interaktion
+  hit.dataset.index = i;
+  hitElements.push(hit);
+  menu.appendChild(hit);
+
+  // Label
+  const midAngle = (startAngle + endAngle) / 2;
+  const x = Math.cos(midAngle * Math.PI / 180) * innerLabelRadius;
+  const y = Math.sin(midAngle * Math.PI / 180) * innerLabelRadius;
+  const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  text.setAttribute("x", x);
+  text.setAttribute("y", y);
+  text.textContent = labels[i];
+  text.classList.add("label");
+  menu.appendChild(text);
+  labelElements.push({text, midAngle});
+}
+
+// Animation der Labels radial
+function animateLabels(open = true) {
+  const startRadius = open ? innerLabelRadius : outerLabelRadius;
+  const endRadius   = open ? outerLabelRadius : innerLabelRadius;
+  const duration = 300;
+  const startTime = performance.now();
+
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    const radius = startRadius + (endRadius - startRadius) * t;
+    labelElements.forEach(obj => {
+      const x = Math.cos(obj.midAngle * Math.PI / 180) * radius;
+      const y = Math.sin(obj.midAngle * Math.PI / 180) * radius;
+      obj.text.setAttribute("x", x);
+      obj.text.setAttribute("y", y);
+    });
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function openMenu() {
+  segmentElements.forEach(el => el.classList.add("active"));
+  hitElements.forEach(el => el.style.pointerEvents = "auto"); // Interaktion aktivieren
+  animateLabels(true);
+}
+
+function closeMenu() {
+  segmentElements.forEach(el => el.classList.remove("active", "hovered"));
+  hitElements.forEach(el => el.style.pointerEvents = "none"); // Interaktion deaktivieren
+  animateLabels(false);
+  currentHovered = null;
+}
+
+// Maus-/Touch-Events
+function handleMove(x, y) {
+  const point = menu.ownerSVGElement.createSVGPoint();
+  point.x = x;
+  point.y = y;
+  const svgPoint = point.matrixTransform(menu.getScreenCTM().inverse());
+  const dx = svgPoint.x, dy = svgPoint.y;
+  const distance = Math.sqrt(dx*dx + dy*dy);
+
+  if (distance < hitInnerRadius) {
+    segmentElements.forEach(s => s.classList.remove("hovered"));
+    currentHovered = null;
+    return;
+  }
+
+  let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+  if (angle < 0) angle += 360;
+  const index = Math.floor(angle / anglePerSegment);
+  const hovered = segmentElements[index];
+
+  if (currentHovered !== hovered) {
+    segmentElements.forEach(s => s.classList.remove("hovered"));
+    hovered.classList.add("hovered");
+    currentHovered = hovered;
+  }
+}
+
+function handleEnd(x, y) {
+  if (currentHovered) {
+    alert(`Kategorie gewählt: ${currentHovered.dataset.label}`);
+  }
+  closeMenu();
+}
+
+// Events
+center.addEventListener("mousedown", openMenu);
+document.addEventListener("mousemove", e => handleMove(e.clientX, e.clientY));
+document.addEventListener("mouseup", e => handleEnd(e.clientX, e.clientY));
+
+center.addEventListener("touchstart", e => { e.preventDefault(); openMenu(); }, { passive:false });
+document.addEventListener("touchmove", e => { const t=e.touches[0]; handleMove(t.clientX,t.clientY); });
+document.addEventListener("touchend", e => { const t=e.changedTouches[0]; handleEnd(t.clientX,t.clientY); });
+
+</script>
+</body>
+</html>
