@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darkmode Messenger</title>
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Login */
+#login {
+  padding: 20px;
+}
+#login input, #login button {
+  padding: 12px;
+  margin: 8px 0;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: none;
+}
+
+/* Chat */
+#chat {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  padding: 10px;
+}
+#messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}
+
+/* Wrapper für horizontale Ausrichtung */
+.message-wrapper {
+  display: flex;
+  width: 100%;
+  margin: 5px 0;
+}
+
+.message-wrapper.own {
+  justify-content: flex-end;
+}
+
+.message-wrapper.other {
+  justify-content: flex-start;
+}
+
+/* Sprechblasen */
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  word-wrap: break-word;
+}
+
+.message.own {
+  background-color: #0b93f6;
+  color: white;
+  border-bottom-right-radius: 0;
+}
+
+.message.other {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-bottom-left-radius: 0;
+}
+
+/* Input & Buttons */
+#messageInput, #sendBtn, #logoutBtn {
+  padding: 12px;
+  margin-top: 5px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+}
+#sendBtn { background-color: #0b93f6; color: white; }
+#logoutBtn { background-color: #888; color: white; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <input type="text" id="username" placeholder="Benutzername">
+  <input type="password" id="password" placeholder="Passwort">
+  <button id="loginBtn">Login</button>
+</div>
+
+<div id="chat">
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Nachricht schreiben">
+  <button id="sendBtn">Senden</button>
+  <button id="logoutBtn">Logout</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2foolYwDeoTrfkynuhJu44lb5qDXHFwg",
+  authDomain: "auth-adfwc.firebaseapp.com",
+  projectId: "auth-adfwc",
+  storageBucket: "auth-adfwc.firebasestorage.app",
+  messagingSenderId: "221420792742",
+  appId: "1:221420792742:web:f75515331cb4c5b4603d67"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const docRef = doc(db, "p", "messenger");
+
+const loginDiv = document.getElementById("login");
+const chatDiv = document.getElementById("chat");
+const loginBtn = document.getElementById("loginBtn");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const messagesDiv = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+let username = "";
+
+// Login / Register
+loginBtn.addEventListener("click", async () => {
+  const name = usernameInput.value.trim();
+  const pw = passwordInput.value.trim();
+  if (!name || !pw) return alert("Bitte Benutzername und Passwort eingeben");
+  const email = name + "@example.com";
+  username = name; // Nur für interne Speicherung
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+  } catch (err) {
+    await createUserWithEmailAndPassword(auth, email, pw);
+  }
+});
+
+// Auth-State Listener
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    loginDiv.style.display = "none";
+    chatDiv.style.display = "flex";
+
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) await setDoc(docRef, { messages: [] });
+
+    onSnapshot(docRef, (docSnap) => {
+      const data = docSnap.data();
+      messagesDiv.innerHTML = "";
+      data.messages.forEach(msg => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("message-wrapper");
+        wrapper.classList.add(msg.user === username ? "own" : "other");
+
+        const div = document.createElement("div");
+        div.classList.add("message");
+        div.classList.add(msg.user === username ? "own" : "other");
+        div.textContent = msg.text; // Benutzername nicht anzeigen
+
+        wrapper.appendChild(div);
+        messagesDiv.appendChild(wrapper);
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+  } else {
+    loginDiv.style.display = "block";
+    chatDiv.style.display = "none";
+  }
+});
+
+// Nachricht senden
+sendBtn.addEventListener("click", async () => {
+  const text = messageInput.value.trim();
+  if (!text) return;
+  await updateDoc(docRef, { messages: arrayUnion({ user: username, text }) });
+  messageInput.value = "";
+  messageInput.focus();
+});
+
+// Enter-Taste zum Senden
+messageInput.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault(); // verhindert Zeilenumbruch
+    const text = messageInput.value.trim();
+    if (!text) return;
+    await updateDoc(docRef, { messages: arrayUnion({ user: username, text }) });
+    messageInput.value = "";
+    messageInput.focus();
+  }
+});
+
+
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+});
+</script>
+
+</body>
+</html>
