@@ -906,6 +906,11 @@ body.dark-mode {
     color: white;
 }
 
+body.dark-mode .kontakt a {
+    color: white;
+    text-decoration: underline;
+}
+
 header button {
     background-color: white;
     border: none;
@@ -919,7 +924,7 @@ header button {
     background-color: white;
 }
 
-.dark-mode *:not(.rainbow-text) {
+.dark-mode *:not(.rainbow-text, .kontakt *) {
     color: white !important;
 }
 
