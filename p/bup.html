@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Download</title>
+</head>
+<body>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+
+const supabase = createClient(
+  "https://jgdbrtxptkfvxfovbsix.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnZGJydHhwdGtmdnhmb3Zic2l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MjIzMjksImV4cCI6MjA3MjI5ODMyOX0.LInNeWLI_Qk1cE1mLyfV6Fq_sZAt5kJkSTWvcpA5dYA"
+)
+
+const email = "bup@example.com"
+const password = prompt("Passwort eingeben:")
+
+async function run() {
+  const { error: loginError } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  if (loginError) {
+    alert("Login fehlgeschlagen")
+    return
+  }
+
+  const { data, error } = await supabase
+    .storage
+    .from("bup")
+    .createSignedUrl("bup_TOTP.exe", 60)
+
+  if (error) {
+    alert("Download Fehler")
+    return
+  }
+
+  window.location.href = data.signedUrl
+}
+
+run()
+</script>
+
+</body>
+</html>
