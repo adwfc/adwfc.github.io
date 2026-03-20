@@ -254,7 +254,7 @@
         textInput.value = data.content || "";
         uploadedFileUrl = data.url || null;
         downloadLink.innerHTML = uploadedFileUrl
-          ? `<a href="${uploadedFileUrl}" target="_blank" rel="noopener noreferrer">📎 Datei öffnen</a>` : "";
+          ? `<a href="${uploadedFileUrl}?nocache=${Date.now()}" target="_blank" rel="noopener noreferrer">📎 Datei öffnen</a>` : "";
         copyBtn.classList.remove("hidden");
         status.textContent = "";
       } else {
