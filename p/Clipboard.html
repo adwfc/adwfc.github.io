@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clipboard</title>
+
+<style>
+  body {
+    font-family: sans-serif;
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 30px;
+    background-color: #070f1b;
+    color: white;
+  }
+
+  input, textarea, button {
+    font-size: 1rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+  }
+
+  .textarea-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  textarea {
+    width: 100%;
+    resize: vertical;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding-right: 50px;
+  }
+
+  #fileInput { display: none; }
+
+  label[for="fileInput"] {
+    display: inline-block;
+    border: 1px dashed white;
+    padding: 0.4em 1.2em;
+    color: grey;
+    border-radius: 6px;
+    bottom: 10px;
+    right: 60px;
+    position: absolute;
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  label[for="fileInput"]:hover {
+    border: 1px solid orange;
+  }
+
+  img { width: 25px; height: auto; }
+
+  #saveBtn {
+    position: absolute;
+    bottom: 10px;
+    right: 8px;
+    max-width: 36px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  #saveBtn img { width: 90%; }
+
+  #loadBtn, #copyBtn {
+    max-width: 50px;
+    margin-left: 10px;
+    cursor: pointer;
+    border: none;
+  }
+
+  #loadBtn img, #copyBtn img { width: 90%; }
+
+  #copyBtn { margin-left: -5px; }
+
+  #pinInput {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  #status, #pinDisplay, #downloadLink {
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+
+  .hidden { display: none; }
+</style>
+</head>
+
+<body>
+
+<h1>Zwischenablage</h1>
+
+<div class="textarea-container">
+  <textarea id="textInput" rows="6" placeholder="Text eingeben..."></textarea>
+  <button id="saveBtn"><img src="Clipboard-Dateien/upload.png"></button>
+  <label for="fileInput">Dateiupload<input type="file" id="fileInput"></label>
+</div>
+
+<div style="display: flex; align-items: center; margin-top: 50px;">
+  <input type="number" id="pinInput" placeholder="PIN" inputmode="numeric">
+  <button id="loadBtn"><img src="Clipboard-Dateien/download.png"></button>
+  <button id="copyBtn" class="hidden"><img src="Clipboard-Dateien/copy.png"></button>
+</div>
+
+<div id="status"></div>
+<div id="downloadLink"></div>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// --- Supabase ---
+const supabaseUrl = 'https://jgdbrtxptkfvxfovbsix.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnZGJydHhwdGtmdnhmb3Zic2l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MjIzMjksImV4cCI6MjA3MjI5ODMyOX0.LInNeWLI_Qk1cE1mLyfV6Fq_sZAt5kJkSTWvcpA5dYA';
+const supabase = createClient(supabaseUrl, supabaseKey);
+const bucket = 'clipboard';
+
+// --- DOM ---
+const textInput = document.getElementById("textInput");
+const pinInput = document.getElementById("pinInput");
+const fileInput = document.getElementById("fileInput");
+const status = document.getElementById("status");
+const downloadLink = document.getElementById("downloadLink");
+const copyBtn = document.getElementById("copyBtn");
+const saveBtn = document.getElementById("saveBtn");
+const loadBtn = document.getElementById("loadBtn");
+
+let uploadedFileName = null;
+
+// PIN max 2 Stellen
+pinInput.addEventListener("input", (e) => {
+  e.target.value = e.target.value.slice(0, 2);
+});
+
+// --- FILE UPLOAD ---
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const fileName = file.name;
+  uploadedFileName = fileName;
+
+  status.textContent = "📤 Lade Datei hoch...";
+
+  try {
+    // 🔹 alten Eintrag holen
+    const { data: existing } = await supabase
+      .from("clipboard")
+      .select("filename")
+      .limit(1)
+      .single();
+
+    // 🔹 alte Datei löschen
+    if (existing?.filename) {
+      await supabase.storage.from(bucket).remove([existing.filename]);
+    }
+
+    // 🔹 neue Datei hochladen
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file, { upsert: true });
+
+    if (error) throw error;
+
+    status.textContent = "✅ Datei hochgeladen!";
+  } catch (err) {
+    console.error(err);
+    status.textContent = "❌ Upload fehlgeschlagen.";
+  }
+});
+
+// --- SAVE ---
+saveBtn.addEventListener("click", async () => {
+  const content = textInput.value.trim();
+
+  if (!pinInput.value.trim()) {
+    pinInput.value = Math.floor(Math.random() * 90 + 10).toString();
+  }
+
+  const pin = pinInput.value.trim();
+
+  if (!content && !uploadedFileName) {
+    alert("Text/Datei fehlt");
+    return;
+  }
+
+  try {
+    await supabase.from("clipboard").delete().neq("pin", ""); // alles löschen
+
+    const { error } = await supabase
+      .from("clipboard")
+      .insert({
+        pin: pin,
+        content: content,
+        filename: uploadedFileName
+      });
+
+    if (error) throw error;
+
+    status.textContent = "✅ Gespeichert!";
+    copyBtn.classList.remove("hidden");
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = "❌ Fehler beim Speichern.";
+  }
+});
+
+// --- LOAD ---
+loadBtn.addEventListener("click", async () => {
+  const pin = pinInput.value.trim();
+
+  const { data, error } = await supabase
+    .from("clipboard")
+    .select("*")
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    alert("❌ Keine Daten gefunden.");
+    return;
+  }
+
+  if (data.pin !== pin) {
+    alert("❌ PIN falsch.");
+    return;
+  }
+
+  textInput.value = data.content || "";
+
+  if (data.filename) {
+    const { data: publicUrlData } = supabase
+      .storage
+      .from(bucket)
+      .getPublicUrl(data.filename);
+
+    downloadLink.innerHTML =
+      `<a href="${publicUrlData.publicUrl}" target="_blank">📎 Datei öffnen</a>`;
+  } else {
+    downloadLink.innerHTML = "";
+  }
+
+  copyBtn.classList.remove("hidden");
+});
+
+// --- COPY ---
+copyBtn.addEventListener("click", async () => {
+  await navigator.clipboard.writeText(textInput.value);
+});
+</script>
+
+</body>
+</html>
