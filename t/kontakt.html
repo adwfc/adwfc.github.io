@@ -270,28 +270,31 @@ fileInput.addEventListener("change", async () => {
      const file = fileInput.files[0];
      if (!file) return;
 
-     const date = new Date().toISOString();
-     const filePath = `${file.name}+${date}`;
+     const date = Date.now();
+     const filePath = `${date}-${file.name}`;
 
      const { error } = await supabase
      .storage
-     .from("form")
+     .from("kontaktformular")
      .upload(filePath, file);
 
      if (error) {
-     alert("Upload fehlgeschlagen");
-     console.error(error);
-     return;
+          alert("Upload fehlgeschlagen");
+          console.error(error);
+          return;
      }
 
      const { data } = supabase
      .storage
-     .from("uploads")
+     .from("kontaktformular")
      .getPublicUrl(filePath);
 
      fileNameField.style.display = "block";
      fileNameField.value = file.name;
-     fileUrlField.value = data.publicUrl;
+     
+     if (fileUrlField) {
+          fileUrlField.value = data.publicUrl;
+     }
 });
 </script>
 
