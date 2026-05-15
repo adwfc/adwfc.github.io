@@ -165,7 +165,7 @@
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
+    const client = window.supabase.createClient(
       'https://ziikbioeavgapnjumpju.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppaWtiaW9lYXZnYXBuanVtcGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMTc4MzIsImV4cCI6MjA2ODc5MzgzMn0.IK147XNWr8E8INYsgYZP45vME0CAASM2LBQWKuaJgyw'
     );
@@ -246,48 +246,52 @@
     });
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const password = document.getElementById('password').value;
+  e.preventDefault();
+  const password = document.getElementById('password').value;
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert("Login fehlgeschlagen: " + error.message);
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
 
-      const { data: files, error: listErr } = await supabase
-        .storage
-        .from('bilder')
-        .list('', { limit: 100 });
+  if (error) return alert("Login fehlgeschlagen: " + error.message);
 
-      if (listErr || !files || files.length === 0) {
-        alert("Keine Bilder gefunden");
-        return;
-      }
+  const { data: files, error: listErr } = await client
+    .storage
+    .from('bilder')
+    .list('', { limit: 100 });
 
-      files.sort((a, b) => a.name.localeCompare(b.name));
-      urls = [];
+  if (listErr || !files || files.length === 0) {
+    alert("Keine Bilder gefunden");
+    return;
+  }
 
-      for (const file of files) {
-        const { data: signed, error: urlErr } = await supabase
-          .storage
-          .from('bilder')
-          .createSignedUrl(file.name, 300);
+  files.sort((a, b) => a.name.localeCompare(b.name));
+  urls = [];
 
-        if (!urlErr && signed?.signedUrl) {
-          const img = new Image();
-          img.src = signed.signedUrl;
-          urls.push({ url: signed.signedUrl, image: img });
-        }
-      }
+  for (const file of files) {
+    const { data: signed, error: urlErr } = await client
+      .storage
+      .from('bilder')
+      .createSignedUrl(file.name, 300);
 
-      if (urls.length === 0) return alert("Keine gültigen Bilder");
+    if (!urlErr && signed?.signedUrl) {
+      const img = new Image();
+      img.src = signed.signedUrl;
+      urls.push({ url: signed.signedUrl, image: img });
+    }
+  }
 
-      zeigeBild(index);
-      form.style.display = 'none';
-      document.getElementById("upload-link").style.display = "none";
-      galerie.style.display = 'block';
-      rakete.style.display = 'block';
-      raketeState = 'links';
-      rakete.style.transform = 'translateX(0)';
-    });
+  if (urls.length === 0) return alert("Keine gültigen Bilder");
+
+  zeigeBild(index);
+  form.style.display = 'none';
+  document.getElementById("upload-link").style.display = "none";
+  galerie.style.display = 'block';
+  rakete.style.display = 'block';
+  raketeState = 'links';
+  rakete.style.transform = 'translateX(0)';
+});
 
     // Lightbox-Interaktion
     galerie.addEventListener('click', (e) => {
