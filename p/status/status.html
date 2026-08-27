@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>Status Erreichbarkeit</title>
+    <link rel="icon" type="image/png" href="favicon.ico">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            background-color: #070f1b;
+            color: white;
+        }
+
+        h1 {
+            margin-left: 30%;
+            margin-top: 5%;
+        }
+
+        main {
+            display: flex;
+            gap: 10%;
+            margin-left: 30%;
+        }
+
+        main > div {
+            width: 20%;
+        }
+
+        main div div {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            position: relative;
+            height: 80px;
+            width: 90%;
+            transition: transform 0.2s ease-out;
+        }
+
+        main div div:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.97);
+            cursor: pointer;
+        }
+
+        main div img {
+            height: 100%;
+            width: auto;
+        }
+
+        main div img:nth-of-type(1) {
+            border-radius: 15px;
+        }
+
+        main div img:nth-of-type(2) {
+            position: absolute;
+            padding-top: 10px;
+            padding-right: 10px;
+            right: 20px;
+            height: 60%;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                margin: 15% 0 8% 10%;
+                width: 50%; 
+            }
+
+            main {
+                display: block;
+                margin-left: 5%;
+                padding-bottom: 10%;
+                width: 90%;
+            }
+
+            main > div {
+                width: 100%;
+            }
+
+            main div div {
+                width: auto; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Status Erreichbarkeit</h1>
+    <main>
+        <div>
+            <div class="y" data-alert="Über threema.com bin ich momentan <>.">
+                <img src="b/threema.png" alt="Logo Threema" title="Threema">
+                <img src="" alt=""></div>
+
+            <div class="y" data-alert="Über signal.org bin ich momentan  <>.">
+                <img src="b/signal.png" alt="Logo Signal" title="Signal">
+                <img src="" alt=""></div>
+                 
+            <div class="n" data-alert="Über whatsapp.com bin ich momentan <>.">
+                <img src="b/whatsapp.png" alt="Logo Whatsapp" title="Whatsapp">
+                <img src="" alt=""></div>
+                 
+            <div class="y" data-alert="Über instagram.com bin ich momentan <>.">
+                <img src="b/instagram.png" alt="Logo Instagram" title="Instagram">
+                <img src="" alt=""></div>
+                 
+            <div class="n" data-alert="Über element.io bin ich momentan <>.">
+                <img src="b/element.png" alt="Logo Element" title="Element">
+                <img src="" alt=""></div>
+        </div>
+
+        <div>
+            <div class="y" data-alert="Per SMS bin ich momentan <>.">
+                <img src="b/sms.png" alt="SMS Grafik" title="SMS">
+                <img src="" alt=""></div>
+                 
+            <div class="y" data-alert="Über meine Handy-Nummer bin ich momentan <>.">
+                <img src="b/handy.png" alt="Handy Symbol" title="Handy">
+                <img src="" alt=""></div>
+                 
+            <div class="y" data-alert="Über unsere Festnetz-Nummer bin ich momentan <>.">
+                <img src="b/festnetz.png" alt="Festnetz Symbol" title="Festnetz">
+                <img src="" alt=""></div>
+                 
+            <div class="y" data-alert="Per E-Mail bin ich momentan <>.">
+                <img src="b/mail.png" alt="E-Mail Symbol" title="E-Mail">
+                <img src="" alt=""></div>
+                 
+            <!--div class="n" data-alert="Per Brief bin ich momentan <>.">
+                <img src="b/brief.png" alt="Brief Symbol" title="Brief">
+                <img src="" alt=""></div-->
+        </div>
+    </main>
+
+<script>
+document.querySelectorAll("main div div").forEach(div => {
+    let status;
+
+    if (div.classList.contains("y")) {
+        status = "verfügbar";
+        div.children[1].src = "b/ja.png";
+        div.children[1].alt = "erreichbar";
+
+    } else {
+        status = "nicht verfügbar";
+        div.children[1].src = "b/nein.png";
+        div.children[1].alt = "nicht erreichbar";
+    }
+
+    div.onclick = () => {
+        alert(div.dataset.alert.replace("<>", status));
+    }
+});
+</script>
+</body>
+
+</html>
