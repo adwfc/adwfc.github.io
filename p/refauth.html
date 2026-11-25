@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>Referrer Auth</title>
+    <meta name="author" content="&Eacute;mile Jeremias Ruff">        
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <meta charset="UTF-8">
+
+    <link rel="icon" type="image/png" href="favicon.ico">
+
+    <style>
+        body {
+            background-color: #15202a;
+            display: flex;
+            gap: 100px;
+            margin: 10%;
+        }
+
+        img {
+            width: 50%;
+        }
+
+        p {
+            color: white;
+            font-size: 20px;
+        }
+
+        input, button {
+            padding: 10px 20px;
+            border: none;
+            outline: none;
+            transition: 0.1s transform linear;
+            font-size: 18px;
+        }
+
+        input {
+            background-color: transparent;
+            color: white;
+            margin-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: white;
+            border-radius: 15px;
+        }
+
+        button:hover, button:focus {
+            background-color: black;
+            color: white;
+            transform: scale(0.98);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <img src="../b/stop.jpg" alt="Foto eines Stoppschildes">
+    <div>
+        <p>Um diesem Link zu folgen, ist eine Authentifizierung notwendig.</p>
+
+        <input type="text" name="password" placeholder="Passwort" autofocus>
+        <button onclick="ladeLink();">Überprüfen und Weiterleiten</button>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const client = supabase.createClient(
+    "https://jgdbrtxptkfvxfovbsix.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnZGJydHhwdGtmdnhmb3Zic2l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MjIzMjksImV4cCI6MjA3MjI5ODMyOX0.LInNeWLI_Qk1cE1mLyfV6Fq_sZAt5kJkSTWvcpA5dYA"
+);
+
+document.querySelector("input").value = "";
+
+document.querySelector("input").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        ladeLink();
+        document.querySelector("button").focus();
+    }
+});
+
+async function logout() {
+    await client.auth.signOut();
+};
+logout();
+
+async function ladeLink() {
+    const password = document.querySelector("input").value;
+    if (!password) {
+        alert("Bitte geben Sie zunächst das Passwort ein.");
+        return;
+    }
+
+    const { data: dataLogin, error: errorLogin } = await client.auth.signInWithPassword({
+        email: "orga_kat@example.com",
+        password: password
+    });
+
+    if (errorLogin) {
+        console.error(errorLogin);
+        if (errorLogin.message === "Invalid login credentials") {
+            alert("Passwort falsch");
+        } else {
+            alert("Login fehlgeschlagen: " + errorLogin.message);
+        }
+        return;
+    }
+
+    const linkId = new URLSearchParams(window.location.search).get("id");
+    const { data: dataRefauth, error: errorRefauth } = await client
+        .from("refauth")
+        .select("ref")
+        .eq("id", linkId)
+        .single();
+
+    if (errorRefauth) {
+        console.log(errorRefauth);
+        alert(errorRefauth.message);
+    } else {
+        await client.auth.signOut();
+        document.querySelector("input").value = "";
+
+        window.location.href = dataRefauth.ref;
+    }
+}
+</script>
+</body>
+
+</html>
